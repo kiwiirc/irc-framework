@@ -4,9 +4,9 @@ var net = require('net'),
 function getConnectionFamily(host, callback) {
     if (net.isIP(host)) {
         if (net.isIPv4(host)) {
-            callback(null, 'IPv4', host);
+            process.nextTick(callback.bind(null, null, 'IPv4', host));
         } else {
-            callback(null, 'IPv6', host);
+            process.nextTick(callback.bind(null, null, 'IPv6', host));
         }
     } else {
         dns.resolve4(host, function resolve4Cb(err, addresses) {

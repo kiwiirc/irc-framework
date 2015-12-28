@@ -32,9 +32,13 @@ function Connection(options) {
     // Buffers for data sent from the IRCd
     this.hold_last = false;
     this.held_data = null;
+
+    this._timers = [];
 }
 
 util.inherits(Connection, DuplexStream);
+
+module.exports = Connection;
 
 Connection.prototype.connect = function(options) {
     var socket_connect_event_name = 'connect',
@@ -106,7 +110,9 @@ Connection.prototype.connect = function(options) {
 
             while (data !== null) {
                 data = that.socket.read();
-                socketOnData.call(that, data);
+                if (data !== null) {
+                    socketOnData.call(that, data);
+                }
             }
         });
 
@@ -170,10 +176,6 @@ Connection.prototype.disposeSocket = function() {
         return;
     }
 
-    if (this.socket) {
-        this.disposeSocket();
-    }
-
     this.clearTimers();
 };
 
@@ -198,10 +200,6 @@ Connection.prototype.clearTimers = function() {
 Connection.prototype.end = function (data, callback) {
     var that = this;
 
-    if (!this.socket) {
-        return;
-    }
-
     this.requested_disconnect = true;
 
     if (this.connected && data) {
@@ -216,6 +214,7 @@ Connection.prototype.end = function (data, callback) {
     DuplexStream.prototype.end.call(this, callback);
 
     this.socket.destroy();
+    this.socket = null;
 };
 
 
