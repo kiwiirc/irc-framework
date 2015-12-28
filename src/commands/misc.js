@@ -1,20 +1,13 @@
 var _ = require('lodash');
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
-
-
 var handlers = {
-    RPL_LISTSTART: function (command) {
+    RPL_LISTSTART: function () {
         var cache = this.cache('chanlist');
         cache.channels = [];
         this.emit('channel list start');
     },
 
-    RPL_LISTEND: function (command) {
+    RPL_LISTEND: function () {
         var cache = this.cache('chanlist');
         cache.destroy();
         this.emit('channel list end');
@@ -41,12 +34,12 @@ var handlers = {
         cache.motd += command.params[command.params.length - 1] + '\n';
     },
 
-    RPL_MOTDSTART: function (command) {
+    RPL_MOTDSTART: function () {
         var cache = this.cache('motd');
         cache.motd = '';
     },
 
-    RPL_ENDOFMOTD: function (command) {
+    RPL_ENDOFMOTD: function () {
         var cache = this.cache('motd');
         this.emit('motd', {
             motd: cache.motd
@@ -56,13 +49,13 @@ var handlers = {
 
 
 
-    RPL_WHOREPLY: function (command) {
+    RPL_WHOREPLY: function () {
         // For the time being, NOOP this command so they don't get passed
         // down to the client. Waste of bandwidth since we do not use it yet
         // TODO: Impliment RPL_WHOREPLY
     },
 
-    RPL_ENDOFWHO: function (command) {
+    RPL_ENDOFWHO: function () {
         // For the time being, NOOP this command so they don't get passed
         // down to the client. Waste of bandwidth since we do not use it yet
         // TODO: Impliment RPL_ENDOFWHO
@@ -75,7 +68,7 @@ var handlers = {
 
 
     MODE: function (command) {
-        var modes = [], event, time;
+        var modes = [], time;
 
         // Check if we have a server-time
         time = command.getServerTime();
@@ -98,7 +91,7 @@ var handlers = {
         });
     },
 
-    ERR_PASSWDMISMATCH: function (command) {
+    ERR_PASSWDMISMATCH: function () {
         this.emit('server ' + this.irc_connection.irc_host.hostname + ' password_mismatch', {});
     },
 
@@ -201,7 +194,7 @@ var handlers = {
         });
     },
 
-    ERR_NOTREGISTERED: function (command) {
+    ERR_NOTREGISTERED: function () {
     },
 
     RPL_MAPMORE: function (command) {
@@ -680,4 +673,10 @@ var handlers = {
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     }
+};
+
+module.exports = function AddCommandHandlers(command_controller) {
+    _.each(handlers, function(handler, handler_command) {
+        command_controller.addHandler(handler_command, handler);
+    });
 };

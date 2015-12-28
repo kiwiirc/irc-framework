@@ -1,12 +1,5 @@
 var _ = require('lodash');
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
-
-
 var handlers = {
     RPL_CHANNELMODEIS: function (command) {
         var channel = command.params[1],
@@ -44,7 +37,9 @@ var handlers = {
         var members = command.params[command.params.length - 1].split(' ');
         var cache = this.cache('names.' + command.params[2]);
 
-        if (!cache.members) cache.members = [];
+        if (!cache.members) {
+            cache.members = [];
+        }
         
         _.each(members, function (member) {
             var i = 0,
@@ -78,7 +73,9 @@ var handlers = {
 
     RPL_BANLIST: function (command) {
         var cache = this.cache('banlist.' + command.params[1]);
-        if (!cache.bans) cache.bans = [];
+        if (!cache.bans) {
+            cache.bans = [];
+        }
 
         cache.bans.push({
             channel: command.params[1],
@@ -144,7 +141,7 @@ var handlers = {
         };
 
         if (this.irc_connection.cap.enabled.indexOf('extended-join') > -1) {
-            data.account = command.params[1] === '*' ? false : command.params[1]
+            data.account = command.params[1] === '*' ? false : command.params[1];
         }
         
         this.emit('join', data);
@@ -236,4 +233,10 @@ var handlers = {
             channel: command.params[1]
         });
     },
+};
+
+module.exports = function AddCommandHandlers(command_controller) {
+    _.each(handlers, function(handler, handler_command) {
+        command_controller.addHandler(handler_command, handler);
+    });
 };

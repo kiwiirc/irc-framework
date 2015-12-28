@@ -11,7 +11,7 @@ var net             = require('net'),
     //Proxy           = require('../proxy.js');
 
 
-function log(what) {
+function log() {
     console.log.apply(console, arguments);
 }
 
@@ -128,7 +128,7 @@ module.exports.IrcConnection = IrcConnection;
 /**
  * Create and keep track of all timers so they can be easily removed
  */
-IrcConnection.prototype.setTimeout = function(fn, length /*, argN */) {
+IrcConnection.prototype.setTimeout = function(/*fn, length, argN */) {
     var tmr = setTimeout.apply(null, arguments);
     this._timers.push(tmr);
     return tmr;
@@ -144,7 +144,7 @@ IrcConnection.prototype.clearTimers = function() {
 
 IrcConnection.prototype.applyIrcEvents = function () {
     this.onServerConnect = this.onServerConnect || onServerConnect.bind(this);
-    this.on('register', this.onServerConnect)
+    this.on('register', this.onServerConnect);
 
     this.onUserNick = this.onUserNick || onUserNick.bind(this);
     this.on('nick', this.onUserNick);
@@ -193,7 +193,7 @@ IrcConnection.prototype.connect = function () {
                 localAddress: outgoing
             });
 
-        } else if (that.proxy) {
+        } /*else if (that.proxy) {
             that.socket = new Proxy.ProxySocket(that.proxy.port, host, {
                 username: that.username,
                 interface: that.proxy.interface
@@ -205,7 +205,7 @@ IrcConnection.prototype.connect = function () {
                 that.socket.connect(that.irc_host.port, that.irc_host.hostname);
             }
 
-        } else {
+        } */else {
             // No socks connection, connect directly to the IRCd
 
             log('(connection ' + that.id + ') Connecting directly to ' + host + ':' + (that.ssl?'+':'') + that.irc_host.port);
@@ -320,7 +320,7 @@ IrcConnection.prototype.connect = function () {
 /**
  * Send an event to the client
  */
-IrcConnection.prototype.clientEvent = function (event_name, data, callback) {
+IrcConnection.prototype.clientEvent = function (event_name, data) {
     this.emit('client_event', event_name, data);
 };
 
@@ -334,7 +334,9 @@ IrcConnection.prototype.write = function (data, force, force_complete_fn) {
     var encoded_buffer = iconv.encode(data + '\r\n', this.encoding);
 
     if (force) {
-        this.socket && this.socket.write(encoded_buffer, force_complete_fn);
+        if (this.socket) {
+            this.socket.write(encoded_buffer, force_complete_fn);
+        }
         log('(connection ' + this.id + ') Raw C:', data);
         return;
     }
@@ -367,7 +369,9 @@ IrcConnection.prototype.flushWriteBuffer = function () {
     // Disabled write buffer? Send everything we have
     if (!this.write_buffer_lines_second) {
         this.write_buffer.forEach(function(buffer) {
-            this.socket && this.socket.write(buffer);
+            if (this.socket) {
+                this.socket.write(buffer);
+            }
             this.write_buffer = null;
         });
 
@@ -383,12 +387,14 @@ IrcConnection.prototype.flushWriteBuffer = function () {
         return;
     }
 
-    this.socket && this.socket.write(this.write_buffer[0]);
+    if (this.socket) {
+        this.socket.write(this.write_buffer[0]);
+    }
     this.write_buffer = this.write_buffer.slice(1);
 
     // Call this function again at some point if we still have data to write
     if (this.write_buffer.length > 0) {
-        that.setTimeout(this.flushWriteBuffer.bind(this), 1000 / this.write_buffer_lines_second);
+        this.setTimeout(this.flushWriteBuffer.bind(this), 1000 / this.write_buffer_lines_second);
     } else {
         // No more buffers to write.. so we've finished
         this.writing_buffer = false;
@@ -429,7 +435,7 @@ IrcConnection.prototype.end = function (data) {
 IrcConnection.prototype.capContainsAny = function (caps) {
     var enabled_caps;
 
-    if (!caps instanceof Array) {
+    if (!(caps instanceof Array)) {
         caps = [caps];
     }
 
@@ -546,20 +552,20 @@ function onUserNick(event) {
  * When a socket connects to an IRCd
  * May be called before any socket handshake are complete (eg. TLS)
  */
-var rawSocketConnect = function(socket) {
+function rawSocketConnect(socket) {
     // Make note of the port numbers for any identd lookups
     // Nodejs < 0.9.6 has no socket.localPort so check this first
     if (typeof socket.localPort !== 'undefined') {
         this.identd_port_pair = socket.localPort.toString() + '_' + socket.remotePort.toString();
         // TODO: Add this tot he identd somewhere
     }
-};
+}
 
 
 /**
  * Handle the socket connect event, starting the IRCd registration
  */
-var socketConnectHandler = function () {
+function socketConnectHandler() {
     var webirc = this.options.webirc;
 
     if (webirc) {
@@ -576,7 +582,7 @@ var socketConnectHandler = function () {
     this.write('USER ' + this.username + ' 0 0 :' + this.gecos);
 
     this.emit('connected');
-};
+}
 
 
 
@@ -589,7 +595,6 @@ function socketOnData(data) {
     var data_pos,               // Current position within the data Buffer
         line_start = 0,
         lines = [],
-        i,
         max_buffer_size = 1024; // 1024 bytes is the maximum length of two RFC1459 IRC messages.
                                 // May need tweaking when IRCv3 message tags are more widespread
 
@@ -649,37 +654,16 @@ function socketOnData(data) {
     processIrcLines(this);
 }
 
-
-
-function ip2Hex(ip) {
-    // We can only deal with IPv4 addresses for now
-    if (!ip.match(/^[0-9]{0,3}\.[0-9]{0,3}\.[0-9]{0,3}\.[0-9]{0,3}$/)) {
-        return;
-    }
-
-    var hexed = ip.split('.').map(function ipSplitMapCb(i){
-        var hex = parseInt(i, 10).toString(16);
-
-        // Pad out the hex value if it's a single char
-        if (hex.length === 1) {
-            hex = '0' + hex;
-        }
-
-        return hex;
-    }).join('');
-
-    return hexed;
-}
-
-
-
 /**
  * Process the messages recieved from the IRCd that are buffered on an IrcConnection object
  * Will only process 4 lines per JS tick so that node can handle any other events while
  * handling a large buffer
  */
 function processIrcLines(irc_con, continue_processing) {
-    if (irc_con.reading_buffer && !continue_processing) return;
+    if (irc_con.reading_buffer && !continue_processing) {
+        return;
+    }
+
     irc_con.reading_buffer = true;
 
     var lines_per_js_tick = 4,
@@ -688,7 +672,9 @@ function processIrcLines(irc_con, continue_processing) {
 
     while(processed_lines < lines_per_js_tick && irc_con.read_buffer.length > 0) {
         line = iconv.decode(irc_con.read_buffer.shift(), irc_con.encoding);
-        if (!line) continue;
+        if (!line) {
+            continue;
+        }
 
         log('(connection ' + irc_con.id + ') Raw S:', line.replace(/^\r+|\r+$/, ''));
 

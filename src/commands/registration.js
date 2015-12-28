@@ -1,12 +1,5 @@
 var _ = require('lodash');
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
-
-
 var handlers = {
 	RPL_WELCOME: function (command) {
         var nick =  command.params[0];
@@ -130,32 +123,38 @@ var handlers = {
     },
 
 
-    RPL_SASLAUTHENTICATED: function (command) {
+    RPL_SASLAUTHENTICATED: function () {
         this.irc_connection.write('CAP END');
         this.irc_connection.cap_negotiation = false;
     },
 
 
-    RPL_SASLLOGGEDIN: function (command) {
+    RPL_SASLLOGGEDIN: function () {
         if (this.irc_connection.cap_negotiation === true) {
             this.irc_connection.write('CAP END');
             this.irc_connection.cap_negotiation = false;
         }
     },
 
-    ERR_SASLNOTAUTHORISED: function (command) {
+    ERR_SASLNOTAUTHORISED: function () {
         this.irc_connection.write('CAP END');
         this.irc_connection.cap_negotiation = false;
     },
 
 
-    ERR_SASLABORTED: function (command) {
+    ERR_SASLABORTED: function () {
         this.irc_connection.write('CAP END');
         this.irc_connection.cap_negotiation = false;
     },
 
 
-    ERR_SASLALREADYAUTHED: function (command) {
+    ERR_SASLALREADYAUTHED: function () {
         // noop
     }
+};
+
+module.exports = function AddCommandHandlers(command_controller) {
+    _.each(handlers, function(handler, handler_command) {
+        command_controller.addHandler(handler_command, handler);
+    });
 };

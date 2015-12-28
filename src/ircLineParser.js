@@ -18,7 +18,7 @@ function parseIrcLine(line) {
 
     if (!msg) {
         // The line was not parsed correctly, must be malformed
-        log('Malformed IRC line: %s', line.replace(/^\r+|\r+$/, ''));
+        console.log('Malformed IRC line: %s', line.replace(/^\r+|\r+$/, ''));
         return;
     }
 
