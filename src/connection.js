@@ -579,7 +579,7 @@ function socketConnectHandler() {
     }
 
     this.write('NICK ' + this.nick);
-    this.write('USER ' + this.username + ' 0 0 :' + this.gecos);
+    this.write('USER ' + this.username + ' 0 * :' + this.gecos);
 
     this.emit('connected');
 }
