@@ -1,2 +1,2 @@
-module.exports.Bot = require('./bot');
-module.exports.ircLineParser = require('./ircLineParser');
+module.exports.Bot = require('./src/bot');
+module.exports.ircLineParser = require('./src/ircLineParser');
