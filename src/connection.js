@@ -318,13 +318,6 @@ IrcConnection.prototype.connect = function () {
 };
 
 /**
- * Send an event to the client
- */
-IrcConnection.prototype.clientEvent = function (event_name, data) {
-    this.emit('client_event', event_name, data);
-};
-
-/**
  * Write a line of data to the IRCd
  * @param data The line of data to be sent
  * @param force Write the data now, ignoring any write queue
