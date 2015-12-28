@@ -1,4 +1,4 @@
-var IRC = require('./');
+var IRC = require('../');
 
 var bot = new IRC.Bot('5.39.86.47', 6667, false, 'prawnsbot', 'prawnsbot', {});
 bot.connect();
