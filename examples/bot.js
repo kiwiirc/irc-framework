@@ -1,6 +1,6 @@
 var IRC = require('../');
 
-var bot = new IRC.Client('5.39.86.47', 6667, false, 'prawnsbot', 'prawnsbot', {});
+var bot = new IRC.Client('irc.freenode.net', 6667, false, 'prawnsbot', 'prawnsbot', {});
 bot.connect();
 bot.on('registered', function() {
 	console.log('Connected!');
