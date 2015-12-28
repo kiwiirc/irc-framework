@@ -2,15 +2,15 @@ var EventEmitter = require('events').EventEmitter;
 var IrcConnection = require('./connection').IrcConnection;
 var _ = require('lodash');
 
-module.exports = IrcBot;
+module.exports = IrcClient;
 
-function IrcBot(hostname, port, ssl, nick, options) {
+function IrcClient(hostname, port, ssl, nick, options) {
 	var that = this;
 
 	EventEmitter.call(this);
 	this.connection = new IrcConnection(hostname, port, ssl, nick, options);
 	this.connection.on('all', function(event_name) {
-		console.log('[IrcBot]', event_name);
+		console.log('[IrcClient]', event_name);
 		var event_args = arguments;
 
 		// Add a reply() function to selected message events
@@ -28,10 +28,10 @@ function IrcBot(hostname, port, ssl, nick, options) {
 	});
 }
 
-require('util').inherits(IrcBot, EventEmitter);
+require('util').inherits(IrcClient, EventEmitter);
 
 
-IrcBot.prototype.raw = function(input) {
+IrcClient.prototype.raw = function(input) {
 	var args;
 
 	if (input.constructor === Array) {
@@ -49,22 +49,22 @@ IrcBot.prototype.raw = function(input) {
 };
 
 
-IrcBot.prototype.connect = function() {
+IrcClient.prototype.connect = function() {
 	this.connection.connect();
 };
 
 
-IrcBot.prototype.quit = function(message) {
+IrcClient.prototype.quit = function(message) {
 	this.raw('QUIT', message);
 };
 
 
-IrcBot.prototype.changeNick = function(nick) {
+IrcClient.prototype.changeNick = function(nick) {
 	this.raw('NICK', nick);
 };
 
 
-IrcBot.prototype.say = function(target, message) {
+IrcClient.prototype.say = function(target, message) {
 	var that = this;
 
     // Maximum length of target + message we can send to the IRC server is 500 characters
@@ -78,7 +78,7 @@ IrcBot.prototype.say = function(target, message) {
 };
 
 
-IrcBot.prototype.notice = function(target, message) {
+IrcClient.prototype.notice = function(target, message) {
 	var that = this;
 
     // Maximum length of target + message we can send to the IRC server is 500 characters
@@ -92,7 +92,7 @@ IrcBot.prototype.notice = function(target, message) {
 };
 
 
-IrcBot.prototype.join = function(channel, key) {
+IrcClient.prototype.join = function(channel, key) {
 	var raw = ['JOIN', channel];
 	if (key) {
         raw.push(key);
@@ -101,7 +101,7 @@ IrcBot.prototype.join = function(channel, key) {
 };
 
 
-IrcBot.prototype.part = function(channel, message) {
+IrcClient.prototype.part = function(channel, message) {
 	var raw = ['PART', channel];
 	if (message) {
         raw.push(message);
@@ -110,59 +110,59 @@ IrcBot.prototype.part = function(channel, message) {
 };
 
 
-IrcBot.prototype.ctcpRequest = function(target, type /*, paramN*/) {
+IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
 	var params = arguments.slice(2);
 	this.raw('PRIVMSG', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
 };
 
 
-IrcBot.prototype.ctcpResponse = function(target, type /*, paramN*/) {
+IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
 	var params = arguments.slice(2);
 	this.raw('NOTICE', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
 };
 
 
-IrcBot.prototype.whois = function(target) {
+IrcClient.prototype.whois = function(target) {
 	this.raw('WHOIS', target);
 };
 
 
-IrcBot.prototype.channel = function(channel_name) {
-	return new IrcBot.Channel(this, channel_name);
+IrcClient.prototype.channel = function(channel_name) {
+	return new IrcClient.Channel(this, channel_name);
 };
 
 
 
 
 
-IrcBot.Channel = function IrcChannel(irc_bot, channel_name, key) {
-	this.irc_bot = irc_bot;
+IrcClient.Channel = function IrcChannel(irc_client, channel_name, key) {
+	this.irc_client = irc_client;
 	this.name = channel_name;
 
-	this.say = _.partial(irc_bot.say.bind(irc_bot), channel_name);
-	this.notice = _.partial(irc_bot.notice.bind(irc_bot), channel_name);
-	//this.action = _.partial(irc_bot.action.bind(irc_bot), channel_name);
-	this.part = _.partial(irc_bot.part.bind(irc_bot), channel_name);
-	this.join = _.partial(irc_bot.join.bind(irc_bot), channel_name);
+	this.say = _.partial(irc_client.say.bind(irc_client), channel_name);
+	this.notice = _.partial(irc_client.notice.bind(irc_client), channel_name);
+	//this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
+	this.part = _.partial(irc_client.part.bind(irc_client), channel_name);
+	this.join = _.partial(irc_client.join.bind(irc_client), channel_name);
 
 	this.users = [];
-	irc_bot.on('userlist', function(event) {
+	irc_client.on('userlist', function(event) {
 		this.users = event.users;
 	});
 
 	this.join(key);
 };
 
-IrcBot.Channel.prototype = {
+IrcClient.Channel.prototype = {
 	updateUsers: function(cb) {
 		var that = this;
-		this.irc_bot.on('userlist', function updateUserList(event) {
+		this.irc_client.on('userlist', function updateUserList(event) {
 			if (event.channel === that.name) {
-				that.irc_bot.removeListener('userlist', updateUserList);
+				that.irc_client.removeListener('userlist', updateUserList);
 				if (typeof cb === 'function') { cb(this); }
 			}
 		});
-		this.irc_bot.raw('NAMES', this.name);
+		this.irc_client.raw('NAMES', this.name);
 	}
 };
 
