@@ -1,0 +1,29 @@
+{
+  "name": "irc-framework",
+  "version": "1.0.0",
+  "description": "A better IRC framework for node.js",
+  "main": "index.js",
+  "dependencies": {
+    "iconv-lite": "^0.4.11",
+    "lodash": "^3.10.1",
+    "socksjs": "^0.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiwiirc/irc-framework.git"
+  },
+  "keywords": [
+    "IRC",
+    "bot",
+    "messaging"
+  ],
+  "author": "prawnsalad",
+  "bugs": {
+    "url": "https://github.com/kiwiirc/irc-framework/issues"
+  },
+  "homepage": "https://github.com/kiwiirc/irc-framework#readme"
+}
