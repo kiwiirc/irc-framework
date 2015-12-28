@@ -1,12 +1,5 @@
 var _ = require('lodash');
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
-
-
 var handlers = {
     NOTICE: function (command) {
         var time,
@@ -55,7 +48,7 @@ var handlers = {
 
 
     PRIVMSG: function (command) {
-        var tmp, time, msg, version_string, client_info;
+        var time, msg, version_string, client_info;
 
         // Check if we have a server-time
         time = command.getServerTime();
@@ -125,4 +118,10 @@ var handlers = {
             msg: command.params[command.params.length - 1]
         });
     },
+};
+
+module.exports = function AddCommandHandlers(command_controller) {
+    _.each(handlers, function(handler, handler_command) {
+        command_controller.addHandler(handler_command, handler);
+    });
 };

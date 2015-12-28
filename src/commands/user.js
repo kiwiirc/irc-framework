@@ -1,12 +1,5 @@
 var _ = require('lodash');
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
-
-
 var handlers = {
     NICK: function (command) {
         var time;
@@ -156,7 +149,7 @@ var handlers = {
         });
     },
 
-    RPL_ENDOFWHOWAS: function (command) {
+    RPL_ENDOFWHOWAS: function () {
         // noop
     },
 
@@ -166,4 +159,10 @@ var handlers = {
             error: 'no_such_nick'
         });
     },
+};
+
+module.exports = function AddCommandHandlers(command_controller) {
+    _.each(handlers, function(handler, handler_command) {
+        command_controller.addHandler(handler_command, handler);
+    });
 };

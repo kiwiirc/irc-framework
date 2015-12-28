@@ -26,7 +26,7 @@ function IrcBot(hostname, port, ssl, nick, options) {
 
 		that.emit.apply(that, arguments);
 	});
-};
+}
 
 require('util').inherits(IrcBot, EventEmitter);
 
@@ -40,7 +40,7 @@ IrcBot.prototype.raw = function(input) {
 		args = Array.prototype.slice.call(arguments, 0);
 	}
 	console.log('raw()', args);
-	var to_send = '';
+
 	if (args[args.length-1].indexOf(' ') > -1) {
 		args[args.length-1] = ':' + args[args.length-1];
 	}
@@ -72,7 +72,7 @@ IrcBot.prototype.say = function(target, message) {
     // be sent from the IRCd to the target without being truncated.
     var blocks = truncateString(message, 350);
 
-    blocks.forEach(function(block, idx) {
+    blocks.forEach(function(block) {
         that.raw('PRIVMSG', target, block);
     });
 };
@@ -86,7 +86,7 @@ IrcBot.prototype.notice = function(target, message) {
     // be sent from the IRCd to the target without being truncated.
     var blocks = truncateString(message, 350);
 
-    blocks.forEach(function(block, idx) {
+    blocks.forEach(function(block) {
         that.raw('NOTICE', target, block);
     });
 };
@@ -94,14 +94,18 @@ IrcBot.prototype.notice = function(target, message) {
 
 IrcBot.prototype.join = function(channel, key) {
 	var raw = ['JOIN', channel];
-	if (key) raw.push(key);
+	if (key) {
+        raw.push(key);
+    }
 	this.raw(raw);
 };
 
 
 IrcBot.prototype.part = function(channel, message) {
 	var raw = ['PART', channel];
-	if (message) raw.push(message);
+	if (message) {
+        raw.push(message);
+    }
 	this.raw(raw);
 };
 
@@ -155,7 +159,7 @@ IrcBot.Channel.prototype = {
 		this.irc_bot.on('userlist', function updateUserList(event) {
 			if (event.channel === that.name) {
 				that.irc_bot.removeListener('userlist', updateUserList);
-				cb && cb(this);
+				if (typeof cb === 'function') { cb(this); }
 			}
 		});
 		this.irc_bot.raw('NAMES', this.name);
