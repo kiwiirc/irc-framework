@@ -23,7 +23,7 @@ Todo:
 
 #### A simple and low-boilerplate framework to build IRC bots.
 ~~~javascript
-var bot = new IRC.Bot('irc.freenode.net', 6667, 'prawnsbot');
+var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
 bot.connect();
 
 bot.on('privmsg', function(event) {
@@ -41,7 +41,7 @@ bot.on('privmsg', function(event) {
 
 #### A more fleshed out framework for clients
 ~~~javascript
-var bot = new IRC.Bot('irc.freenode.net', 6667, 'prawnsbot');
+var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
 bot.connect();
 
 var buffers = [];
