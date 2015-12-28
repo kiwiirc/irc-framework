@@ -1,7 +1,8 @@
-var _ = require('lodash');
+var each = require('lodash.foreach'),
+    find = require('lodash.find');
 
 module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
+    each(handlers, function(handler, handler_command) {
         command_controller.addHandler(handler_command, handler);
     });
 };
@@ -31,7 +32,7 @@ var handlers = {
             });
         } else {
             // Support '@#channel' formats
-            _.find(this.irc_connection.ircd_options.PREFIX, function(prefix) {
+            find(this.irc_connection.ircd_options.PREFIX, function(prefix) {
                 if (prefix.symbol === target[0]) {
                     target_group = target[0];
                     target = target.substring(1);

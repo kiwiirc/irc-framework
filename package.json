@@ -5,7 +5,15 @@
   "main": "index.js",
   "dependencies": {
     "iconv-lite": "^0.4.11",
-    "lodash": "^3.10.1",
+    "lodash.clone": "^3.0.3",
+    "lodash.contains": "^2.4.3",
+    "lodash.difference": "^3.2.2",
+    "lodash.find": "^3.2.1",
+    "lodash.foreach": "^3.0.3",
+    "lodash.includes": "^3.1.3",
+    "lodash.intersection": "^3.2.0",
+    "lodash.partial": "^3.1.1",
+    "lodash.reduce": "^3.1.2",
     "socksjs": "^0.5.0"
   },
   "devDependencies": {

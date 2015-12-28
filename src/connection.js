@@ -2,7 +2,7 @@ var net             = require('net'),
     tls             = require('tls'),
     util            = require('util'),
     dns             = require('dns'),
-    _               = require('lodash'),
+    intersection    = require('lodash.intersection'),
     Socks           = require('socksjs'),
     IrcCommands     = require('./commands'),
     ircLineParser   = require('./ircLineParser'),
@@ -433,7 +433,7 @@ IrcConnection.prototype.capContainsAny = function (caps) {
         caps = [caps];
     }
 
-    enabled_caps = _.intersection(this.cap.enabled, caps);
+    enabled_caps = intersection(this.cap.enabled, caps);
     return enabled_caps.length > 0;
 };
 

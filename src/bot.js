@@ -1,6 +1,6 @@
 var EventEmitter = require('events').EventEmitter;
 var IrcConnection = require('./connection').IrcConnection;
-var _ = require('lodash');
+var partial = require('lodash.partial');
 
 module.exports = IrcBot;
 
@@ -135,11 +135,11 @@ IrcBot.Channel = function IrcChannel(irc_bot, channel_name, key) {
 	this.irc_bot = irc_bot;
 	this.name = channel_name;
 
-	this.say = _.partial(irc_bot.say.bind(irc_bot), channel_name);
-	this.notice = _.partial(irc_bot.notice.bind(irc_bot), channel_name);
-	//this.action = _.partial(irc_bot.action.bind(irc_bot), channel_name);
-	this.part = _.partial(irc_bot.part.bind(irc_bot), channel_name);
-	this.join = _.partial(irc_bot.join.bind(irc_bot), channel_name);
+	this.say = partial(irc_bot.say.bind(irc_bot), channel_name);
+	this.notice = partial(irc_bot.notice.bind(irc_bot), channel_name);
+	//this.action = partial(irc_bot.action.bind(irc_bot), channel_name);
+	this.part = partial(irc_bot.part.bind(irc_bot), channel_name);
+	this.join = partial(irc_bot.join.bind(irc_bot), channel_name);
 
 	this.users = [];
 	irc_bot.on('userlist', function(event) {
