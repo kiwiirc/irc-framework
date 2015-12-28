@@ -68,15 +68,7 @@ var handlers = {
                 });
 
             } else if (msg.substr(1, 7) === 'VERSION') {
-                client_info = this.irc_connection.session.client.client_info;
-                version_string = 'TODO: A VERSION';
-
-                // If the client build_version differs from the server, add this to the version_string
-                if (client_info && client_info.build_version !== 'global.build_version') {
-                    version_string += ', client build: ' + client_info.build_version;
-                }
-
-                version_string = 'KiwiIRC (' + version_string + ')';
+                version_string = 'node.js irc-framework';
                 this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'VERSION ' + version_string + String.fromCharCode(1));
 
             } else if (msg.substr(1, 6) === 'SOURCE') {
