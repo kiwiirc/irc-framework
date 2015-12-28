@@ -8,6 +8,7 @@ A better IRC framework for node.js. For bots and full clients. (a work in progre
 * Grows as needed for larger applications
 * IRCv3 compliant
 * Multiple (+ auto detected) encoding support
+* Complete test suit
 
 ### Status
 Currently ripped out of the Kiwi IRC project and running independently.
