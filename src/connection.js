@@ -679,6 +679,11 @@ function processIrcLines(irc_con, continue_processing) {
         log('(connection ' + irc_con.id + ') Raw S:', line.replace(/^\r+|\r+$/, ''));
 
         message = ircLineParser(line);
+        if (!message) {
+            // A malformed IRC line
+            continue;
+        }
+
         irc_con.irc_commands.dispatch(new IrcCommands.Command(message.command.toUpperCase(), message));
         processed_lines++;
     }
