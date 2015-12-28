@@ -1,7 +1,7 @@
-var _ = require('lodash');
+var each = require('lodash.foreach');
 
 module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
+    each(handlers, function(handler, handler_command) {
         command_controller.addHandler(handler_command, handler);
     });
 };
@@ -46,7 +46,7 @@ var handlers = {
 
         if (!cache.members) cache.members = [];
         
-        _.each(members, function (member) {
+        each(members, function (member) {
             var i = 0,
                 j = 0,
                 modes = [];

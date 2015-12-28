@@ -1,7 +1,11 @@
-var _ = require('lodash');
+var each = require('lodash.foreach'),
+    includes = require('lodash.includes'),
+    contains = require('lodash.contains'),
+    intersection = require('lodash.intersection'),
+    difference = require('lodash.difference');
 
 module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
+    each(handlers, function(handler, handler_command) {
         command_controller.addHandler(handler_command, handler);
     });
 };
@@ -28,7 +32,7 @@ var handlers = {
             option = options[i].split("=", 2);
             option[0] = option[0].toUpperCase();
             this.irc_connection.ircd_options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
-            if (_.include(['NETWORK', 'PREFIX', 'CHANTYPES', 'CHANMODES', 'NAMESX'], option[0])) {
+            if (includes(['NETWORK', 'PREFIX', 'CHANTYPES', 'CHANMODES', 'NAMESX'], option[0])) {
                 if (option[0] === 'PREFIX') {
                     matches = /\(([^)]*)\)(.*)/.exec(option[1]);
                     if ((matches) && (matches.length === 3)) {
@@ -41,7 +45,7 @@ var handlers = {
                     this.irc_connection.ircd_options.CHANTYPES = this.irc_connection.ircd_options.CHANTYPES.split('');
                 } else if (option[0] === 'CHANMODES') {
                     this.irc_connection.ircd_options.CHANMODES = option[1].split(',');
-                } else if ((option[0] === 'NAMESX') && (!_.contains(this.irc_connection.cap.enabled, 'multi-prefix'))) {
+                } else if ((option[0] === 'NAMESX') && (!contains(this.irc_connection.cap.enabled, 'multi-prefix'))) {
                     this.irc_connection.write('PROTOCTL NAMESX');
                 }
             }
@@ -69,7 +73,7 @@ var handlers = {
         switch (command.params[1]) {
             case 'LS':
                 // Compute which of the available capabilities we want and request them
-                request = _.intersection(capabilities, want);
+                request = intersection(capabilities, want);
                 if (request.length > 0) {
                     this.irc_connection.cap.requested = request;
                     this.irc_connection.write('CAP REQ :' + request.join(' '));
@@ -83,10 +87,10 @@ var handlers = {
                     // Update list of enabled capabilities
                     this.irc_connection.cap.enabled = capabilities;
                     // Update list of capabilities we would like to have but that aren't enabled
-                    this.irc_connection.cap.requested = _.difference(this.irc_connection.cap.requested, capabilities);
+                    this.irc_connection.cap.requested = difference(this.irc_connection.cap.requested, capabilities);
                 }
                 if (this.irc_connection.cap.enabled.length > 0) {
-                    if (_.contains(this.irc_connection.cap.enabled, 'sasl')) {
+                    if (contains(this.irc_connection.cap.enabled, 'sasl')) {
                         this.irc_connection.write('AUTHENTICATE PLAIN');
                     } else {
                         this.irc_connection.write('CAP END');
@@ -96,7 +100,7 @@ var handlers = {
                 break;
             case 'NAK':
                 if (capabilities.length > 0) {
-                    this.irc_connection.cap.requested = _.difference(this.irc_connection.cap.requested, capabilities);
+                    this.irc_connection.cap.requested = difference(this.irc_connection.cap.requested, capabilities);
                 }
                 if (this.irc_connection.cap.requested.length > 0) {
                     this.irc_connection.write('CAP END');

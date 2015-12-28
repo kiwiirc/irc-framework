@@ -1,4 +1,6 @@
-var _ = require('lodash'),
+var clone = require('lodash.clone'),
+    find = require('lodash.find'),
+    reduce = require('lodash.reduce'),
     irc_numerics = require('./numerics');
 
 
@@ -83,18 +85,18 @@ IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params)
         modes = [],
         has_param, i, j, add;
 
-    prefixes = _.reduce(prefixes, function (list, prefix) {
+    prefixes = reduce(prefixes, function (list, prefix) {
         list.push(prefix.mode);
         return list;
     }, []);
     always_param = always_param.split('').concat(prefixes);
 
     has_param = function (mode, add) {
-        if (_.find(always_param, function (m) {
+        if (find(always_param, function (m) {
             return m === mode;
         })) {
             return true;
-        } else if (add && _.find((chanmodes[2] || '').split(''), function (m) {
+        } else if (add && find((chanmodes[2] || '').split(''), function (m) {
             return m === mode;
         })) {
             return true;
@@ -157,8 +159,8 @@ IrcCommandsHandler.prototype.cache = function(id) {
 
 function IrcCommand(command, data) {
     this.command = command += '';
-    this.params = _.clone(data.params);
-    this.tags = _.clone(data.tags);
+    this.params = clone(data.params);
+    this.tags = clone(data.tags);
 
     this.prefix = data.prefix;
     this.nick = data.nick;
@@ -175,7 +177,7 @@ IrcCommand.prototype.getServerTime = function() {
         return;
     }
 
-    time = _.find(this.tags, function (tag) {
+    time = find(this.tags, function (tag) {
         return tag.tag === 'time';
     });
 

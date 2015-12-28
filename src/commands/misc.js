@@ -1,7 +1,8 @@
-var _ = require('lodash');
+var each = require('lodash.foreach'),
+    clone = require('lodash.clone');
 
 module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
+    each(handlers, function(handler, handler_command) {
         command_controller.addHandler(handler_command, handler);
     });
 };
@@ -205,91 +206,91 @@ var handlers = {
     },
 
     RPL_MAPMORE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_MAPEND: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LINKS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ENDOFLINKS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_UNKNOWNCOMMAND: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, '`' + params.slice(0, -1).join(', ') + '` ' + command.params[command.params.length - 1]);
     },
 
     ERR_NOMOTD: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, command.params[command.params.length - 1]);
     },
 
     ERR_NOPRIVILEGES: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, command.params[command.params.length - 1]);
     },
 
     RPL_STATSCONN: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LUSERCLIENT: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LUSEROP: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LUSERUNKNOWN: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LUSERCHANNELS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LUSERME: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_LOCALUSERS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_GLOBALUSERS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
@@ -299,7 +300,7 @@ var handlers = {
     },
 
     RPL_YOURHOST: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
@@ -311,372 +312,372 @@ var handlers = {
     },
 
     RPL_MYINFO: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SNOMASK: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_NOWOPER: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACELINK: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACECONNECTING: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACEHANDSHAKE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACEUNKNOWN: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACEOPERATOR: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACEUSER: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACESERVER: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACESERVICE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACENEWTYPE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACECLASS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_TRACERECONNECT: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSLINKINFO: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSCOMMANDS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSCLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSNLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSILINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSKLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSPLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSYLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ENDOFSTATS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSBLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_UMODEIS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SQLINE_NICK: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATS_E: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATS_D: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SPAMFILTER: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SERVICEINFO: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ENDOFSERVICES: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SERVICE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SERVLIST: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_SERVLISTEND: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSLLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSUPTIME: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSOLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSHLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSSLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSGLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSXLINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSULINE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_STATSDEBUG: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ADMINME: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ADMINLOC1: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ADMINLOC2: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ADMINEMAIL: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_HELPHDR: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_HELPOP: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_HELPTLR: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ZIPSTATS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_INFO: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_ENDINFO: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     RPL_NOSUCHSERVER: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_NOADMININFO: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_NOTENOUGHPARAMS: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_NOOPERHOST: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_UNKNOWNMODE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_CANTKILLSERVER: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_ISCHANSERVICE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
 
     ERR_ISREALSERVICE: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     },
     ERR_CANNOTDOCOMMAND: function (command) {
-        var params = _.clone(command.params);
+        var params = clone(command.params);
         params.shift();
         this.emitGenericNotice(command, params.slice(0, -1).join(', ') + ' ' + command.params[command.params.length - 1]);
     }
