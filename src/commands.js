@@ -130,24 +130,26 @@ IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params)
 /**
  * Cache object for commands buffering data before emitting them
  */
-var caches = Object.create(null);
-function destroyCacheFn(id) {
+function destroyCacheFn(cache, id) {
     return function() {
         console.log('removing cache', id);
-        delete caches[id];
+        delete cache[id];
     };
 }
 IrcCommandsHandler.prototype.cache = function(id) {
-    var cache = caches[id];
+    var cache;
+
+    this._caches = this._caches || Object.create(null);
+    cache = this._caches[id];
 
     if (!cache) {
         console.log('creating cache', id);
         cache = Object.defineProperty({}, 'destroy', {
             enumerable: false,
             configurable: false,
-            value: destroyCacheFn(id)
+            value: destroyCacheFn(this._caches, id)
         });
-        caches[id] = cache;
+        this._caches[id] = cache;
     }
 
     return cache;
