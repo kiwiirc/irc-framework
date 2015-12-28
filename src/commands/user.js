@@ -31,6 +31,21 @@ var handlers = {
     },
 
 
+    ERR_NICKNAMEINUSE: function (command) {
+        this.emit('nick in use', {
+            nick: command.params[1],
+            reason: command.params[command.params.length - 1]
+        });
+    },
+
+    ERR_ERRONEUSNICKNAME: function(command) {
+        this.emit('nick invalid', {
+            nick: command.params[1],
+            reason: command.params[command.params.length - 1]
+        });
+    },
+
+
     RPL_ENDOFWHOIS: function (command) {
         var nick = command.params[1];
         var cache = this.cache('whois.' + nick);
@@ -159,6 +174,11 @@ var handlers = {
             error: 'no_such_nick'
         });
     },
+
+    RPL_UMODEIS: function (command) {
+        //this.irc_connection.umodes = the modes
+        console.log('IMPLEMENT ME: umodes setting on irc_connection');
+    }
 };
 
 module.exports = function AddCommandHandlers(command_controller) {

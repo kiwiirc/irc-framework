@@ -70,6 +70,9 @@ var IrcConnection = function (hostname, port, ssl, nick, options) {
     this.password = options.password || '';
     this.quit_message = options.quit_message || ''; // Uses default from config if empty
 
+    // Updated by the IRCd
+    this.umodes = [];
+
     // Set the passed encoding. or the default if none giving or it fails
     if (!options.encoding || !this.setEncoding(options.encoding)) {
         this.setEncoding('utf8');
