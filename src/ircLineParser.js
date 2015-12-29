@@ -4,7 +4,7 @@ module.exports = parseIrcLine;
  * Deviates from the RFC a little to support the '/' character now used in some
  * IRCds
  */
-var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:]+?))?(?: :(.*))?$/i;
+var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
 
 function parseIrcLine(line) {
     var msg,
