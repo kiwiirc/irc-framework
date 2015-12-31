@@ -11,14 +11,16 @@
   "devDependencies": {
     "chai": "^3.4.1",
     "chai-subset": "^1.2.0",
+    "istanbul": "^0.4.1",
     "jshint": "^2.8.0",
     "mocha": "^2.3.4",
     "sinon": "^1.17.2"
   },
   "scripts": {
-    "test": "npm run lint && npm run mocha -- -R dot",
-    "lint": "jshint src/ examples/ || true",
-    "mocha": "mocha"
+    "test": "npm run lint && npm run coverage -- -R dot",
+    "lint": "jshint src/ examples/ test/ || true",
+    "unit-test": "mocha",
+    "coverage": "istanbul cover --include-all-sources _mocha --"
   },
   "repository": {
     "type": "git",
