@@ -1,4 +1,6 @@
-module.exports = parseIrcLine;
+var _ = require('lodash'),
+    parseISO8601 = require('./parseiso8601');
+
 /**
  * The regex that parses a line of data from the IRCd
  * Deviates from the RFC a little to support the '/' character now used in some
@@ -11,7 +13,7 @@ function parseIrcLine(line) {
         i,
         tags = [],
         tag,
-        msg_obj;
+        params;
 
     // Parse the complete line, removing any carriage returns
     msg = parse_regex.exec(line.replace(/^\r+|\r+$/, ''));
@@ -32,19 +34,59 @@ function parseIrcLine(line) {
         }
     }
 
-    msg_obj = {
-        tags:       tags,
-        prefix:     msg[2],
-        nick:       msg[3] || msg[2],  // Nick will be in the prefix slot if a full user mask is not used
-        ident:      msg[4] || '',
-        hostname:   msg[5] || '',
-        command:    msg[6],
-        params:     msg[7] ? msg[7].split(/ +/) : []
-    };
+    params = msg[7] ? msg[7].split(/ +/) : [];
 
     if (typeof msg[8] !== 'undefined') {
-        msg_obj.params.push(msg[8].trimRight());
+        params.push(msg[8].trimRight());
     }
 
-    return msg_obj;
+    return new Message(tags, msg[2], msg[3] || msg[2], msg[4] || '', msg[5] || '', msg[6], params);
 }
+
+module.exports = parseIrcLine;
+
+function Message(tags, prefix, nick, ident, hostname, command, params) {
+    this.tags = tags;
+    this.prefix = prefix;
+    this.nick = nick;
+    this.ident = ident;
+    this.hostname = hostname;
+    this.command = command;
+    this.params = params;
+}
+
+Message.prototype.getServerTime = function () {
+    var time;
+
+    // No tags? No times.
+    if (!this.tags || this.tags.length === 0) {
+        return;
+    }
+
+    time = _.find(this.tags, function (tag) {
+        return tag.tag === 'time';
+    });
+
+    if (time) {
+        time = time.value;
+    }
+
+    // Convert the time value to a unixtimestamp
+    if (typeof time === 'string') {
+        if (time.indexOf('T') > -1) {
+            time = parseISO8601(time);
+
+        } else if(time.match(/^[0-9.]+$/)) {
+            // A string formatted unix timestamp
+            time = new Date(time * 1000);
+        }
+
+        time = time.getTime();
+
+    } else if (typeof time === 'number') {
+        time = new Date(time * 1000);
+        time = time.getTime();
+    }
+
+    return time;
+};

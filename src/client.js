@@ -11,6 +11,11 @@ function IrcClient(hostname, port, ssl, nick, options) {
 
 	EventEmitter.call(this);
 	this.connection = new IrcConnection(hostname, port, ssl, nick, options);
+	this.use(require('./commands/registration'));
+	this.use(require('./commands/channel'));
+	this.use(require('./commands/user'));
+	this.use(require('./commands/messaging'));
+	this.use(require('./commands/misc'));
 	this.connection.on('all', function(event_name) {
 		console.log('[IrcClient]', event_name);
 		var event_args = arguments;
@@ -133,7 +138,9 @@ IrcClient.prototype.channel = function(channel_name) {
 	return new IrcClient.Channel(this, channel_name);
 };
 
-
+IrcClient.prototype.use = function() {
+	return this.connection.irc_commands.use.apply(this.connection.irc_commands, [].slice.call(arguments));
+};
 
 
 

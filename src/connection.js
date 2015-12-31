@@ -4,7 +4,7 @@ var net             = require('net'),
     dns             = require('dns'),
     _               = require('lodash'),
     Socks           = require('socksjs'),
-    IrcCommands     = require('./commands'),
+    CommandHandler  = require('./commandhandler'),
     ircLineParser   = require('./ircLineParser'),
     EventEmitter    = require('events').EventEmitter,
     iconv           = require('iconv-lite');
@@ -79,7 +79,7 @@ var IrcConnection = function (hostname, port, ssl, nick, options) {
     }
 
     // IRC protocol handling
-    this.irc_commands = new IrcCommands.Handler(this);
+    this.irc_commands = new CommandHandler(this);
 
     // IRC connection information
     this.irc_host = {hostname: hostname, port: port};
@@ -501,6 +501,33 @@ IrcConnection.prototype.setEncoding = function (encoding) {
     }
 };
 
+
+function destroyCacheFn(cache, id) {
+    return function() {
+        console.log('removing cache', id);
+        delete cache[id];
+    };
+}
+
+IrcConnection.prototype.cache = function(id) {
+    var cache;
+
+    this._caches = this._caches || Object.create(null);
+    cache = this._caches[id];
+
+    if (!cache) {
+        console.log('creating cache', id);
+        cache = Object.defineProperty({}, 'destroy', {
+            enumerable: false,
+            configurable: false,
+            value: destroyCacheFn(this._caches, id)
+        });
+        this._caches[id] = cache;
+    }
+
+    return cache;
+};
+
 function getConnectionFamily(host, callback) {
     if (net.isIP(host)) {
         if (net.isIPv4(host)) {
@@ -680,7 +707,7 @@ function processIrcLines(irc_con, continue_processing) {
             continue;
         }
 
-        irc_con.irc_commands.dispatch(new IrcCommands.Command(message.command.toUpperCase(), message));
+        irc_con.irc_commands.dispatch(message);
         processed_lines++;
     }
 
