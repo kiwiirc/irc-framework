@@ -2042,5 +2042,15 @@ describe('src/ircLineParser.js', function () {
             });
         });
 
+        it('should parse a message that has params that contain, but do not start with, a colon', function () {
+            var msgObj = parseIrcLine(':irc.example.org 005 nick SECURELIST SILENCE=32 SSL=[::]:6697 STATUSMSG=!@%+ TOPICLEN=1000 UHNAMES USERIP VBANLIST WALLCHOPS WALLVOICES WATCH=64 :are supported by this server');
+
+            expect(msgObj).to.containSubset({
+                command: '005',
+                hostname: 'irc.example.org',
+                params: ['nick', 'SECURELIST', 'SILENCE=32', 'SSL=[::]:6697', 'STATUSMSG=!@%+', 'TOPICLEN=1000', 'UHNAMES', 'USERIP', 'VBANLIST', 'WALLCHOPS', 'WALLVOICES', 'WATCH=64', 'are supported by this server']
+            });
+        });
+
     });
 });
