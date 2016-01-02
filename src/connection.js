@@ -13,19 +13,13 @@ function Connection(options) {
     this.options = options || {};
 
     this.connected = false;
-
     this.requested_disconnect = false;
-
     this.reconnect_attempts = 0;
 
     this.read_buffer = [];
     this.reading_buffer = false;
 
     this.read_command_buffer = [];
-
-    if (!options.encoding || !this.setEncoding(options.encoding)) {
-        this.setEncoding('utf8');
-    }
 
     this.localAddress = this.options.localAddress;
 
@@ -34,15 +28,29 @@ function Connection(options) {
     this.held_data = null;
 
     this._timers = [];
+
+    // Options sent by the IRCd
+    // TODO: This shouldn't be here. This module is only for socket connection handling
+    this.ircd_options = Object.create(null);
+    this.ircd_options.PREFIX = [
+        {symbol: '~', mode: 'q'},
+        {symbol: '&', mode: 'a'},
+        {symbol: '@', mode: 'o'},
+        {symbol: '%', mode: 'h'},
+        {symbol: '+', mode: 'v'}
+    ];
+
+    this.cap = {requested: [], enabled: []};
 }
 
 util.inherits(Connection, DuplexStream);
 
 module.exports = Connection;
 
-Connection.prototype.connect = function(options) {
+Connection.prototype.connect = function() {
     var socket_connect_event_name = 'connect',
         that = this,
+        options = this.options,
         dest_addr;
 
     if (options.socks) {
@@ -55,27 +63,35 @@ Connection.prototype.connect = function(options) {
 
     this.requested_disconnect = false;
 
+    if (!this.options.encoding || !this.setEncoding(this.options.encoding)) {
+        this.setEncoding('utf8');
+    }
+
     getConnectionFamily(dest_addr, function getConnectionFamilyCb(err, family, host) {
         var outgoing_addr = this.localAddress || '0.0.0.0';
+        var ircd_host = host;
+        var ircd_port = options.port || 6667;
 
         if (options.socks) {
+            console.log('Connecting via socks to ' + options.host + ':' + ircd_port);
             that.socket = Socks.connect({
                 host: options.host,
-                port: options.port,
+                port: ircd_port,
                 ssl: options.tls,
                 rejectUnauthorized: options.rejectUnauthorized
             }, {
                 host: host,
-                port: options.socks.port,
+                port: options.socks.port || 8080,
                 user: options.socks.user,
                 pass: options.socks.pass,
                 localAddress: outgoing_addr
             });
         } else {
+            console.log('Connecting directly to ' + ircd_host + ':' + ircd_port);
             if (options.tls) {
                 that.socket = tls.connect({
-                    host: host,
-                    port: options.port,
+                    host: ircd_host,
+                    port: ircd_port,
                     rejectUnauthorized: options.rejectUnauthorized,
                     localAddress: outgoing_addr
                 });
@@ -84,22 +100,31 @@ Connection.prototype.connect = function(options) {
 
             } else {
                 that.socket = net.connect({
-                    host: host,
-                    port: options.port,
+                    host: ircd_host,
+                    port: ircd_port,
                     localAddress: outgoing_addr
                 });
+
+                socket_connect_event_name = 'connect';
             }
         }
 
-        that.socket.on(socket_connect_event_name, function socketConnectCb() {
+        // We need the raw socket connect event.
+        // node.js 0.12 no longer has a .socket property.
+        (that.socket.socket || that.socket).on('connect', rawSocketConnect);
+        that.socket.on(socket_connect_event_name, socketFullyConnected);
+
+        function rawSocketConnect() {
+            // TLS connections have the actual socket as a property
             var is_tls = (typeof this.socket !== 'undefined');
 
-            if (is_tls) {
-                that.connected = true;
+            // TODO: This is where it's safe to read socket pairs for identd
+        }
 
-                that.emit('connected');
-            }
-        });
+        function socketFullyConnected() {
+            that.connected = true;
+            that.emit('connected');
+        }
 
         that.socket.on('error', function socketErrorCb(event) {
             that.emit('socket error', event);
@@ -119,7 +144,6 @@ Connection.prototype.connect = function(options) {
         that.socket.on('close', function socketCloseCb(had_error) {
             var was_connected = that.connected,
                 should_reconnect = false;
-
                 that.connected = false;
 
                 that.disposeSocket();
@@ -154,7 +178,7 @@ Connection.prototype.connect = function(options) {
 
 Connection.prototype._write = function(chunk, encoding, callback) {
     var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
-
+    console.log('Raw C:', chunk.toString());
     return this.socket.write(encoded_buffer, callback);
 };
 
@@ -162,9 +186,21 @@ Connection.prototype._read = function() {
     var message,
         continue_pushing = true;
 
+    this._reading = true;
+
     while (continue_pushing && this.read_command_buffer.length > 0) {
         message = this.read_command_buffer.shift();
         continue_pushing = this.push(message);
+        if (!continue_pushing) {
+            this._reading = false;
+        }
+    }
+};
+
+Connection.prototype.pushCommandBuffer = function(command) {
+    this.read_command_buffer.push(command);
+    if (this._reading) {
+        this._read();
     }
 };
 
@@ -213,8 +249,10 @@ Connection.prototype.end = function (data, callback) {
 
     DuplexStream.prototype.end.call(this, callback);
 
-    this.socket.destroy();
-    this.socket = null;
+    if (this.socket) {
+        this.socket.destroy();
+        this.socket = null;
+    }
 };
 
 
@@ -348,7 +386,7 @@ function processIrcLines(irc_con, continue_processing) {
             continue;
         }
 
-        console.log('(connection ' + irc_con.id + ') Raw S:', line.replace(/^\r+|\r+$/, ''));
+        console.log('Raw S:', line.replace(/^\r+|\r+$/, ''));
 
         message = ircLineParser(line);
 
@@ -357,7 +395,7 @@ function processIrcLines(irc_con, continue_processing) {
             continue;
         }
 
-        irc_con.read_command_buffer.push(message);
+        irc_con.pushCommandBuffer(message);
 
         processed_lines++;
     }

@@ -1,6 +1,8 @@
 var Set = require('es6-set');
 
 function User(opts) {
+    opts = opts || {};
+    
     this.nick = opts.nick || '';
     this.ident = opts.ident || '';
     this.host = opts.host || '';
@@ -9,7 +11,7 @@ function User(opts) {
     this.modes = new Set(opts.modes || []);
 }
 
-module.exports = User();
+module.exports = User;
 
 User.prototype.toggleModes = function(modestr) {
     var adding = true,

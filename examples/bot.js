@@ -1,16 +1,19 @@
 var IRC = require('../');
 
-var bot = new IRC.Bot('5.39.86.47', 6667, false, 'prawnsbot', 'prawnsbot', {});
-bot.connect();
+var bot = new IRC.Bot();
+bot.connect({
+	host: '5.39.86.47',
+	nick: 'prawnsbot'
+});
 bot.on('registered', function() {
 	console.log('Connected!');
-	//bot.join('#prawnsalad');
-	var channel = bot.channel('#prawnsalad');
-	channel.join();
-	channel.say('Hi!');
-	channel.updateUsers(function() {
-		console.log(channel.users);
-	});
+	bot.join('#prawnsalad');
+	//var channel = bot.channel('#prawnsalad');
+	//channel.join();
+	//channel.say('Hi!');
+	//channel.updateUsers(function() {
+	//	console.log(channel.users);
+	//});
 });
 
 bot.on('close', function() {
@@ -23,6 +26,10 @@ bot.on('privmsg', function(event) {
 	} else {
 		event.reply('no');
 	}
+});
+
+bot.matchMessage(/^!hi/, function(event) {
+	event.reply('sup');
 });
 
 bot.on('whois', function(event) {

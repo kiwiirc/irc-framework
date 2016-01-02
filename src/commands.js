@@ -1,8 +1,12 @@
 var _ = require('lodash'),
-    irc_numerics = require('./numerics');
+    irc_numerics = require('./numerics'),
+    util = require('util'),
+    stream = require('stream');
 
 
 function IrcCommandsHandler (irc_connection) {
+    stream.Writable.call(this, { objectMode : true });
+
     this.irc_connection = irc_connection;
     this.handlers = [];
 
@@ -13,6 +17,12 @@ function IrcCommandsHandler (irc_connection) {
     require('./commands/misc')(this);
 }
 
+util.inherits(IrcCommandsHandler, stream.Writable);
+
+IrcCommandsHandler.prototype._write = function(chunk, encoding, callback) {
+    this.dispatch(new IrcCommand(chunk.command.toUpperCase(), chunk));
+    callback();
+};
 
 IrcCommandsHandler.prototype.dispatch = function (irc_command) {
     var command_name = irc_command.command;

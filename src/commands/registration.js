@@ -5,7 +5,7 @@ var handlers = {
         var nick =  command.params[0];
 
         // Get the server name so we know which messages are by the server in future
-        this.irc_connection.server_name = command.prefix;
+        //this.irc_connection.server_name = command.prefix;
 
         this.cap_negotiation = false;
         this.emit('registered', {
