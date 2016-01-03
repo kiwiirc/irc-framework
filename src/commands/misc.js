@@ -71,7 +71,7 @@ var handlers = {
 
 
     PING: function (command) {
-        this.irc_connection.write('PONG ' + command.params[command.params.length - 1]);
+        this.connection.write('PONG ' + command.params[command.params.length - 1]);
     },
 
 
@@ -100,39 +100,39 @@ var handlers = {
     },
 
     ERR_PASSWDMISMATCH: function () {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' password_mismatch', {});
+        this.emit('server password_mismatch', {});
     },
 
     ERR_LINKCHANNEL: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' channel_redirect', {
+        this.emit('server channel_redirect', {
             from: command.params[1],
             to: command.params[2]
         });
     },
 
     ERR_NOSUCHNICK: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' no_such_nick', {
+        this.emit('server no_such_nick', {
             nick: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_CANNOTSENDTOCHAN: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' cannot_send_to_channel', {
+        this.emit('server cannot_send_to_channel', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_TOOMANYCHANNELS: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' too_many_channels', {
+        this.emit('server too_many_channels', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_USERNOTINCHANNEL: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' user_not_in_channel', {
+        this.emit('server user_not_in_channel', {
             nick: command.params[0],
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
@@ -140,49 +140,49 @@ var handlers = {
     },
 
     ERR_NOTONCHANNEL: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' not_on_channel', {
+        this.emit('server not_on_channel', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_USERONCHANNEL: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' user_on_channel', {
+        this.emit('server user_on_channel', {
             nick: command.params[1],
             channel: command.params[2]
         });
     },
 
     ERR_CHANNELISFULL: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' channel_is_full', {
+        this.emit('server channel_is_full', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_INVITEONLYCHAN: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' invite_only_channel', {
+        this.emit('server invite_only_channel', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_BANNEDFROMCHAN: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' banned_from_channel', {
+        this.emit('server banned_from_channel', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_BADCHANNELKEY: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' bad_channel_key', {
+        this.emit('server bad_channel_key', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
     ERR_CHANOPRIVSNEEDED: function (command) {
-        this.emit('server ' + this.irc_connection.irc_host.hostname + ' chanop_privs_needed', {
+        this.emit('server chanop_privs_needed', {
             channel: command.params[1],
             reason: command.params[command.params.length - 1]
         });

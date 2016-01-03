@@ -5,9 +5,9 @@ var handlers = {
         var nick =  command.params[0];
 
         // Get the server name so we know which messages are by the server in future
-        //this.irc_connection.server_name = command.prefix;
+        this.connection.network.server = command.prefix;
 
-        this.cap_negotiation = false;
+        this.connection.network.cap.negotiating = false;
         this.emit('registered', {
             nick: nick
         });
@@ -17,31 +17,36 @@ var handlers = {
     RPL_ISUPPORT: function (command) {
         var options, i, option, matches, j;
         options = command.params;
+        
         for (i = 1; i < options.length; i++) {
             option = options[i].split("=", 2);
             option[0] = option[0].toUpperCase();
-            this.irc_connection.ircd_options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
-            if (_.include(['NETWORK', 'PREFIX', 'CHANTYPES', 'CHANMODES', 'NAMESX'], option[0])) {
-                if (option[0] === 'PREFIX') {
-                    matches = /\(([^)]*)\)(.*)/.exec(option[1]);
-                    if ((matches) && (matches.length === 3)) {
-                        this.irc_connection.ircd_options.PREFIX = [];
-                        for (j = 0; j < matches[2].length; j++) {
-                            this.irc_connection.ircd_options.PREFIX.push({symbol: matches[2].charAt(j), mode: matches[1].charAt(j)});
-                        }
+
+            this.connection.network.options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
+
+            if (option[0] === 'PREFIX') {
+                matches = /\(([^)]*)\)(.*)/.exec(option[1]);
+                if ((matches) && (matches.length === 3)) {
+                    this.connection.network.options.PREFIX = [];
+                    for (j = 0; j < matches[2].length; j++) {
+                        this.connection.network.options.PREFIX.push({symbol: matches[2].charAt(j), mode: matches[1].charAt(j)});
                     }
-                } else if (option[0] === 'CHANTYPES') {
-                    this.irc_connection.ircd_options.CHANTYPES = this.irc_connection.ircd_options.CHANTYPES.split('');
-                } else if (option[0] === 'CHANMODES') {
-                    this.irc_connection.ircd_options.CHANMODES = option[1].split(',');
-                } else if ((option[0] === 'NAMESX') && (!_.contains(this.irc_connection.cap.enabled, 'multi-prefix'))) {
-                    this.irc_connection.write('PROTOCTL NAMESX');
                 }
+            } else if (option[0] === 'CHANTYPES') {
+                this.connection.network.options.CHANTYPES = this.connection.network.options.CHANTYPES.split('');
+            } else if (option[0] === 'CHANMODES') {
+                this.connection.network.options.CHANMODES = option[1].split(',');
+            } else if (option[0] === 'NETWORK') {
+                this.connection.network.name = option[1];
+            } else if (option[0] === 'NAMESX' && !this.connection.network.cap.isEnabled('multi-prefix')) {
+                // Tell the server to send us all user modes in NAMES reply, not jsut the highest one
+                this.connection.write('PROTOCTL NAMESX');
             }
         }
+        
         this.emit('server options', {
-            options: this.irc_connection.ircd_options,
-            cap: this.irc_connection.cap.enabled
+            options: this.connection.network.options,
+            cap: this.connection.network.cap.enabled
         });
     },
 
@@ -55,7 +60,7 @@ var handlers = {
         // Which capabilities we want to enable
         var want = ['multi-prefix', 'away-notify', 'server-time', 'extended-join', 'znc.in/server-time-iso', 'znc.in/server-time', 'twitch.tv/membership'];
 
-        if (this.irc_connection.password) {
+        if (this.connection.password) {
             want.push('sasl');
         }
 
@@ -64,36 +69,36 @@ var handlers = {
                 // Compute which of the available capabilities we want and request them
                 request = _.intersection(capabilities, want);
                 if (request.length > 0) {
-                    this.irc_connection.cap.requested = request;
-                    this.irc_connection.write('CAP REQ :' + request.join(' '));
+                    this.connection.network.cap.requested = request;
+                    this.connection.write('CAP REQ :' + request.join(' '));
                 } else {
-                    this.irc_connection.write('CAP END');
-                    this.irc_connection.cap_negotiation = false;
+                    this.connection.write('CAP END');
+                    this.connection.network.cap.negotiating = false;
                 }
                 break;
             case 'ACK':
                 if (capabilities.length > 0) {
                     // Update list of enabled capabilities
-                    this.irc_connection.cap.enabled = capabilities;
+                    this.connection.network.cap.enabled = capabilities;
                     // Update list of capabilities we would like to have but that aren't enabled
-                    this.irc_connection.cap.requested = _.difference(this.irc_connection.cap.requested, capabilities);
+                    this.connection.network.cap.requested = _.difference(this.connection.network.cap.requested, capabilities);
                 }
-                if (this.irc_connection.cap.enabled.length > 0) {
-                    if (_.contains(this.irc_connection.cap.enabled, 'sasl')) {
-                        this.irc_connection.write('AUTHENTICATE PLAIN');
+                if (this.connection.network.cap.enabled.length > 0) {
+                    if (this.connection.network.cap.isEnabled('sasl')) {
+                        this.connection.write('AUTHENTICATE PLAIN');
                     } else {
-                        this.irc_connection.write('CAP END');
-                        this.irc_connection.cap_negotiation = false;
+                        this.connection.write('CAP END');
+                        this.connection.network.cap.negotiating = false;
                     }
                 }
                 break;
             case 'NAK':
                 if (capabilities.length > 0) {
-                    this.irc_connection.cap.requested = _.difference(this.irc_connection.cap.requested, capabilities);
+                    this.connection.network.cap.requested = _.difference(this.connection.network.cap.requested, capabilities);
                 }
-                if (this.irc_connection.cap.requested.length > 0) {
-                    this.irc_connection.write('CAP END');
-                    this.irc_connection.cap_negotiation = false;
+                if (this.connection.network.cap.requested.length > 0) {
+                    this.connection.write('CAP END');
+                    this.connection.network.cap.negotiating = false;
                 }
                 break;
             case 'LIST':
@@ -104,47 +109,47 @@ var handlers = {
 
 
     AUTHENTICATE: function (command) {
-        var b = new Buffer(this.irc_connection.nick + "\0" + this.irc_connection.nick + "\0" + this.irc_connection.password, 'utf8');
+        var b = new Buffer(this.connection.nick + "\0" + this.connection.nick + "\0" + this.connection.password, 'utf8');
         var b64 = b.toString('base64');
         if (command.params[0] === '+') {
             while (b64.length >= 400) {
-                this.irc_connection.write('AUTHENTICATE ' + b64.slice(0, 399));
+                this.connection.write('AUTHENTICATE ' + b64.slice(0, 399));
                 b64 = b64.slice(399);
             }
             if (b64.length > 0) {
-                this.irc_connection.write('AUTHENTICATE ' + b64);
+                this.connection.write('AUTHENTICATE ' + b64);
             } else {
-                this.irc_connection.write('AUTHENTICATE +');
+                this.connection.write('AUTHENTICATE +');
             }
         } else {
-            this.irc_connection.write('CAP END');
-            this.irc_connection.cap_negotiation = false;
+            this.connection.write('CAP END');
+            this.connection.network.cap.negotiating = false;
         }
     },
 
 
     RPL_SASLAUTHENTICATED: function () {
-        this.irc_connection.write('CAP END');
-        this.irc_connection.cap_negotiation = false;
+        this.connection.write('CAP END');
+        this.connection.network.cap.negotiating = false;
     },
 
 
     RPL_SASLLOGGEDIN: function () {
-        if (this.irc_connection.cap_negotiation === true) {
-            this.irc_connection.write('CAP END');
-            this.irc_connection.cap_negotiation = false;
+        if (this.connection.network.cap.negotiating === true) {
+            this.connection.write('CAP END');
+            this.connection.network.cap.negotiating = false;
         }
     },
 
     ERR_SASLNOTAUTHORISED: function () {
-        this.irc_connection.write('CAP END');
-        this.irc_connection.cap_negotiation = false;
+        this.connection.write('CAP END');
+        this.connection.network.cap.negotiating = false;
     },
 
 
     ERR_SASLABORTED: function () {
-        this.irc_connection.write('CAP END');
-        this.irc_connection.cap_negotiation = false;
+        this.connection.write('CAP END');
+        this.connection.network.cap.negotiating = false;
     },
 
 

@@ -176,8 +176,8 @@ var handlers = {
     },
 
     RPL_UMODEIS: function (command) {
-        //this.irc_connection.umodes = the modes
-        console.log('IMPLEMENT ME: umodes setting on irc_connection');
+        //this.connection.umodes = the modes
+        console.log('IMPLEMENT ME: umodes setting on connection');
     }
 };
 

@@ -4,10 +4,10 @@ var _ = require('lodash'),
     stream = require('stream');
 
 
-function IrcCommandsHandler (irc_connection) {
+function IrcCommandsHandler (connection) {
     stream.Writable.call(this, { objectMode : true });
 
-    this.irc_connection = irc_connection;
+    this.connection = connection;
     this.handlers = [];
 
     require('./commands/registration')(this);
@@ -75,8 +75,8 @@ IrcCommandsHandler.prototype.emitGenericNotice = function (command, msg, is_erro
 
 
 IrcCommandsHandler.prototype.emit = function() {
-    this.irc_connection.emit.apply(this.irc_connection, ['all'].concat(Array.prototype.slice.call(arguments,0)));
-    this.irc_connection.emit.apply(this.irc_connection, arguments);
+    this.connection.emit.apply(this.connection, ['all'].concat(Array.prototype.slice.call(arguments,0)));
+    this.connection.emit.apply(this.connection, arguments);
 };
 
 
@@ -87,8 +87,8 @@ IrcCommandsHandler.prototype.emit = function() {
  * [ { mode: '-i', param: null } ]
  */
 IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params) {
-    var chanmodes = this.irc_connection.ircd_options.CHANMODES || [],
-        prefixes = this.irc_connection.ircd_options.PREFIX || [],
+    var chanmodes = this.connection.network.options.CHANMODES || [],
+        prefixes = this.connection.network.options.PREFIX || [],
         always_param = (chanmodes[0] || '').concat((chanmodes[1] || '')),
         modes = [],
         has_param, i, j, add;
