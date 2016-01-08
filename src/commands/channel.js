@@ -1,41 +1,48 @@
-var _ = require('lodash');
+var _ = require('lodash'),
+    parseModeList = require('../parsemodelist');
 
 var handlers = {
-    RPL_CHANNELMODEIS: function (command) {
+    '324': function RPL_CHANNELMODEIS(client, command, next) {
         var channel = command.params[1],
-            modes = this.parseModeList.call(this, command.params[2], command.params.slice(3));
+            modes = parseModeList(client.ircd_options.CHANMODES || [], client.ircd_options.PREFIX || [], command.params[2], command.params.slice(3));
 
-        this.emit('channel info', {
+        client.emit('channel info', {
             channel: channel,
             modes: modes
         });
+
+        next();
     },
 
 
-    RPL_CREATIONTIME: function (command) {
+    '329': function RPL_CREATIONTIME(client, command, next) {
         var channel = command.params[1];
 
-        this.emit('channel info', {
+        client.emit('channel info', {
             channel: channel,
             created_at: parseInt(command.params[2], 10)
         });
+
+        next();
     },
 
 
-    RPL_CHANNEL_URL: function (command) {
+    '328': function RPL_CHANNEL_URL(client, command, next) {
         var channel = command.params[1];
 
-        this.emit('channel info', {
+        client.emit('channel info', {
             channel: channel,
             url: command.params[command.params.length - 1]
         });
+
+        next();
     },
 
 
-    RPL_NAMEREPLY: function (command) {
+    '353': function RPL_NAMEREPLY(client, command, next) {
         var that = this;
         var members = command.params[command.params.length - 1].split(' ');
-        var cache = this.cache('names.' + command.params[2]);
+        var cache = client.cache('names.' + command.params[2]);
 
         if (!cache.members) {
             cache.members = [];
@@ -58,21 +65,25 @@ var handlers = {
 
             cache.members.push({nick: member, modes: modes});
         });
+
+        next();
     },
 
 
-    RPL_ENDOFNAMES: function (command) {
-        var cache = this.cache('names.' + command.params[1]);
-        this.emit('userlist', {
+    '366': function RPL_ENDOFNAMES(client, command, next) {
+        var cache = client.cache('names.' + command.params[1]);
+        client.emit('userlist', {
             channel: command.params[1],
             users: cache.members
         });
         cache.destroy();
+
+        next();
     },
 
 
-    RPL_BANLIST: function (command) {
-        var cache = this.cache('banlist.' + command.params[1]);
+    '367': function RPL_BANLIST(client, command, next) {
+        var cache = client.cache('banlist.' + command.params[1]);
         if (!cache.bans) {
             cache.bans = [];
         }
@@ -83,46 +94,56 @@ var handlers = {
             banned_by: command.params[3],
             banned_at: command.params[4]
         });
+
+        next();
     },
 
 
-    RPL_ENDOFBANLIST: function (command) {
-        var cache = this.cache('banlist.' + command.params[1]);
-        this.emit('banlist', {
+    '368': function RPL_ENDOFBANLIST(client, command, next) {
+        var cache = client.cache('banlist.' + command.params[1]);
+        client.emit('banlist', {
             channel: command.params[1],
             bans: cache.bans
         });
 
         cache.destroy();
+
+        next();
     },
 
 
-    RPL_TOPIC: function (command) {
-        this.emit('topic', {
+    '332': function RPL_TOPIC(client, command, next) {
+        client.emit('topic', {
             channel: command.params[1],
             topic: command.params[command.params.length - 1]
         });
+
+        next();
     },
 
 
-    RPL_NOTOPIC: function (command) {
-        this.emit('topic', {
+    '331': function RPL_NOTOPIC(client, command, next) {
+        client.emit('topic', {
             channel: command.params[1],
             topic: ''
         });
+
+        next();
     },
 
 
-    RPL_TOPICWHOTIME: function (command) {
-        this.emit('topicsetby', {
+    '333': function RPL_TOPICWHOTIME(client, command, next) {
+        client.emit('topicsetby', {
             nick: command.params[2],
             channel: command.params[1],
             when: command.params[3]
         });
+
+        next();
     },
 
 
-    JOIN: function (command) {
+    JOIN: function JOIN(client, command, next) {
         var channel, time;
         if (typeof command.params[0] === 'string' && command.params[0] !== '') {
             channel = command.params[0];
@@ -140,15 +161,17 @@ var handlers = {
             time: time
         };
 
-        if (this.irc_connection.cap.enabled.indexOf('extended-join') > -1) {
+        if (client.cap.enabled.indexOf('extended-join') > -1) {
             data.account = command.params[1] === '*' ? false : command.params[1];
         }
         
-        this.emit('join', data);
+        client.emit('join', data);
+
+        next();
     },
 
 
-    PART: function (command) {
+    PART: function PART(client, command, next) {
         var time, channel, message;
 
         // Check if we have a server-time
@@ -159,7 +182,7 @@ var handlers = {
             message = command.params[command.params.length - 1];
         }
 
-        this.emit('part', {
+        client.emit('part', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -167,16 +190,18 @@ var handlers = {
             message: message,
             time: time
         });
+
+        next();
     },
 
 
-    KICK: function (command) {
+    KICK: function KICK(client, command, next) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('kick', {
+        client.emit('kick', {
             kicked: command.params[1],
             nick: command.nick,
             ident: command.ident,
@@ -185,26 +210,30 @@ var handlers = {
             message: command.params[command.params.length - 1],
             time: time
         });
+
+        next();
     },
 
 
-    QUIT: function (command) {
+    QUIT: function QUIT(client, command, next) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('quit', {
+        client.emit('quit', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
             message: command.params[command.params.length - 1],
             time: time
         });
+
+        next();
     },
 
 
-    TOPIC: function (command) {
+    TOPIC: function QUIT(client, command, next) {
         var time;
 
         // If we don't have an associated channel, no need to continue
@@ -218,25 +247,25 @@ var handlers = {
         var channel = command.params[0],
             topic = command.params[command.params.length - 1] || '';
 
-        this.emit('topic', {
+        client.emit('topic', {
             nick: command.nick,
             channel: channel,
             topic: topic,
             time: time
         });
+
+        next();
     },
 
 
-    RPL_INVITING: function (command) {
-        this.emit('invited', {
+    '341': function RPL_INVITING(client, command, next) {
+        client.emit('invited', {
             nick: command.params[0],
             channel: command.params[1]
         });
+
+        next();
     },
 };
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
+module.exports = handlers;

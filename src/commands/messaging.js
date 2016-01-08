@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 var handlers = {
-    NOTICE: function (command) {
+    NOTICE: function NOTICE(client, command, next) {
         var time,
             msg,
             target, target_group;
@@ -14,7 +14,7 @@ var handlers = {
         msg = command.params[command.params.length - 1];
         if ((msg.charAt(0) === String.fromCharCode(1)) && (msg.charAt(msg.length - 1) === String.fromCharCode(1))) {
             // It's a CTCP response
-            this.emit('ctcp response', {
+            client.emit('ctcp response', {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -24,7 +24,7 @@ var handlers = {
             });
         } else {
             // Support '@#channel' formats
-            _.find(this.irc_connection.ircd_options.PREFIX, function(prefix) {
+            _.find(client.ircd_options.PREFIX, function(prefix) {
                 if (prefix.symbol === target[0]) {
                     target_group = target[0];
                     target = target.substring(1);
@@ -33,8 +33,8 @@ var handlers = {
                 return true;
             });
 
-            this.emit('notice', {
-                from_server: command.prefix === this.irc_connection.server_name ? true : false,
+            client.emit('notice', {
+                from_server: command.prefix === client.server_name ? true : false,
                 nick: command.nick || undefined,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -44,11 +44,13 @@ var handlers = {
                 time: time
             });
         }
+
+        next();
     },
 
 
-    PRIVMSG: function (command) {
-        var time, msg, version_string, client_info;
+    PRIVMSG: function PRIVMSG(client, command, next) {
+        var time, msg, version_string;
 
         // Check if we have a server-time
         time = command.getServerTime();
@@ -58,7 +60,7 @@ var handlers = {
             //CTCP request
             if (msg.substr(1, 6) === 'ACTION') {
 
-                this.emit('action', {
+                client.emit('action', {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -69,16 +71,16 @@ var handlers = {
 
             } else if (msg.substr(1, 7) === 'VERSION') {
                 version_string = 'node.js irc-framework';
-                this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'VERSION ' + version_string + String.fromCharCode(1));
+                client.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'VERSION ' + version_string + String.fromCharCode(1));
 
             } else if (msg.substr(1, 6) === 'SOURCE') {
-                this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'SOURCE http://www.kiwiirc.com/' + String.fromCharCode(1));
+                client.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'SOURCE http://www.kiwiirc.com/' + String.fromCharCode(1));
 
             } else if (msg.substr(1, 10) === 'CLIENTINFO') {
-                this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'CLIENTINFO SOURCE VERSION TIME' + String.fromCharCode(1));
+                client.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'CLIENTINFO SOURCE VERSION TIME' + String.fromCharCode(1));
 
             } else {
-                this.emit('ctcp request', {
+                client.emit('ctcp request', {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -89,7 +91,7 @@ var handlers = {
                 });
             }
         } else {
-            this.emit('privmsg', {
+            client.emit('privmsg', {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -98,22 +100,22 @@ var handlers = {
                 time: time
             });
         }
+
+        next();
     },
 
 
-    RPL_WALLOPS: function (command) {
-        this.emit('wallops', {
+    WALLOPS: function RPL_WALLOPS(client, command, next) {
+        client.emit('wallops', {
             from_server: false,
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
             msg: command.params[command.params.length - 1]
         });
+
+        next();
     },
 };
 
-module.exports = function AddCommandHandlers(command_controller) {
-    _.each(handlers, function(handler, handler_command) {
-        command_controller.addHandler(handler_command, handler);
-    });
-};
+module.exports = handlers;
