@@ -4,7 +4,8 @@ function User(opts) {
     opts = opts || {};
     
     this.nick = opts.nick || '';
-    this.ident = opts.ident || '';
+    this.username = opts.username || '';
+    this.gecos = opts.gecos || '';
     this.host = opts.host || '';
     this.away = !!opts.away;
 

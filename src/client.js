@@ -15,12 +15,31 @@ util.inherits(IrcClient, EventEmitter);
 
 module.exports = IrcClient;
 
+IrcClient.prototype._applyDefaultOptions = function(user_options) {
+    var defaults = {
+        nick: 'ircbot',
+        username: 'ircbot',
+        gecos: 'ircbot'
+    };
+
+    var props = Object.keys(defaults);
+    for (var i=0; i<props.length; i++) {
+        if (typeof user_options[props[i]] === 'undefined') {
+            user_options[props[i]] = defaults[props[i]];
+        }
+    }
+
+    return user_options;
+};
+
 IrcClient.prototype.connect = function(options) {
     console.log('IrcClient.connect()');
 
     var client = this;
-
+    
     this.options = options;
+    this._applyDefaultOptions(this.options);
+
     if (this.connection && this.connection.connected) {
         this.connection.end();
     }
@@ -28,7 +47,11 @@ IrcClient.prototype.connect = function(options) {
     this.connection = new Connection(options);
     this.network = new NetworkInfo();
     this.command_handler = new Commands.Handler(this.connection, this.network);
-    this.user = new User({nick: options.nick});
+    this.user = new User({
+        nick: options.nick,
+        username: options.username,
+        gecos: options.gecos
+    });
 
     client.addCommandHandlerListeners();
     
@@ -108,8 +131,8 @@ IrcClient.prototype.registerToNetwork = function() {
         this.connection.write('PASS ' + this.password);
     }
 
-    this.connection.write('NICK ' + this.options.nick);
-    this.connection.write('USER ' + this.options.username + ' 0 * :' + this.options.gecos);
+    this.connection.write('NICK ' + this.user.nick);
+    this.connection.write('USER ' + this.user.username + ' 0 * :' + this.user.gecos);
 };
 
 
