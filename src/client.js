@@ -2,6 +2,8 @@ var EventEmitter = require('events').EventEmitter,
     util = require('util'),
     _ = require('lodash'),
     DuplexStream = require('stream').Duplex,
+    MiddlewareHandler = require('middleware-handler'),
+    MiddlewareStream = require('./middlewarestream'),
     Commands = require('./commands'),
     Connection = require('./connection'),
     NetworkInfo = require('./networkinfo'),
@@ -9,6 +11,12 @@ var EventEmitter = require('events').EventEmitter,
 
 function IrcClient() {
     EventEmitter.call(this);
+    this.middleware = new MiddlewareHandler();
+
+    // Some sugar to add middleware
+    this.use = (function() {
+        this.middleware.use.apply(this.middleware, arguments);
+    }).bind(this);
 }
 
 util.inherits(IrcClient, EventEmitter);
@@ -70,7 +78,12 @@ IrcClient.prototype.connect = function(options) {
         client.registerToNetwork();
     });
 
-    this.connection.pipe(this.command_handler);
+    // IRC command routing
+    this.connection
+        .pipe(new MiddlewareStream(this.middleware))
+        .pipe(this.command_handler);
+
+    // Everything is setup and prepared, start connecting
     this.connection.connect();
 };
 
@@ -79,7 +92,7 @@ IrcClient.prototype.proxyConnectionIrcEvents = function() {
     var client = this;
 
     this.connection.on('all', function(event_name) {
-        console.log(event_name, Array.prototype.slice.call(arguments, 1));
+        //console.log(event_name, Array.prototype.slice.call(arguments, 1));
         var event_args = arguments;
 
         // Add a reply() function to selected message events
