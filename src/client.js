@@ -262,6 +262,8 @@ IrcClient.prototype.matchAction = function(match_regex, cb) {
 
 
 IrcClient.Channel = function IrcChannel(irc_client, channel_name, key) {
+    var that = this;
+
 	this.irc_client = irc_client;
 	this.name = channel_name;
 
@@ -275,7 +277,9 @@ IrcClient.Channel = function IrcChannel(irc_client, channel_name, key) {
 
 	this.users = [];
 	irc_client.on('userlist', function(event) {
-		this.users = event.users;
+        if (event.channel === that.name) {
+            this.users = event.users;
+        }
 	});
 
 	this.join(key);
