@@ -24,7 +24,7 @@ var handlers = {
             });
         } else {
             // Support '@#channel' formats
-            _.find(this.connection.network.options.PREFIX, function(prefix) {
+            _.find(this.network.options.PREFIX, function(prefix) {
                 if (prefix.symbol === target[0]) {
                     target_group = target[0];
                     target = target.substring(1);
@@ -34,7 +34,7 @@ var handlers = {
             });
 
             this.emit('notice', {
-                from_server: command.prefix === this.connection.network.server ? true : false,
+                from_server: command.prefix === this.network.server ? true : false,
                 nick: command.nick || undefined,
                 ident: command.ident,
                 hostname: command.hostname,

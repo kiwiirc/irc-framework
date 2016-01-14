@@ -28,30 +28,6 @@ function Connection(options) {
     this.held_data = null;
 
     this._timers = [];
-
-    // Options sent by the IRCd
-    // TODO: This shouldn't be here. This module is only for socket connection handling
-    this.network = {
-        name: 'Network',
-        server: '',
-        options: {
-            PREFIX: [
-                {symbol: '~', mode: 'q'},
-                {symbol: '&', mode: 'a'},
-                {symbol: '@', mode: 'o'},
-                {symbol: '%', mode: 'h'},
-                {symbol: '+', mode: 'v'}
-            ]
-        },
-        cap: {
-            negotiating: false,
-            requested: [],
-            enabled: [],
-            isEnabled: function(cap_name) {
-                return this.enabled.indexOf(cap_name) > -1;
-            },
-        }
-    };
 }
 
 util.inherits(Connection, DuplexStream);

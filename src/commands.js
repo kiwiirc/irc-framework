@@ -4,10 +4,11 @@ var _ = require('lodash'),
     stream = require('stream');
 
 
-function IrcCommandsHandler (connection) {
+function IrcCommandsHandler (connection, network_info) {
     stream.Writable.call(this, { objectMode : true });
 
     this.connection = connection;
+    this.network = network_info;
     this.handlers = [];
 
     require('./commands/registration')(this);
@@ -87,8 +88,8 @@ IrcCommandsHandler.prototype.emit = function() {
  * [ { mode: '-i', param: null } ]
  */
 IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params) {
-    var chanmodes = this.connection.network.options.CHANMODES || [],
-        prefixes = this.connection.network.options.PREFIX || [],
+    var chanmodes = this.network.options.CHANMODES || [],
+        prefixes = this.network.options.PREFIX || [],
         always_param = (chanmodes[0] || '').concat((chanmodes[1] || '')),
         modes = [],
         has_param, i, j, add;

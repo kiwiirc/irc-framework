@@ -3,7 +3,7 @@ var EventEmitter = require('events').EventEmitter,
     _ = require('lodash'),
     Commands = require('./commands'),
     Connection = require('./connection'),
-    Server = require('./server'),
+    NetworkInfo = require('./networkinfo'),
     User = require('./user');
 
 function IrcClient() {
@@ -25,7 +25,8 @@ IrcClient.prototype.connect = function(options) {
     }
 
     this.connection = new Connection(options);
-    this.command_handler = new Commands.Handler(this.connection);
+    client.network = new NetworkInfo();
+    this.command_handler = new Commands.Handler(this.connection, this.network);
     
     // Proxy some connection events onto this client
     ['reconnecting', 'close'].forEach(function(event_name) {
@@ -37,7 +38,6 @@ IrcClient.prototype.connect = function(options) {
     this.proxyConnectionIrcEvents();
 
     this.connection.on('connected', function () {
-        client.server = new Server();
         client.user = new User();
 
         client.addCommandHandlerListeners();
