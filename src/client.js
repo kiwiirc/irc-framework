@@ -26,7 +26,7 @@ IrcClient.prototype.connect = function(options) {
     }
 
     this.connection = new Connection(options);
-    client.network = new NetworkInfo();
+    this.network = new NetworkInfo();
     this.command_handler = new Commands.Handler(this.connection, this.network);
     
     // Proxy some connection events onto this client
