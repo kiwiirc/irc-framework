@@ -1,450 +1,252 @@
 var net             = require('net'),
     tls             = require('tls'),
     util            = require('util'),
-    dns             = require('dns'),
-    _               = require('lodash'),
+    DuplexStream    = require('stream').Duplex,
     Socks           = require('socksjs'),
-    IrcCommands     = require('./commands'),
     ircLineParser   = require('./ircLineParser'),
-    EventEmitter    = require('events').EventEmitter,
+    getConnectionFamily = require('./getconnectionfamily'),
     iconv           = require('iconv-lite');
-    //Proxy           = require('../proxy.js');
 
-
-function log() {
-    console.log.apply(console, arguments);
-}
-
-var next_connection_id = 1;
-function generateConnectionId() {
-    return next_connection_id++;
-}
-
-var IrcConnection = function (hostname, port, ssl, nick, options) {
-    EventEmitter.call(this);
-    this.setMaxListeners(0);
+function Connection(options) {
+    DuplexStream.call(this, { readableObjectMode : true });
 
     this.options = options || {};
 
-    // An ID to identify this connection instance
-    this.id = generateConnectionId();
-
-    // All setInterval/setTimeout values relating to this connection will be
-    // added here. Keeps it easier to clearTimeout() them all during cleanup.
-    this._timers = [];
-
-    // Socket state
     this.connected = false;
-
-    // If the connection closes and this is false, we reconnect
     this.requested_disconnect = false;
-
-    // Number of times we have tried to reconnect
     this.reconnect_attempts = 0;
 
-    // Last few lines from the IRCd for context when disconnected (server errors, etc)
-    this.last_few_lines = [];
-
-    // IRCd message buffers
     this.read_buffer = [];
-
-    // In process of reading the IRCd messages?
     this.reading_buffer = false;
 
-    // IRCd write buffers (flood controll)
-    this.write_buffer = [];
+    this.read_command_buffer = [];
 
-    // In process of writing the buffer?
-    this.writing_buffer = false;
-
-    // Max number of lines to write a second
-    this.write_buffer_lines_second = 2;
-
-    // If we are in the CAP negotiation stage
-    this.cap_negotiation = true;
-
-    // User information
-    this.nick = nick;
-    this.username = options.username || 'ircbot';
-    this.gecos = options.gecos || this.username; // Users real-name. Uses default from config if empty
-    this.password = options.password || '';
-    this.quit_message = options.quit_message || ''; // Uses default from config if empty
-
-    // Updated by the IRCd
-    this.umodes = [];
-
-    // Set the passed encoding. or the default if none giving or it fails
-    if (!options.encoding || !this.setEncoding(options.encoding)) {
-        this.setEncoding('utf8');
-    }
-
-    // IRC protocol handling
-    this.irc_commands = new IrcCommands.Handler(this);
-
-    // IRC connection information
-    this.irc_host = {hostname: hostname, port: port};
-    this.ssl = !!ssl;
-
-    // SOCKS proxy details
-    // TODO: Wildcard matching of hostnames and/or CIDR ranges of IP addresses
-    if (options.proxy && options.proxy.type === 'socks') {
-        this.socks = {
-            host: options.proxy.address,
-            port: options.proxy.port,
-            user: options.proxy.user,
-            pass: options.proxy.pass
-        };
-    } else {
-        this.socks = false;
-    }
-
-    // Kiwi proxy info may be set within a server module. {port: 7779, host: 'kiwi.proxy.com', ssl: false}
-    this.proxy = false;
-
-    // Net. interface this connection should be made through
-    this.localAddress = options.localAddress;
-
-    // Options sent by the IRCd
-    this.ircd_options = Object.create(null);
-    this.ircd_options.PREFIX = [
-        {symbol: '~', mode: 'q'},
-        {symbol: '&', mode: 'a'},
-        {symbol: '@', mode: 'o'},
-        {symbol: '%', mode: 'h'},
-        {symbol: '+', mode: 'v'}
-    ];
-
-    this.cap = {requested: [], enabled: []};
+    this.localAddress = this.options.localAddress;
 
     // Buffers for data sent from the IRCd
     this.hold_last = false;
     this.held_data = null;
 
-    this.applyIrcEvents();
-};
-util.inherits(IrcConnection, EventEmitter);
+    this._timers = [];
+}
 
-module.exports.IrcConnection = IrcConnection;
+util.inherits(Connection, DuplexStream);
 
+module.exports = Connection;
 
+Connection.prototype.connect = function() {
+    var socket_connect_event_name = 'connect',
+        that = this,
+        options = this.options,
+        dest_addr;
 
-/**
- * Create and keep track of all timers so they can be easily removed
- */
-IrcConnection.prototype.setTimeout = function(/*fn, length, argN */) {
-    var tmr = setTimeout.apply(null, arguments);
-    this._timers.push(tmr);
-    return tmr;
-};
-
-IrcConnection.prototype.clearTimers = function() {
-    this._timers.forEach(function(tmr) {
-        clearTimeout(tmr);
-    });
-};
-
-
-
-IrcConnection.prototype.applyIrcEvents = function () {
-    this.onServerConnect = this.onServerConnect || onServerConnect.bind(this);
-    this.on('register', this.onServerConnect);
-
-    this.onUserNick = this.onUserNick || onUserNick.bind(this);
-    this.on('nick', this.onUserNick);
-};
-
-
-/**
- * Start the connection to the IRCd
- */
-IrcConnection.prototype.connect = function () {
-    var that = this;
-
-    // The socket connect event to listener for
-    var socket_connect_event_name = 'connect';
-
-    // The destination address
-    var dest_addr;
-    if (this.socks) {
+    if (options.socks) {
         dest_addr = this.socks.host;
-    } else if (this.proxy) {
-        dest_addr = this.proxy.host;
     } else {
-        dest_addr = this.irc_host.hostname;
+        dest_addr = options.host;
     }
 
-    // Make sure we don't already have an open connection
     this.disposeSocket();
 
     this.requested_disconnect = false;
 
-    // Get the IP family for the dest_addr (either socks or IRCd destination)
+    if (!this.options.encoding || !this.setEncoding(this.options.encoding)) {
+        this.setEncoding('utf8');
+    }
+
     getConnectionFamily(dest_addr, function getConnectionFamilyCb(err, family, host) {
-        var outgoing = this.localAddress || '0.0.0.0';
+        var outgoing_addr = this.localAddress || '0.0.0.0';
+        var ircd_host = host;
+        var ircd_port = options.port || 6667;
 
-        // Are we connecting through a SOCKS proxy?
-        if (that.socks) {
+        if (options.socks) {
+            console.log('Connecting via socks to ' + options.host + ':' + ircd_port);
             that.socket = Socks.connect({
-                host: that.irc_host.host,
-                port: that.irc_host.port,
-                ssl: that.ssl,
-                rejectUnauthorized: that.options.reject_unauthorised_certificates
-            }, {host: host,
-                port: that.socks.port,
-                user: that.socks.user,
-                pass: that.socks.pass,
-                localAddress: outgoing
+                host: options.host,
+                port: ircd_port,
+                ssl: options.tls,
+                rejectUnauthorized: options.rejectUnauthorized
+            }, {
+                host: host,
+                port: options.socks.port || 8080,
+                user: options.socks.user,
+                pass: options.socks.pass,
+                localAddress: outgoing_addr
             });
-
-        } /*else if (that.proxy) {
-            that.socket = new Proxy.ProxySocket(that.proxy.port, host, {
-                username: that.username,
-                interface: that.proxy.interface
-            }, {ssl: that.proxy.ssl});
-
-            if (that.ssl) {
-                that.socket.connectTls(that.irc_host.port, that.irc_host.hostname);
-            } else {
-                that.socket.connect(that.irc_host.port, that.irc_host.hostname);
-            }
-
-        } */else {
-            // No socks connection, connect directly to the IRCd
-
-            log('(connection ' + that.id + ') Connecting directly to ' + host + ':' + (that.ssl?'+':'') + that.irc_host.port);
-
-            if (that.ssl) {
+        } else {
+            console.log('Connecting directly to ' + ircd_host + ':' + ircd_port);
+            if (options.tls) {
                 that.socket = tls.connect({
-                    host: host,
-                    port: that.irc_host.port,
-                    rejectUnauthorized: that.options.reject_unauthorised_certificates,
-                    localAddress: outgoing
-                });
-
-                // We need the raw socket connect event.
-                // node.js 0.12 no longer has a .socket property.
-                (that.socket.socket || that.socket).on('connect', function() {
-                    rawSocketConnect.call(that, this);
+                    host: ircd_host,
+                    port: ircd_port,
+                    rejectUnauthorized: options.rejectUnauthorized,
+                    localAddress: outgoing_addr
                 });
 
                 socket_connect_event_name = 'secureConnect';
 
             } else {
                 that.socket = net.connect({
-                    host: host,
-                    port: that.irc_host.port,
-                    localAddress: outgoing
+                    host: ircd_host,
+                    port: ircd_port,
+                    localAddress: outgoing_addr
                 });
+
+                socket_connect_event_name = 'connect';
             }
         }
 
-        // Apply the socket listeners
-        that.socket.on(socket_connect_event_name, function socketConnectCb() {
+        // We need the raw socket connect event.
+        // node.js 0.12 no longer has a .socket property.
+        (that.socket.socket || that.socket).on('connect', rawSocketConnect);
+        that.socket.on(socket_connect_event_name, socketFullyConnected);
 
+        function rawSocketConnect() {
             // TLS connections have the actual socket as a property
-            var is_tls = (typeof this.socket !== 'undefined') ?
-                true :
-                false;
+            var is_tls = (typeof this.socket !== 'undefined');
 
-            // TLS sockets have already called this
-            if (!is_tls) {
-                rawSocketConnect.call(that, this);
-            }
+            // TODO: This is where it's safe to read socket pairs for identd
+        }
 
-            log('(connection ' + that.id + ') Socket connected');
+        function socketFullyConnected() {
             that.connected = true;
-
-            socketConnectHandler.call(that);
-        });
+            that.emit('connected');
+        }
 
         that.socket.on('error', function socketErrorCb(event) {
             that.emit('socket error', event);
         });
 
-        that.socket.on('data', function () {
-            socketOnData.apply(that, arguments);
+        that.socket.on('readable', function socketReadableCb() {
+            var data;
+
+            while (data !== null) {
+                data = that.socket.read();
+                if (data !== null) {
+                    socketOnData.call(that, data);
+                }
+            }
         });
 
         that.socket.on('close', function socketCloseCb(had_error) {
-            // If that.connected is false, we never actually managed to connect
             var was_connected = that.connected,
-                safely_registered = (new Date()) - that.server.registered > 10000, // Safely = registered + 10secs after.
                 should_reconnect = false;
+                that.connected = false;
 
-            log('(connection ' + that.id + ') Socket closed');
-            that.connected = false;
-            that.server.reset();
+                that.disposeSocket();
 
-            // Remove this socket form the identd lookup
-            if (that.identd_port_pair) {
-                // TODO: Delete this from the identd somewhere
-            }
-
-            // Close the whole socket down
-            that.disposeSocket();
-
-            if (!that.ircd_reconnect) {
-                that.emit('close', had_error);
-
-            } else {
-                // If trying to reconnect, continue with it
-                if (that.reconnect_attempts && that.reconnect_attempts < 3) {
-                    should_reconnect = true;
-
-                // If this was an unplanned disconnect and we were originally connected OK, reconnect
-                } else if (!that.requested_disconnect  && was_connected && safely_registered) {
-                    should_reconnect = true;
-
-                } else {
-                    should_reconnect = false;
-                }
-
-                if (should_reconnect) {
-                    log('(connection ' + that.id + ') Socket reconnecting');
-                    that.reconnect_attempts++;
-                    that.emit('reconnecting');
-                } else {
+                if (!that.ircd_reconnect) {
                     that.emit('close', had_error);
-                    that.reconnect_attempts = 0;
-                }
+                } else {
+                    if (that.reconnect_attempts && that.reconnect_attempts < 3) {
+                        should_reconnect = true;
+                    } else if (!that.requested_disconnect && was_connected) {
+                        should_reconnect = true;
+                    }
 
-                // If this socket closing was not expected and we did actually connect and
-                // we did previously completely register on the network, then reconnect
-                if (should_reconnect) {
-                    that.setTimeout(function() {
-                        that.connect();
-                    }, 4000);
+                    if (should_reconnect) {
+                        that.reconnect_attempts += 1;
+                        that.emit('reconnecting');
+                    } else {
+                        that.emit('close', had_error);
+                        that.reconnect_attempts = 0;
+                    }
+
+                    if (should_reconnect) {
+                        that.setTimeout(function () {
+                            that.connect(options);
+                        }, 4000);
+                    }
                 }
-            }
         });
+
+    });
+};
+
+Connection.prototype._write = function(chunk, encoding, callback) {
+    var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
+    console.log('Raw C:', chunk.toString());
+    return this.socket.write(encoded_buffer, callback);
+};
+
+Connection.prototype._read = function() {
+    var message,
+        continue_pushing = true;
+
+    this._reading = true;
+
+    while (continue_pushing && this.read_command_buffer.length > 0) {
+        message = this.read_command_buffer.shift();
+        continue_pushing = this.push(message);
+        if (!continue_pushing) {
+            this._reading = false;
+        }
+    }
+};
+
+Connection.prototype.pushCommandBuffer = function(command) {
+    this.read_command_buffer.push(command);
+    if (this._reading) {
+        this._read();
+    }
+};
+
+Connection.prototype.disposeSocket = function() {
+    // If we're still connected, wait until the socket is closed before disposing
+    // so that all the events are still correctly triggered
+    if (this.socket && this.connected) {
+        this.end();
+        return;
+    }
+
+    this.clearTimers();
+};
+
+/**
+ * Create and keep track of all timers so they can be easily removed
+ */
+Connection.prototype.setTimeout = function(/*fn, length, argN */) {
+    var tmr = setTimeout.apply(null, arguments);
+    this._timers.push(tmr);
+    return tmr;
+};
+
+Connection.prototype.clearTimers = function() {
+    this._timers.forEach(function(tmr) {
+        clearTimeout(tmr);
     });
 };
 
 /**
- * Write a line of data to the IRCd
- * @param data The line of data to be sent
- * @param force Write the data now, ignoring any write queue
- */
-IrcConnection.prototype.write = function (data, force, force_complete_fn) {
-    //ENCODE string to encoding of the server
-    var encoded_buffer = iconv.encode(data + '\r\n', this.encoding);
-
-    if (force) {
-        if (this.socket) {
-            this.socket.write(encoded_buffer, force_complete_fn);
-        }
-        log('(connection ' + this.id + ') Raw C:', data);
-        return;
-    }
-
-    log('(connection ' + this.id + ') Raw C:', data);
-    this.write_buffer.push(encoded_buffer);
-
-    // Only flush if we're not writing already
-    if (!this.writing_buffer) {
-        this.flushWriteBuffer();
-    }
-};
-
-
-
-/**
- * Flush the write buffer to the server in a throttled fashion
- */
-IrcConnection.prototype.flushWriteBuffer = function () {
-
-    // In case the socket closed between writing our queue.. clean up
-    if (!this.connected) {
-        this.write_buffer = [];
-        this.writing_buffer = false;
-        return;
-    }
-
-    this.writing_buffer = true;
-
-    // Disabled write buffer? Send everything we have
-    if (!this.write_buffer_lines_second) {
-        this.write_buffer.forEach(function(buffer) {
-            if (this.socket) {
-                this.socket.write(buffer);
-            }
-            this.write_buffer = null;
-        });
-
-        this.write_buffer = [];
-        this.writing_buffer = false;
-
-        return;
-    }
-
-    // Nothing to write? Stop writing and leave
-    if (this.write_buffer.length === 0) {
-        this.writing_buffer = false;
-        return;
-    }
-
-    if (this.socket) {
-        this.socket.write(this.write_buffer[0]);
-    }
-    this.write_buffer = this.write_buffer.slice(1);
-
-    // Call this function again at some point if we still have data to write
-    if (this.write_buffer.length > 0) {
-        this.setTimeout(this.flushWriteBuffer.bind(this), 1000 / this.write_buffer_lines_second);
-    } else {
-        // No more buffers to write.. so we've finished
-        this.writing_buffer = false;
-    }
-};
-
-
-
-/**
  * Close the connection to the IRCd after forcing one last line
  */
-IrcConnection.prototype.end = function (data) {
+Connection.prototype.end = function (data, callback) {
     var that = this;
-
-    if (!this.socket) {
-        return;
-    }
 
     this.requested_disconnect = true;
 
     if (this.connected && data) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
-        this.write(data, true, function() {
+        this.write(data, function() {
             that.end();
         });
 
         return;
     }
 
-    this.socket.destroy();
-};
+    DuplexStream.prototype.end.call(this, callback);
 
-
-
-/**
- * Check if any server capabilities are enabled
- */
-IrcConnection.prototype.capContainsAny = function (caps) {
-    var enabled_caps;
-
-    if (!(caps instanceof Array)) {
-        caps = [caps];
+    if (this.socket) {
+        this.socket.destroy();
+        this.socket = null;
     }
-
-    enabled_caps = _.intersection(this.cap.enabled, caps);
-    return enabled_caps.length > 0;
 };
-
 
 
 /**
  * Clean up this IrcConnection instance and any sockets
  */
-IrcConnection.prototype.dispose = function () {
+Connection.prototype.dispose = function () {
     // If we're still connected, wait until the socket is closed before disposing
     // so that all the events are still correctly triggered
     if (this.socket && this.connected) {
@@ -456,26 +258,7 @@ IrcConnection.prototype.dispose = function () {
         this.disposeSocket();
     }
 
-    this.server.dispose();
-    this.server = undefined;
-
-    this.irc_commands = undefined;
-
     this.clearTimers();
-    this.removeAllListeners();
-};
-
-
-
-/**
- * Clean up any sockets for this IrcConnection
- */
-IrcConnection.prototype.disposeSocket = function () {
-    if (this.socket) {
-        this.socket.end();
-        this.socket.removeAllListeners();
-        this.socket = null;
-    }
 };
 
 /**
@@ -483,7 +266,7 @@ IrcConnection.prototype.disposeSocket = function () {
  * Return true in case of success
  */
 
-IrcConnection.prototype.setEncoding = function (encoding) {
+Connection.prototype.setEncoding = function (encoding) {
     var encoded_test;
 
     try {
@@ -500,88 +283,6 @@ IrcConnection.prototype.setEncoding = function (encoding) {
         return false;
     }
 };
-
-function getConnectionFamily(host, callback) {
-    if (net.isIP(host)) {
-        if (net.isIPv4(host)) {
-            callback(null, 'IPv4', host);
-        } else {
-            callback(null, 'IPv6', host);
-        }
-    } else {
-        dns.resolve4(host, function resolve4Cb(err, addresses) {
-            if (!err) {
-                callback(null, 'IPv4', addresses[0]);
-            } else {
-                dns.resolve6(host, function resolve6Cb(err, addresses) {
-                    if (!err) {
-                        callback(null, 'IPv6',addresses[0]);
-                    } else {
-                        callback(err);
-                    }
-                });
-            }
-        });
-    }
-}
-
-
-
-function onServerConnect(event) {
-    this.nick = event.nick;
-}
-
-
-function onUserNick(event) {
-    // Only deal with messages targetted to us
-    if (event.nick !== this.nick) {
-        return;
-    }
-
-    this.nick = event.newnick;
-}
-
-
-
-
-/**
- * When a socket connects to an IRCd
- * May be called before any socket handshake are complete (eg. TLS)
- */
-function rawSocketConnect(socket) {
-    // Make note of the port numbers for any identd lookups
-    // Nodejs < 0.9.6 has no socket.localPort so check this first
-    if (typeof socket.localPort !== 'undefined') {
-        this.identd_port_pair = socket.localPort.toString() + '_' + socket.remotePort.toString();
-        // TODO: Add this tot he identd somewhere
-    }
-}
-
-
-/**
- * Handle the socket connect event, starting the IRCd registration
- */
-function socketConnectHandler() {
-    var webirc = this.options.webirc;
-
-    if (webirc) {
-        this.write('WEBIRC ' + webirc.password + ' kiwiIRC ' + webirc.hostname + ' ' + webirc.address);
-    }
-
-    this.write('CAP LS');
-
-    if (this.password) {
-        this.write('PASS ' + this.password);
-    }
-
-    this.write('NICK ' + this.nick);
-    this.write('USER ' + this.username + ' 0 * :' + this.gecos);
-
-    this.emit('connected');
-}
-
-
-
 
 
 /**
@@ -672,15 +373,17 @@ function processIrcLines(irc_con, continue_processing) {
             continue;
         }
 
-        log('(connection ' + irc_con.id + ') Raw S:', line.replace(/^\r+|\r+$/, ''));
+        console.log('Raw S:', line.replace(/^\r+|\r+$/, ''));
 
         message = ircLineParser(line);
+
         if (!message) {
             // A malformed IRC line
             continue;
         }
 
-        irc_con.irc_commands.dispatch(new IrcCommands.Command(message.command.toUpperCase(), message));
+        irc_con.pushCommandBuffer(message);
+
         processed_lines++;
     }
 
@@ -690,7 +393,3 @@ function processIrcLines(irc_con, continue_processing) {
         irc_con.reading_buffer = false;
     }
 }
-
-
-
-

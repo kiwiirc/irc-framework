@@ -1,9 +1,14 @@
 var _ = require('lodash'),
-    irc_numerics = require('./numerics');
+    irc_numerics = require('./numerics'),
+    util = require('util'),
+    stream = require('stream');
 
 
-function IrcCommandsHandler (irc_connection) {
-    this.irc_connection = irc_connection;
+function IrcCommandsHandler (connection, network_info) {
+    stream.Writable.call(this, { objectMode : true });
+
+    this.connection = connection;
+    this.network = network_info;
     this.handlers = [];
 
     require('./commands/registration')(this);
@@ -13,6 +18,12 @@ function IrcCommandsHandler (irc_connection) {
     require('./commands/misc')(this);
 }
 
+util.inherits(IrcCommandsHandler, stream.Writable);
+
+IrcCommandsHandler.prototype._write = function(chunk, encoding, callback) {
+    this.dispatch(new IrcCommand(chunk.command.toUpperCase(), chunk));
+    callback();
+};
 
 IrcCommandsHandler.prototype.dispatch = function (irc_command) {
     var command_name = irc_command.command;
@@ -65,8 +76,8 @@ IrcCommandsHandler.prototype.emitGenericNotice = function (command, msg, is_erro
 
 
 IrcCommandsHandler.prototype.emit = function() {
-    this.irc_connection.emit.apply(this.irc_connection, ['all'].concat(Array.prototype.slice.call(arguments,0)));
-    this.irc_connection.emit.apply(this.irc_connection, arguments);
+    this.connection.emit.apply(this.connection, ['all'].concat(Array.prototype.slice.call(arguments,0)));
+    this.connection.emit.apply(this.connection, arguments);
 };
 
 
@@ -77,8 +88,8 @@ IrcCommandsHandler.prototype.emit = function() {
  * [ { mode: '-i', param: null } ]
  */
 IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params) {
-    var chanmodes = this.irc_connection.ircd_options.CHANMODES || [],
-        prefixes = this.irc_connection.ircd_options.PREFIX || [],
+    var chanmodes = this.network.options.CHANMODES || [],
+        prefixes = this.network.options.PREFIX || [],
         always_param = (chanmodes[0] || '').concat((chanmodes[1] || '')),
         modes = [],
         has_param, i, j, add;

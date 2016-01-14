@@ -47,10 +47,10 @@ var handlers = {
                 modes = [];
 
             // Make sure we have some prefixes already
-            if (that.irc_connection.ircd_options.PREFIX) {
-                for (j = 0; j < that.irc_connection.ircd_options.PREFIX.length; j++) {
-                    if (member.charAt(i) === that.irc_connection.ircd_options.PREFIX[j].symbol) {
-                        modes.push(that.irc_connection.ircd_options.PREFIX[j].mode);
+            if (that.network.options.PREFIX) {
+                for (j = 0; j < that.network.options.PREFIX.length; j++) {
+                    if (member.charAt(i) === that.network.options.PREFIX[j].symbol) {
+                        modes.push(that.network.options.PREFIX[j].mode);
                         i++;
                     }
                 }
@@ -140,7 +140,7 @@ var handlers = {
             time: time
         };
 
-        if (this.irc_connection.cap.enabled.indexOf('extended-join') > -1) {
+        if (this.network.cap.isEnabled('extended-join')) {
             data.account = command.params[1] === '*' ? false : command.params[1];
         }
         

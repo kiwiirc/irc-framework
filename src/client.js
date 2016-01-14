@@ -1,68 +1,162 @@
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var DuplexStream = require('stream').Duplex;
-var IrcConnection = require('./connection').IrcConnection;
-var _ = require('lodash');
+var EventEmitter = require('events').EventEmitter,
+    util = require('util'),
+    _ = require('lodash'),
+    DuplexStream = require('stream').Duplex,
+    Commands = require('./commands'),
+    Connection = require('./connection'),
+    NetworkInfo = require('./networkinfo'),
+    User = require('./user');
 
-module.exports = IrcClient;
-
-function IrcClient(hostname, port, ssl, nick, options) {
-	var that = this;
-
-	EventEmitter.call(this);
-	this.connection = new IrcConnection(hostname, port, ssl, nick, options);
-	this.connection.on('all', function(event_name) {
-		console.log('[IrcClient]', event_name);
-		var event_args = arguments;
-
-		// Add a reply() function to selected message events
-		if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
-			arguments[1].reply = function(message) {
-				var dest = event_args[1].target === that.connection.nick ?
-					event_args[1].nick :
-					event_args[1].target;
-
-				that.say(dest, message);
-			};
-		}
-
-		that.emit.apply(that, arguments);
-	});
+function IrcClient() {
+    EventEmitter.call(this);
 }
 
 util.inherits(IrcClient, EventEmitter);
 
+module.exports = IrcClient;
 
-IrcClient.prototype.raw = function(input) {
-	var args;
+IrcClient.prototype.connect = function(options) {
+    console.log('IrcClient.connect()');
 
-	if (input.constructor === Array) {
-		args = input;
-	} else {
-		args = Array.prototype.slice.call(arguments, 0);
-	}
-	console.log('raw()', args);
+    var client = this;
 
-	if (args[args.length-1].indexOf(' ') > -1) {
-		args[args.length-1] = ':' + args[args.length-1];
-	}
+    this.options = options;
+    if (this.connection && this.connection.connected) {
+        this.connection.end();
+    }
 
-	this.connection.write(args.join(' '));
+    this.connection = new Connection(options);
+    client.network = new NetworkInfo();
+    this.command_handler = new Commands.Handler(this.connection, this.network);
+    
+    // Proxy some connection events onto this client
+    ['reconnecting', 'close'].forEach(function(event_name) {
+        client.connection.on(event_name, function() {
+            client.emit.apply(client, arguments);
+        });
+    });
+
+    this.proxyConnectionIrcEvents();
+
+    this.connection.on('connected', function () {
+        client.user = new User();
+
+        client.addCommandHandlerListeners();
+
+        client.emit('socket connected');
+        client.registerToNetwork();
+    });
+
+    this.connection.pipe(this.command_handler);
+    this.connection.connect();
 };
 
 
-IrcClient.prototype.connect = function() {
-	this.connection.connect();
+IrcClient.prototype.proxyConnectionIrcEvents = function() {
+    var client = this;
+
+    this.connection.on('all', function(event_name) {
+        console.log(event_name, Array.prototype.slice.call(arguments, 1));
+        var event_args = arguments;
+
+        // Add a reply() function to selected message events
+        if (['privmsg', 'notice', 'action', 'message'].indexOf(event_name) > -1) {
+            event_args[1].reply = function(message) {
+                var dest = event_args[1].target === client.connection.nick ?
+                    event_args[1].nick :
+                    event_args[1].target;
+
+                client.say(dest, message);
+            };
+        }
+
+        client.emit.apply(client, event_args);
+    });
+};
+
+
+IrcClient.prototype.addCommandHandlerListeners = function() {
+    var client = this;
+    var commands = this.command_handler;
+
+    commands.on('server options', function (event) {
+        _.each(event.options, function (opt) {
+            this.server.ISUPPORT.add(opt[0], opt[1]);
+        });
+    });
+
+    commands.on('nick', function(event) {
+        if (client.user.nick === event.nick) {
+            client.user.nick = event.new_nick;
+        }
+    });
+
+    commands.on('registered', function(event) {
+        if (client.user.nick === event.nick) {
+            client.user.nick = event.new_nick;
+        }
+
+        client.emit('connected');
+    });
+};
+
+
+IrcClient.prototype.registerToNetwork = function() {
+    var webirc = this.options.webirc;
+
+    if (webirc) {
+        this.connection.write('WEBIRC ' + webirc.password + ' kiwiIRC ' + webirc.hostname + ' ' + webirc.address);
+    }
+
+    this.connection.write('CAP LS');
+
+    if (this.options.password) {
+        this.connection.write('PASS ' + this.password);
+    }
+
+    this.connection.write('NICK ' + this.options.nick);
+    this.connection.write('USER ' + this.options.username + ' 0 * :' + this.options.gecos);
+};
+
+
+Object.defineProperty(IrcClient.prototype, 'connected', {
+    enumerable: true,
+    get: function () {
+        return this.connection && this.connection.connected;
+    }
+});
+
+
+
+
+/**
+ * Client API
+ */
+IrcClient.prototype.raw = function(input) {
+    var args;
+
+    if (input.constructor === Array) {
+        args = input;
+    } else {
+        args = Array.prototype.slice.call(arguments, 0);
+    }
+    console.log('raw()', args);
+
+    if (args[args.length-1].indexOf(' ') > -1) {
+        args[args.length-1] = ':' + args[args.length-1];
+    }
+
+    this.connection.write(args.join(' '));
 };
 
 
 IrcClient.prototype.quit = function(message) {
-	this.raw('QUIT', message);
+    this.raw('QUIT', message);
 };
 
 
 IrcClient.prototype.changeNick = function(nick) {
-	this.raw('NICK', nick);
+    this.raw('NICK', nick);
 };
 
 
@@ -130,7 +224,37 @@ IrcClient.prototype.whois = function(target) {
 
 
 IrcClient.prototype.channel = function(channel_name) {
-	return new IrcClient.Channel(this, channel_name);
+    return new IrcClient.Channel(this, channel_name);
+};
+
+
+IrcClient.prototype.match = function(match_regex, cb, message_type) {
+    var client = this;
+
+    var onMessage = function(event) {
+        if (event.msg.match(match_regex)) {
+            cb(event);
+        }
+    };
+
+    this.on(message_type || 'message', onMessage);
+
+    return {
+        stop: function() {
+            client.removeListener(message_type || 'message', onMessage);
+        }
+    };
+};
+
+
+IrcClient.prototype.matchNotice = function(match_regex, cb) {
+    return this.match(match_regex, cb, 'notice');
+};
+IrcClient.prototype.matchMessage = function(match_regex, cb) {
+    return this.match(match_regex, cb, 'privmsg');
+};
+IrcClient.prototype.matchAction = function(match_regex, cb) {
+    return this.match(match_regex, cb, 'action');
 };
 
 

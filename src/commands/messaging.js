@@ -24,7 +24,7 @@ var handlers = {
             });
         } else {
             // Support '@#channel' formats
-            _.find(this.irc_connection.ircd_options.PREFIX, function(prefix) {
+            _.find(this.network.options.PREFIX, function(prefix) {
                 if (prefix.symbol === target[0]) {
                     target_group = target[0];
                     target = target.substring(1);
@@ -34,7 +34,7 @@ var handlers = {
             });
 
             this.emit('notice', {
-                from_server: command.prefix === this.irc_connection.server_name ? true : false,
+                from_server: command.prefix === this.network.server ? true : false,
                 nick: command.nick || undefined,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -48,7 +48,7 @@ var handlers = {
 
 
     PRIVMSG: function (command) {
-        var time, msg, version_string, client_info;
+        var time, msg, version_string;
 
         // Check if we have a server-time
         time = command.getServerTime();
@@ -69,13 +69,13 @@ var handlers = {
 
             } else if (msg.substr(1, 7) === 'VERSION') {
                 version_string = 'node.js irc-framework';
-                this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'VERSION ' + version_string + String.fromCharCode(1));
+                this.connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'VERSION ' + version_string + String.fromCharCode(1));
 
             } else if (msg.substr(1, 6) === 'SOURCE') {
-                this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'SOURCE http://www.kiwiirc.com/' + String.fromCharCode(1));
+                this.connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'SOURCE http://www.kiwiirc.com/' + String.fromCharCode(1));
 
             } else if (msg.substr(1, 10) === 'CLIENTINFO') {
-                this.irc_connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'CLIENTINFO SOURCE VERSION TIME' + String.fromCharCode(1));
+                this.connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'CLIENTINFO SOURCE VERSION TIME' + String.fromCharCode(1));
 
             } else {
                 this.emit('ctcp request', {
