@@ -230,15 +230,17 @@ IrcClient.prototype.channel = function(channel_name) {
 IrcClient.prototype.match = function(match_regex, cb, message_type) {
     var client = this;
 
-    this.on(message_type || 'message', function onMessage(event) {
+    var onMessage = function(event) {
         if (event.msg.match(match_regex)) {
             cb(event);
         }
-    });
+    };
+
+    this.on(message_type || 'message', onMessage);
 
     return {
         stop: function() {
-            client.removeListener('privmsg', onMessage);
+            client.removeListener(message_type || 'message', onMessage);
         }
     };
 };

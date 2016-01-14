@@ -48,7 +48,7 @@ var handlers = {
 
 
     PRIVMSG: function (command) {
-        var time, msg, version_string, client_info;
+        var time, msg, version_string;
 
         // Check if we have a server-time
         time = command.getServerTime();

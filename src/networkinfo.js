@@ -26,5 +26,5 @@ function NetworkInfo() {
         isEnabled: function(cap_name) {
             return this.enabled.indexOf(cap_name) > -1;
         },
-    }
+    };
 }
