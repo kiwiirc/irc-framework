@@ -1,6 +1,6 @@
 var IRC = require('../');
 
-var bot = new IRC.Bot();
+var bot = new IRC.Client();
 bot.connect({
 	host: '5.39.86.47',
 	nick: 'prawnsbot'
