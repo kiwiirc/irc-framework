@@ -28,6 +28,9 @@ IrcClient.prototype.connect = function(options) {
     this.connection = new Connection(options);
     this.network = new NetworkInfo();
     this.command_handler = new Commands.Handler(this.connection, this.network);
+    this.user = new User({nick: options.nick});
+
+    client.addCommandHandlerListeners();
     
     // Proxy some connection events onto this client
     ['reconnecting', 'close'].forEach(function(event_name) {
@@ -38,11 +41,7 @@ IrcClient.prototype.connect = function(options) {
 
     this.proxyConnectionIrcEvents();
 
-    this.connection.on('connected', function () {
-        client.user = new User();
-
-        client.addCommandHandlerListeners();
-
+    this.connection.on('socket connected', function () {
         client.emit('socket connected');
         client.registerToNetwork();
     });
@@ -60,14 +59,18 @@ IrcClient.prototype.proxyConnectionIrcEvents = function() {
         var event_args = arguments;
 
         // Add a reply() function to selected message events
-        if (['privmsg', 'notice', 'action', 'message'].indexOf(event_name) > -1) {
+        if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
             event_args[1].reply = function(message) {
-                var dest = event_args[1].target === client.connection.nick ?
+                var dest = event_args[1].target === client.user.nick ?
                     event_args[1].nick :
                     event_args[1].target;
 
                 client.say(dest, message);
             };
+
+            // These events with .reply() function are all messages
+            // TODO: Should this consider a notice a message?
+            client.emit('message', _.extend({type: event_name}, event_args[1]));
         }
 
         client.emit.apply(client, event_args);
@@ -77,25 +80,16 @@ IrcClient.prototype.proxyConnectionIrcEvents = function() {
 
 IrcClient.prototype.addCommandHandlerListeners = function() {
     var client = this;
-    var commands = this.command_handler;
+    var connection = this.connection;
 
-    commands.on('server options', function (event) {
-        _.each(event.options, function (opt) {
-            this.server.ISUPPORT.add(opt[0], opt[1]);
-        });
-    });
-
-    commands.on('nick', function(event) {
+    connection.on('nick', function(event) {
         if (client.user.nick === event.nick) {
             client.user.nick = event.new_nick;
         }
     });
 
-    commands.on('registered', function(event) {
-        if (client.user.nick === event.nick) {
-            client.user.nick = event.new_nick;
-        }
-
+    connection.on('registered', function(event) {
+        client.user.nick = event.nick;
         client.emit('connected');
     });
 };

@@ -110,7 +110,7 @@ Connection.prototype.connect = function() {
 
         function socketFullyConnected() {
             that.connected = true;
-            that.emit('connected');
+            that.emit('socket connected');
         }
 
         that.socket.on('error', function socketErrorCb(event) {
