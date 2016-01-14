@@ -19,7 +19,8 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
     var defaults = {
         nick: 'ircbot',
         username: 'ircbot',
-        gecos: 'ircbot'
+        gecos: 'ircbot',
+        encoding: 'utf8'
     };
 
     var props = Object.keys(defaults);
