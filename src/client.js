@@ -80,7 +80,7 @@ IrcClient.prototype.connect = function(options) {
 
     // IRC command routing
     this.connection
-        .pipe(new MiddlewareStream(this.middleware))
+        .pipe(new MiddlewareStream(this.middleware, this))
         .pipe(this.command_handler);
 
     // Everything is setup and prepared, start connecting
