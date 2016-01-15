@@ -1,14 +1,14 @@
 var util            = require('util'),
     DuplexStream    = require('stream').Duplex;
 
-module.exports = MiddlwareStream;
+module.exports = MiddlewareStream;
 
 /**
  * Taking a middlware object and its associated client, create a stream to
  * pipe events into the middleware and spit them back out once completed.
  */
 
-function MiddlwareStream(middleware_handler, client) {
+function MiddlewareStream(middleware_handler, client) {
     DuplexStream.call(this, { objectMode : true });
     this.middleware = middleware_handler;
     this.client = client;
@@ -16,11 +16,11 @@ function MiddlwareStream(middleware_handler, client) {
     this._reading = false;
 }
 
-util.inherits(MiddlwareStream, DuplexStream);
+util.inherits(MiddlewareStream, DuplexStream);
 
 
 
-MiddlwareStream.prototype._write = function(chunk, encoding, callback) {
+MiddlewareStream.prototype._write = function(chunk, encoding, callback) {
     var that = this;
 
     this.middleware.handle([chunk.command, chunk, this.client], function(err) {
@@ -38,7 +38,7 @@ MiddlwareStream.prototype._write = function(chunk, encoding, callback) {
     callback();
 };
 
-MiddlwareStream.prototype._read = function() {
+MiddlewareStream.prototype._read = function() {
     var message;
 
     this._reading = true;
