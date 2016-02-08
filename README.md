@@ -26,7 +26,7 @@ Todo:
 var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
 bot.connect();
 
-bot.on('privmsg', function(event) {
+bot.on('message', function(event) {
   	if (event.msg.indexOf('hello') === 0) {
   		  event.reply('Hi!');
   	}
@@ -36,6 +36,12 @@ bot.on('privmsg', function(event) {
   		event.reply('Joining ' + to_join + '..');
   		bot.join(to_join);
   	}
+});
+
+
+// Or a quicker to match messages...
+bot.matchMessage(/^hi/, function(event) {
+	event.reply('hello there!');
 });
 ~~~
 
