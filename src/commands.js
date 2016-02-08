@@ -7,6 +7,9 @@ var _ = require('lodash'),
 function IrcCommandsHandler (connection, network_info) {
     stream.Writable.call(this, { objectMode : true });
 
+    // Adds an 'all' event to .emit()
+    this.addAllEventName();
+
     this.connection = connection;
     this.network = network_info;
     this.handlers = [];
@@ -75,9 +78,14 @@ IrcCommandsHandler.prototype.emitGenericNotice = function (command, msg, is_erro
 };
 
 
-IrcCommandsHandler.prototype.emit = function() {
-    this.connection.emit.apply(this.connection, ['all'].concat(Array.prototype.slice.call(arguments,0)));
-    this.connection.emit.apply(this.connection, arguments);
+// Adds an 'all' event to .emit()
+IrcCommandsHandler.prototype.addAllEventName = function() {
+    var original_emit = this.emit;
+    this.emit = function() {
+        var args = Array.prototype.slice.call(arguments, 0);
+        original_emit.apply(this, ['all'].concat(args));
+        original_emit.apply(this, args);
+    };
 };
 
 
