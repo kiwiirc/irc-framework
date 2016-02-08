@@ -1,10 +1,14 @@
 var _ = require('lodash'),
     irc_numerics = require('./numerics'),
+    IrcCommand = require('./command'),
     util = require('util'),
     stream = require('stream');
 
 
-function IrcCommandsHandler (connection, network_info) {
+module.exports = IrcCommandHandler;
+
+
+function IrcCommandHandler(connection, network_info) {
     stream.Writable.call(this, { objectMode : true });
 
     // Adds an 'all' event to .emit()
@@ -16,21 +20,23 @@ function IrcCommandsHandler (connection, network_info) {
 
     this.request_extra_caps = [];
 
-    require('./commands/registration')(this);
-    require('./commands/channel')(this);
-    require('./commands/user')(this);
-    require('./commands/messaging')(this);
-    require('./commands/misc')(this);
+    require('./handlers/registration')(this);
+    require('./handlers/channel')(this);
+    require('./handlers/user')(this);
+    require('./handlers/messaging')(this);
+    require('./handlers/misc')(this);
 }
 
-util.inherits(IrcCommandsHandler, stream.Writable);
+util.inherits(IrcCommandHandler, stream.Writable);
 
-IrcCommandsHandler.prototype._write = function(chunk, encoding, callback) {
+
+IrcCommandHandler.prototype._write = function(chunk, encoding, callback) {
     this.dispatch(new IrcCommand(chunk.command.toUpperCase(), chunk));
     callback();
 };
 
-IrcCommandsHandler.prototype.dispatch = function (irc_command) {
+
+IrcCommandHandler.prototype.dispatch = function (irc_command) {
     var command_name = irc_command.command;
 
     // Check if we have a numeric->command name- mapping for this command
@@ -46,12 +52,12 @@ IrcCommandsHandler.prototype.dispatch = function (irc_command) {
 };
 
 
-IrcCommandsHandler.prototype.requestExtraCaps = function(cap) {
+IrcCommandHandler.prototype.requestExtraCaps = function(cap) {
     this.request_extra_caps = this.request_extra_caps.concat(cap);
 };
 
 
-IrcCommandsHandler.prototype.addHandler = function (command, handler) {
+IrcCommandHandler.prototype.addHandler = function (command, handler) {
     if (typeof handler !== 'function') {
         return false;
     }
@@ -59,7 +65,7 @@ IrcCommandsHandler.prototype.addHandler = function (command, handler) {
 };
 
 
-IrcCommandsHandler.prototype.emitUnknownCommand = function (command) {
+IrcCommandHandler.prototype.emitUnknownCommand = function (command) {
     this.emit(command.command, {
         command: command.command,
         params: command.params
@@ -67,26 +73,8 @@ IrcCommandsHandler.prototype.emitUnknownCommand = function (command) {
 };
 
 
-IrcCommandsHandler.prototype.emitGenericNotice = function (command, msg, is_error) {
-    // Default to being an error
-    if (typeof is_error !== 'boolean') {
-        is_error = true;
-    }
-
-    this.emit('notice', {
-        from_server: true,
-        nick: command.prefix,
-        ident: '',
-        hostname: '',
-        target: command.params[0],
-        msg: msg,
-        numeric: parseInt(command.command, 10)
-    });
-};
-
-
 // Adds an 'all' event to .emit()
-IrcCommandsHandler.prototype.addAllEventName = function() {
+IrcCommandHandler.prototype.addAllEventName = function() {
     var original_emit = this.emit;
     this.emit = function() {
         var args = Array.prototype.slice.call(arguments, 0);
@@ -102,7 +90,7 @@ IrcCommandsHandler.prototype.addAllEventName = function() {
  * [ { mode: '+k', param: 'pass' } ]
  * [ { mode: '-i', param: null } ]
  */
-IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params) {
+IrcCommandHandler.prototype.parseModeList = function (mode_string, mode_params) {
     var chanmodes = this.network.options.CHANMODES || [],
         prefixes = this.network.options.PREFIX || [],
         always_param = (chanmodes[0] || '').concat((chanmodes[1] || '')),
@@ -155,6 +143,10 @@ IrcCommandsHandler.prototype.parseModeList = function (mode_string, mode_params)
 
 /**
  * Cache object for commands buffering data before emitting them
+ * eg.
+ * var cache = this.cache('userlist');
+ * cache.nicks = [];
+ * cache.destroy();
  */
 function destroyCacheFn(cache, id) {
     return function() {
@@ -162,7 +154,9 @@ function destroyCacheFn(cache, id) {
         delete cache[id];
     };
 }
-IrcCommandsHandler.prototype.cache = function(id) {
+
+
+IrcCommandHandler.prototype.cache = function(id) {
     var cache;
 
     this._caches = this._caches || Object.create(null);
@@ -180,89 +174,3 @@ IrcCommandsHandler.prototype.cache = function(id) {
 
     return cache;
 };
-
-
-
-function IrcCommand(command, data) {
-    this.command = command += '';
-    this.params = _.clone(data.params);
-    this.tags = _.clone(data.tags);
-
-    this.prefix = data.prefix;
-    this.nick = data.nick;
-    this.ident = data.ident;
-    this.hostname = data.hostname;
-}
-
-
-IrcCommand.prototype.getServerTime = function() {
-    var time;
-
-    // No tags? No times.
-    if (!this.tags || this.tags.length === 0) {
-        return;
-    }
-
-    time = _.find(this.tags, function (tag) {
-        return tag.tag === 'time';
-    });
-
-    if (time) {
-        time = time.value;
-    }
-
-    // Convert the time value to a unixtimestamp
-    if (typeof time === 'string') {
-        if (time.indexOf('T') > -1) {
-            time = parseISO8601(time);
-
-        } else if(time.match(/^[0-9.]+$/)) {
-            // A string formatted unix timestamp
-            time = new Date(time * 1000);
-        }
-
-        time = time.getTime();
-
-    } else if (typeof time === 'number') {
-        time = new Date(time * 1000);
-        time = time.getTime();
-    }
-
-    return time;
-};
-
-
-
-
-
-// Code based on http://anentropic.wordpress.com/2009/06/25/javascript-iso8601-parser-and-pretty-dates/#comment-154
-function parseISO8601(str) {
-    if (Date.prototype.toISOString) {
-        return new Date(str);
-    } else {
-        var parts = str.split('T'),
-            dateParts = parts[0].split('-'),
-            timeParts = parts[1].split('Z'),
-            timeSubParts = timeParts[0].split(':'),
-            timeSecParts = timeSubParts[2].split('.'),
-            timeHours = Number(timeSubParts[0]),
-            _date = new Date();
-
-        _date.setUTCFullYear(Number(dateParts[0]));
-        _date.setUTCDate(1);
-        _date.setUTCMonth(Number(dateParts[1])-1);
-        _date.setUTCDate(Number(dateParts[2]));
-        _date.setUTCHours(Number(timeHours));
-        _date.setUTCMinutes(Number(timeSubParts[1]));
-        _date.setUTCSeconds(Number(timeSecParts[0]));
-        if (timeSecParts[1]) {
-            _date.setUTCMilliseconds(Number(timeSecParts[1]));
-        }
-
-        return _date;
-    }
-}
-
-
-module.exports.Handler = IrcCommandsHandler;
-module.exports.Command = IrcCommand;

@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter,
     DuplexStream = require('stream').Duplex,
     MiddlewareHandler = require('middleware-handler'),
     MiddlewareStream = require('./middlewarestream'),
-    Commands = require('./commands'),
+    IrcCommandHandler = require('./commands/').CommandHandler,
     Connection = require('./connection'),
     NetworkInfo = require('./networkinfo'),
     User = require('./user');
@@ -73,7 +73,7 @@ IrcClient.prototype.connect = function(options) {
         gecos: options.gecos
     });
 
-    this.command_handler = new Commands.Handler(this.connection, this.network);
+    this.command_handler = new IrcCommandHandler(this.connection, this.network);
     this.command_handler.requestExtraCaps(this.request_extra_caps);
 
     client.addCommandHandlerListeners();
