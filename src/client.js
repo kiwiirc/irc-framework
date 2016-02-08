@@ -15,6 +15,8 @@ function IrcClient() {
     // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
     this.raw_middleware = new MiddlewareHandler();
     this.parsed_middleware = new MiddlewareHandler();
+
+    this.request_extra_caps = [];
 }
 
 util.inherits(IrcClient, EventEmitter);
@@ -40,6 +42,11 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
 };
 
 
+IrcClient.prototype.requestCap = function(cap) {
+    this.request_extra_caps = this.request_extra_caps.concat(cap);
+};
+
+
 IrcClient.prototype.use = function(middleware_fn) {
     middleware_fn(this, this.raw_middleware, this.parsed_middleware);
     return this;
@@ -60,12 +67,14 @@ IrcClient.prototype.connect = function(options) {
 
     this.connection = new Connection(options);
     this.network = new NetworkInfo();
-    this.command_handler = new Commands.Handler(this.connection, this.network);
     this.user = new User({
         nick: options.nick,
         username: options.username,
         gecos: options.gecos
     });
+
+    this.command_handler = new Commands.Handler(this.connection, this.network);
+    this.command_handler.requestExtraCaps(this.request_extra_caps);
 
     client.addCommandHandlerListeners();
     

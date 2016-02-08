@@ -32,11 +32,12 @@ function NickservMiddleware() {
 function MyIrcMiddleware() {
 	return function(client, raw_events, parsed_events) {
 		parsed_events.use(theMiddleware);
+		client.requestCap('kiwiirc.com/user');
 	}
 
 
 	function theMiddleware(command, event, client, next) {
-		console.log('[MyMiddleware]', command, event);
+		//console.log('[MyMiddleware]', command, event);
 		if (command === 'message' && event.msg.indexOf('omg') === 0) {
 			event.msg += '!!!!!';
 			event.reply('> appended extra points');

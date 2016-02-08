@@ -14,6 +14,8 @@ function IrcCommandsHandler (connection, network_info) {
     this.network = network_info;
     this.handlers = [];
 
+    this.request_extra_caps = [];
+
     require('./commands/registration')(this);
     require('./commands/channel')(this);
     require('./commands/user')(this);
@@ -41,6 +43,11 @@ IrcCommandsHandler.prototype.dispatch = function (irc_command) {
     } else {
         this.emitUnknownCommand(irc_command);
     }
+};
+
+
+IrcCommandsHandler.prototype.requestExtraCaps = function(cap) {
+    this.request_extra_caps = this.request_extra_caps.concat(cap);
 };
 
 
