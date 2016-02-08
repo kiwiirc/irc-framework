@@ -3,7 +3,7 @@ var net             = require('net'),
     util            = require('util'),
     DuplexStream    = require('stream').Duplex,
     Socks           = require('socksjs'),
-    ircLineParser   = require('./ircLineParser'),
+    ircLineParser   = require('./irclineparser'),
     getConnectionFamily = require('./getconnectionfamily'),
     iconv           = require('iconv-lite');
 
