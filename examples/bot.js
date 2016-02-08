@@ -1,8 +1,59 @@
 var IRC = require('../');
 
+
+/**
+ * Example middleware structure to handle NickServ authentication
+ * Accepts a `nickserv` object from the client connect() options
+ */
+function NickservMiddleware() {
+	return function(client, raw_events, parsed_events) {
+		raw_events.use(theMiddleware);
+	}
+
+
+	function theMiddleware(command, event, client, next) {
+		if (command === '005') {
+			if (client.options.nickserv) {
+				var options = client.options.nickserv;
+				client.say('nickserv', 'identify ' + options.account + ' ' + options.password);
+			}
+		}
+
+		if (command === 'PRIVMSG' && event.params[0].toLowerCase() === 'nickserv') {
+			// Handle success/retries/failures
+		}
+
+		next();
+	}
+}
+
+
+
+function MyIrcMiddleware() {
+	return function(client, raw_events, parsed_events) {
+		parsed_events.use(theMiddleware);
+		client.requestCap('kiwiirc.com/user');
+	}
+
+
+	function theMiddleware(command, event, client, next) {
+		//console.log('[MyMiddleware]', command, event);
+		if (command === 'message' && event.msg.indexOf('omg') === 0) {
+			event.msg += '!!!!!';
+			event.reply('> appended extra points');
+		}
+
+		next();
+	}
+}
+
+
+
+
 var bot = new IRC.Client();
+bot.use(MyIrcMiddleware());
 bot.connect({
-	host: '5.39.86.47',
+	host: 'irc.snoonet.org',
 	nick: 'prawnsbot'
 });
 bot.on('registered', function() {
@@ -20,11 +71,10 @@ bot.on('close', function() {
 	console.log('Connection close');
 });
 
-bot.on('privmsg', function(event) {
+bot.on('message', function(event) {
+	console.log('<' + event.target + '>', event.msg);
 	if (event.msg.indexOf('whois') === 0) {
 		bot.whois(event.msg.split(' ')[1]);
-	} else {
-		event.reply('no');
 	}
 });
 

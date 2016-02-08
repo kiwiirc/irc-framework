@@ -2,6 +2,8 @@ var EventEmitter = require('events').EventEmitter,
     util = require('util'),
     _ = require('lodash'),
     DuplexStream = require('stream').Duplex,
+    MiddlewareHandler = require('middleware-handler'),
+    MiddlewareStream = require('./middlewarestream'),
     Commands = require('./commands'),
     Connection = require('./connection'),
     NetworkInfo = require('./networkinfo'),
@@ -9,6 +11,12 @@ var EventEmitter = require('events').EventEmitter,
 
 function IrcClient() {
     EventEmitter.call(this);
+
+    // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
+    this.raw_middleware = new MiddlewareHandler();
+    this.parsed_middleware = new MiddlewareHandler();
+
+    this.request_extra_caps = [];
 }
 
 util.inherits(IrcClient, EventEmitter);
@@ -33,6 +41,18 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
     return user_options;
 };
 
+
+IrcClient.prototype.requestCap = function(cap) {
+    this.request_extra_caps = this.request_extra_caps.concat(cap);
+};
+
+
+IrcClient.prototype.use = function(middleware_fn) {
+    middleware_fn(this, this.raw_middleware, this.parsed_middleware);
+    return this;
+};
+
+
 IrcClient.prototype.connect = function(options) {
     console.log('IrcClient.connect()');
 
@@ -47,12 +67,14 @@ IrcClient.prototype.connect = function(options) {
 
     this.connection = new Connection(options);
     this.network = new NetworkInfo();
-    this.command_handler = new Commands.Handler(this.connection, this.network);
     this.user = new User({
         nick: options.nick,
         username: options.username,
         gecos: options.gecos
     });
+
+    this.command_handler = new Commands.Handler(this.connection, this.network);
+    this.command_handler.requestExtraCaps(this.request_extra_caps);
 
     client.addCommandHandlerListeners();
     
@@ -63,56 +85,72 @@ IrcClient.prototype.connect = function(options) {
         });
     });
 
-    this.proxyConnectionIrcEvents();
-
     this.connection.on('socket connected', function () {
         client.emit('socket connected');
         client.registerToNetwork();
     });
 
-    this.connection.pipe(this.command_handler);
+    // IRC command routing
+    this.connection
+        .pipe(new MiddlewareStream(this.raw_middleware, this))
+        .pipe(this.command_handler);
+
+    // Proxy the command handler events onto the client object, with some added sugar
+    this.proxyIrcEvents();
+
+    // Everything is setup and prepared, start connecting
     this.connection.connect();
 };
 
 
-IrcClient.prototype.proxyConnectionIrcEvents = function() {
+// Proxy the command handler events onto the client object, with some added sugar
+// Events are handled in order:
+// 1. Received from the command handler
+// 2. Checked if any extra properties/methods are to be added to the event + re-emitted
+// 3. Routed through middleware
+// 4. Emitted from the client instance
+IrcClient.prototype.proxyIrcEvents = function() {
     var client = this;
 
-    this.connection.on('all', function(event_name) {
-        console.log(event_name, Array.prototype.slice.call(arguments, 1));
-        var event_args = arguments;
-
+    this.command_handler.on('all', function(event_name, event_arg) {
         // Add a reply() function to selected message events
         if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
-            event_args[1].reply = function(message) {
-                var dest = event_args[1].target === client.user.nick ?
-                    event_args[1].nick :
-                    event_args[1].target;
+            event_arg.reply = function(message) {
+                var dest = event_arg.target === client.user.nick ?
+                    event_arg.nick :
+                    event_arg.target;
 
                 client.say(dest, message);
             };
 
-            // These events with .reply() function are all messages
+            // These events with .reply() function are all messages. Emit it separately
             // TODO: Should this consider a notice a message?
-            client.emit('message', _.extend({type: event_name}, event_args[1]));
+            client.command_handler.emit('message', _.extend({type: event_name}, event_arg));
         }
 
-        client.emit.apply(client, event_args);
+        client.parsed_middleware.handle([event_name, event_arg, client], function(err) {
+            if (err) {
+                console.error('Middleware error', err);
+                return;
+            }
+
+            client.emit(event_name, event_arg);
+        });
     });
 };
 
 
 IrcClient.prototype.addCommandHandlerListeners = function() {
     var client = this;
-    var connection = this.connection;
+    var commands = this.command_handler;
 
-    connection.on('nick', function(event) {
+    commands.on('nick', function(event) {
         if (client.user.nick === event.nick) {
             client.user.nick = event.new_nick;
         }
     });
 
-    connection.on('registered', function(event) {
+    commands.on('registered', function(event) {
         client.user.nick = event.nick;
         client.emit('connected');
     });

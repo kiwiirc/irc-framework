@@ -59,6 +59,10 @@ var handlers = {
 
         // Which capabilities we want to enable
         var want = ['multi-prefix', 'away-notify', 'server-time', 'extended-join', 'znc.in/server-time-iso', 'znc.in/server-time', 'twitch.tv/membership'];
+        want = _(want)
+            .concat(this.request_extra_caps)
+            .uniq()
+            .value();
 
         if (this.connection.password) {
             want.push('sasl');
