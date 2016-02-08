@@ -57,3 +57,33 @@ bot.on('registered', function() {
 	});
 });
 ~~~
+
+
+#### Middleware
+~~~javascript
+function ExampleMiddleware() {
+	return function(client, raw_events, parsed_events) {
+		parsed_events.use(theMiddleware);
+	}
+
+
+	function theMiddleware(command, event, client, next) {
+		if (command === 'registered') {
+			if (client.options.nickserv) {
+				var options = client.options.nickserv;
+				client.say('nickserv', 'identify ' + options.account + ' ' + options.password);
+			}
+		}
+
+		if (command === 'message' && event.event.nick.toLowerCase() === 'nickserv') {
+			// Handle success/retries/failures
+		}
+
+		next();
+	}
+}
+
+
+var irc_bot = new IRC.Client();
+irc_bot.use(ExampleMiddleware());
+~~~
