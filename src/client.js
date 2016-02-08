@@ -86,6 +86,7 @@ IrcClient.prototype.connect = function(options) {
         .pipe(new MiddlewareStream(this.raw_middleware, this))
         .pipe(this.command_handler);
 
+    // Proxy the command handler events onto the client object, with some added sugar
     this.proxyIrcEvents();
 
     // Everything is setup and prepared, start connecting
@@ -93,7 +94,8 @@ IrcClient.prototype.connect = function(options) {
 };
 
 
-// Parsed events from the command handler are handled in order:
+// Proxy the command handler events onto the client object, with some added sugar
+// Events are handled in order:
 // 1. Received from the command handler
 // 2. Checked if any extra properties/methods are to be added to the event + re-emitted
 // 3. Routed through middleware
