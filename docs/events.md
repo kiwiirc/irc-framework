@@ -175,7 +175,7 @@ Once the client has connected and successfully registered on the IRC network. Th
 #### Messaging
 **notice**
 
-Also triggers a **message** event.
+Also triggers a **message** event with .type = 'notice'
 ~~~javascript
 {
     from_server: command.prefix === this.network.server ? true : false,
@@ -192,7 +192,7 @@ Also triggers a **message** event.
 
 **action**
 
-Also triggers a **message** event.
+Also triggers a **message** event with .type = 'action'
 ~~~javascript
 {
     nick: command.nick,
@@ -207,7 +207,7 @@ Also triggers a **message** event.
 
 **privmsg**
 
-Also triggers a **message** event.
+Also triggers a **message** event with .type = 'privmsg'
 ~~~javascript
 {
     nick: command.nick,
