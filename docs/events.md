@@ -4,11 +4,19 @@ Raw IRC events are parsed and turned into javascript friendly event objects. IRC
 
 You can bind to an event via the `.on` method.
 ~~~javascript
-var client = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
+var client = new IRC.Client();
+client.connect({
+    host: 'irc.freenode.net',
+    port: 6667,
+    nick: 'prawnsbot'
+});
+
 client.on('registered', function(event) {
     // ...
 });
 ~~~
+
+*Note: These also apply when using the parsed events within middleware.*
 
 
 #### Registration
