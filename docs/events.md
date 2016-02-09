@@ -304,7 +304,7 @@ Also triggers a **message** event.
 
 **whois**
 
-Not all of these options will be available. Some will be missing dependong on the network.
+Not all of these options will be available. Some will be missing depending on the network.
 ~~~javascript
 {
 	away: 'away message',
