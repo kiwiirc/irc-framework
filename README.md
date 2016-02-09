@@ -14,10 +14,10 @@ A better IRC framework for node.js. For bots and full clients. (a work in progre
 Currently ripped out of the Kiwi IRC project and running independently.
 
 Todo:
-* Remove all references to any Kiwi IRC specific internals.
+* ~~Remove all references to any Kiwi IRC specific internals.~~
 * Implement an event proxy for `Channel` objects to enable `channel.on('event', ..)`.
-* Do something nice with all the commands in commands/misc.js, maybe even delete them and expect the application to handle these via the `raw` event.
-* Rename `commands/` to `command_handlers/`
+* ~~Do something nice with all the commands in commands/misc.js, maybe even delete them and expect the application to handle these via the `raw` event.~~
+* ~~Rename `commands/` to `command_handlers/`~~
 * Implement some form of debugging. Look into the `debug` module?
 
 
