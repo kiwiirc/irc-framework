@@ -14,10 +14,10 @@ A better IRC framework for node.js. For bots and full clients. (a work in progre
 Currently ripped out of the Kiwi IRC project and running independently.
 
 Todo:
-* Remove all references to any Kiwi IRC specific internals.
+* ~~Remove all references to any Kiwi IRC specific internals.~~
 * Implement an event proxy for `Channel` objects to enable `channel.on('event', ..)`.
-* Do something nice with all the commands in commands/misc.js, maybe even delete them and expect the application to handle these via the `raw` event.
-* Rename `commands/` to `command_handlers/`
+* ~~Do something nice with all the commands in commands/misc.js, maybe even delete them and expect the application to handle these via the `raw` event.~~
+* ~~Rename `commands/` to `command_handlers/`~~
 * Implement some form of debugging. Look into the `debug` module?
 
 
@@ -45,7 +45,7 @@ bot.matchMessage(/^hi/, function(event) {
 });
 ~~~
 
-#### A more fleshed out framework for clients
+#### Channel/buffer objects. Great for building clients
 ~~~javascript
 var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
 bot.connect();
@@ -61,6 +61,10 @@ bot.on('registered', function() {
 	channel.updateUserList(function() {
 		console.log(channel.users);
 	});
+
+	// Or you could even stream the channel messages elsewhere
+	var stream = channel.stream();
+	stream.pipe(process.stdout);
 });
 ~~~
 
