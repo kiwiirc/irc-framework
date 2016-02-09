@@ -217,7 +217,7 @@ IrcClient.prototype.changeNick = function(nick) {
 
 
 IrcClient.prototype.say = function(target, message) {
-	var that = this;
+    var that = this;
 
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
@@ -231,7 +231,7 @@ IrcClient.prototype.say = function(target, message) {
 
 
 IrcClient.prototype.notice = function(target, message) {
-	var that = this;
+    var that = this;
 
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
@@ -245,37 +245,37 @@ IrcClient.prototype.notice = function(target, message) {
 
 
 IrcClient.prototype.join = function(channel, key) {
-	var raw = ['JOIN', channel];
-	if (key) {
+    var raw = ['JOIN', channel];
+    if (key) {
         raw.push(key);
     }
-	this.raw(raw);
+    this.raw(raw);
 };
 
 
 IrcClient.prototype.part = function(channel, message) {
-	var raw = ['PART', channel];
-	if (message) {
+    var raw = ['PART', channel];
+    if (message) {
         raw.push(message);
     }
-	this.raw(raw);
+    this.raw(raw);
 };
 
 
 IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
-	var params = arguments.slice(2);
-	this.raw('PRIVMSG', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
+    var params = arguments.slice(2);
+    this.raw('PRIVMSG', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
 };
 
 
 IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
-	var params = arguments.slice(2);
-	this.raw('NOTICE', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
+    var params = arguments.slice(2);
+    this.raw('NOTICE', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
 };
 
 
 IrcClient.prototype.whois = function(target) {
-	this.raw('WHOIS', target);
+    this.raw('WHOIS', target);
 };
 
 
@@ -320,104 +320,104 @@ IrcClient.prototype.matchAction = function(match_regex, cb) {
 IrcClient.Channel = function IrcChannel(irc_client, channel_name, key) {
     var that = this;
 
-	this.irc_client = irc_client;
-	this.name = channel_name;
+    this.irc_client = irc_client;
+    this.name = channel_name;
 
-	// TODO: Proxy channel related events from irc_bot to this instance
+    // TODO: Proxy channel related events from irc_bot to this instance
 
-	this.say = _.partial(irc_client.say.bind(irc_client), channel_name);
-	this.notice = _.partial(irc_client.notice.bind(irc_client), channel_name);
-	//this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
-	this.part = _.partial(irc_client.part.bind(irc_client), channel_name);
-	this.join = _.partial(irc_client.join.bind(irc_client), channel_name);
+    this.say = _.partial(irc_client.say.bind(irc_client), channel_name);
+    this.notice = _.partial(irc_client.notice.bind(irc_client), channel_name);
+    //this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
+    this.part = _.partial(irc_client.part.bind(irc_client), channel_name);
+    this.join = _.partial(irc_client.join.bind(irc_client), channel_name);
 
-	this.users = [];
-	irc_client.on('userlist', function(event) {
+    this.users = [];
+    irc_client.on('userlist', function(event) {
         if (event.channel === that.name) {
             this.users = event.users;
         }
-	});
+    });
 
-	this.join(key);
+    this.join(key);
 };
 
 IrcClient.Channel.prototype.relay = function(target_chan, opts) {
-	opts = _.extend({
-		one_way: false,    // Only relay messages to target_chan, not the reverse
-		replay_nick: true  // Include the sending nick as part of the relayed message
-	}, opts);
-	
-	if (typeof target_chan === 'string') {
-		target_chan = this.irc_client.channel(target_chan);
-	}
-	var this_stream = this.stream(opts);
-	var other_stream = target_chan.stream(opts);
+    opts = _.extend({
+        one_way: false,    // Only relay messages to target_chan, not the reverse
+        replay_nick: true  // Include the sending nick as part of the relayed message
+    }, opts);
+    
+    if (typeof target_chan === 'string') {
+        target_chan = this.irc_client.channel(target_chan);
+    }
+    var this_stream = this.stream(opts);
+    var other_stream = target_chan.stream(opts);
 
-	this_stream.pipe(other_stream);
-	if (!opts.one_way) {
-		other_stream.pipe(this_stream);
-	}
+    this_stream.pipe(other_stream);
+    if (!opts.one_way) {
+        other_stream.pipe(this_stream);
+    }
 };
 
 IrcClient.Channel.prototype.stream = function(stream_opts) {
-	var that = this;
-	var read_queue = [];
-	var is_reading = false;
+    var that = this;
+    var read_queue = [];
+    var is_reading = false;
 
-	var stream = new DuplexStream({
-		objectMode: true,
+    var stream = new DuplexStream({
+        objectMode: true,
 
-		write: function(chunk, encoding, next) {
-			// Support piping from one irc buffer to another
-			if (typeof chunk === 'object' && typeof chunk.msg === 'string') {
-				if (stream_opts.replay_nicks) {
-					chunk = '<' + chunk.nick + '> ' + chunk.msg;
-				} else {
-					chunk = chunk.msg;
-				}
-			}
+        write: function(chunk, encoding, next) {
+            // Support piping from one irc buffer to another
+            if (typeof chunk === 'object' && typeof chunk.msg === 'string') {
+                if (stream_opts.replay_nicks) {
+                    chunk = '<' + chunk.nick + '> ' + chunk.msg;
+                } else {
+                    chunk = chunk.msg;
+                }
+            }
 
-		    that.say(chunk.toString());
-		    next();
-		},
+            that.say(chunk.toString());
+            next();
+        },
 
-		read: function() {
-		    var message;
-			
-			is_reading = true;
+        read: function() {
+            var message;
+            
+            is_reading = true;
 
-		    while (read_queue.length > 0) {
-		        message = read_queue.shift();		        
-		        if (this.push(message) === false) {
-		        	is_reading = false;
-		        	break;
-		        }
-		    }
-		}
-	});
+            while (read_queue.length > 0) {
+                message = read_queue.shift();               
+                if (this.push(message) === false) {
+                    is_reading = false;
+                    break;
+                }
+            }
+        }
+    });
 
-	this.irc_client.on('privmsg', function(event) {
-		if (event.target.toLowerCase() === that.name.toLowerCase()) {
-			read_queue.push(event);
-			
-			if (is_reading) {
-				stream._read();
-			}
-		}
-	});
+    this.irc_client.on('privmsg', function(event) {
+        if (event.target.toLowerCase() === that.name.toLowerCase()) {
+            read_queue.push(event);
+            
+            if (is_reading) {
+                stream._read();
+            }
+        }
+    });
 
-	return stream;
+    return stream;
 };
 
 IrcClient.Channel.prototype.updateUsers = function(cb) {
-	var that = this;
-	this.irc_client.on('userlist', function updateUserList(event) {
-		if (event.channel === that.name) {
-			that.irc_client.removeListener('userlist', updateUserList);
-			if (typeof cb === 'function') { cb(this); }
-		}
-	});
-	this.irc_client.raw('NAMES', this.name);
+    var that = this;
+    this.irc_client.on('userlist', function updateUserList(event) {
+        if (event.channel === that.name) {
+            that.irc_client.removeListener('userlist', updateUserList);
+            if (typeof cb === 'function') { cb(this); }
+        }
+    });
+    this.irc_client.raw('NAMES', this.name);
 };
 
 
