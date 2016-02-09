@@ -1,11 +1,11 @@
 /*globals describe, it */
 var chai = require('chai'),
-    parseIrcLine = require('../src/ircLineParser'),
+    parseIrcLine = require('../src/irclineparser'),
     expect = chai.expect;
 
 chai.use(require('chai-subset'));
 
-describe('src/ircLineParser.js', function () {
+describe('src/irclineparser.js', function () {
 
     describe('message parsing', function () {
 
