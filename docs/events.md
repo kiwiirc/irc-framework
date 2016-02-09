@@ -2,8 +2,19 @@
 
 Raw IRC events are parsed and turned into javascript friendly event objects. IRC events that are not parsed are triggered using their IRC command name.
 
+You can bind to an event via the `.on` method.
+~~~javascript
+var client = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
+client.on('registered', function(event) {
+    // ...
+});
+~~~
+
+
 #### Registration
 **registered**
+
+Once the client has connected and successfully registered on the IRC network. This is a good place to start joining channels.
 ~~~javascript
 {
     nick: nick
@@ -154,6 +165,53 @@ Raw IRC events are parsed and turned into javascript friendly event objects. IRC
 
 
 #### Messaging
+**notice**
+
+Also triggers a **message** event.
+~~~javascript
+{
+    from_server: command.prefix === this.network.server ? true : false,
+    nick: command.nick || undefined,
+    ident: command.ident,
+    hostname: command.hostname,
+    target: target,
+    group: target_group,
+    msg: msg,
+    time: time
+}
+~~~
+
+
+**action**
+
+Also triggers a **message** event.
+~~~javascript
+{
+    nick: command.nick,
+    ident: command.ident,
+    hostname: command.hostname,
+    target: command.params[0],
+    msg: msg.substring(8, msg.length - 1),
+    time: time
+}
+~~~
+
+
+**privmsg**
+
+Also triggers a **message** event.
+~~~javascript
+{
+    nick: command.nick,
+    ident: command.ident,
+    hostname: command.hostname,
+    target: command.params[0],
+    msg: msg,
+    time: time
+}
+~~~
+
+
 **ctcp response**
 ~~~javascript
 {
@@ -179,48 +237,6 @@ Raw IRC events are parsed and turned into javascript friendly event objects. IRC
     time: time
 }
 ~~~
-
-
-**notice**
-~~~javascript
-{
-    from_server: command.prefix === this.network.server ? true : false,
-    nick: command.nick || undefined,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: target,
-    group: target_group,
-    msg: msg,
-    time: time
-}
-~~~
-
-
-**action**
-~~~javascript
-{
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: command.params[0],
-    msg: msg.substring(8, msg.length - 1),
-    time: time
-}
-~~~
-
-
-**privmsg**
-~~~javascript
-{
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: command.params[0],
-    msg: msg,
-    time: time
-}
-~~~
-
 
 
 **wallops**
@@ -279,6 +295,8 @@ Raw IRC events are parsed and turned into javascript friendly event objects. IRC
 
 
 **whois**
+
+Not all of these options will be available. Some will be missing dependong on the network.
 ~~~javascript
 {
 	away: 'away message',
