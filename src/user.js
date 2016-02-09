@@ -2,7 +2,7 @@ var Set = require('es6-set');
 
 function User(opts) {
     opts = opts || {};
-    
+
     this.nick = opts.nick || '';
     this.username = opts.username || '';
     this.gecos = opts.gecos || '';
@@ -15,11 +15,11 @@ function User(opts) {
 module.exports = User;
 
 User.prototype.toggleModes = function(modestr) {
-    var adding = true,
-        i;
+    var adding = true;
+    var i;
 
     for (i in modestr) {
-        switch(modestr[i]) {
+        switch (modestr[i]) {
         case '+':
             adding = true;
             break;
@@ -27,7 +27,7 @@ User.prototype.toggleModes = function(modestr) {
             adding = false;
             break;
         default:
-            this.modes[adding?'set':'delete'](modestr[i]);
+            this.modes[adding ? 'set' : 'delete'](modestr[i]);
         }
     }
 };

@@ -1,18 +1,14 @@
 var _ = require('lodash');
+var util = require('util');
 
 var handlers = {
-    NOTICE: function (command) {
-        var time,
-            msg,
-            target, target_group;
+    NOTICE: function(command) {
+        var time = command.getServerTime();
+        var msg = command.params[command.params.length - 1];
+        var target = command.params[0];
+        var target_group;
 
-        // Check if we have a server-time
-        time = command.getServerTime();
-
-        target = command.params[0];
-
-        msg = command.params[command.params.length - 1];
-        if ((msg.charAt(0) === String.fromCharCode(1)) && (msg.charAt(msg.length - 1) === String.fromCharCode(1))) {
+        if ((msg.charAt(0) === '\01') && (msg.charAt(msg.length - 1) === '\01')) {
             // It's a CTCP response
             this.emit('ctcp response', {
                 nick: command.nick,
@@ -47,15 +43,12 @@ var handlers = {
     },
 
 
-    PRIVMSG: function (command) {
-        var time, msg, version_string;
+    PRIVMSG: function(command) {
+        var time = command.getServerTime();
+        var msg = command.params[command.params.length - 1];
 
-        // Check if we have a server-time
-        time = command.getServerTime();
-
-        msg = command.params[command.params.length - 1];
-        if ((msg.charAt(0) === String.fromCharCode(1)) && (msg.charAt(msg.length - 1) === String.fromCharCode(1))) {
-            //CTCP request
+        if ((msg.charAt(0) === '\01') && (msg.charAt(msg.length - 1) === '\01')) {
+            // CTCP request
             if (msg.substr(1, 6) === 'ACTION') {
 
                 this.emit('action', {
@@ -68,14 +61,24 @@ var handlers = {
                 });
 
             } else if (msg.substr(1, 7) === 'VERSION') {
-                version_string = 'node.js irc-framework';
-                this.connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'VERSION ' + version_string + String.fromCharCode(1));
+                this.connection.write(util.format(
+                    'NOTICE %s :\01VERSION %s\01',
+                    command.nick,
+                    'node.js irc-framework'
+                ));
 
             } else if (msg.substr(1, 6) === 'SOURCE') {
-                this.connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'SOURCE http://www.kiwiirc.com/' + String.fromCharCode(1));
+                this.connection.write(util.format(
+                    'NOTICE %s :\01SOURCE %s\01',
+                    command.nick,
+                    'https://www.kiwiirc.com/'
+                ));
 
             } else if (msg.substr(1, 10) === 'CLIENTINFO') {
-                this.connection.write('NOTICE ' + command.nick + ' :' + String.fromCharCode(1) + 'CLIENTINFO SOURCE VERSION TIME' + String.fromCharCode(1));
+                this.connection.write(util.format(
+                    'NOTICE %s :\01CLIENTINFO SOURCE VERSION\01',
+                    command.nick
+                ));
 
             } else {
                 this.emit('ctcp request', {
@@ -101,7 +104,7 @@ var handlers = {
     },
 
 
-    RPL_WALLOPS: function (command) {
+    RPL_WALLOPS: function(command) {
         this.emit('wallops', {
             from_server: false,
             nick: command.nick,
@@ -109,7 +112,7 @@ var handlers = {
             hostname: command.hostname,
             msg: command.params[command.params.length - 1]
         });
-    },
+    }
 };
 
 module.exports = function AddCommandHandlers(command_controller) {

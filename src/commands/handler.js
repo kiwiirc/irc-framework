@@ -1,15 +1,15 @@
-var _ = require('lodash'),
-    irc_numerics = require('./numerics'),
-    IrcCommand = require('./command'),
-    util = require('util'),
-    stream = require('stream');
+var _ = require('lodash');
+var irc_numerics = require('./numerics');
+var IrcCommand = require('./command');
+var util = require('util');
+var stream = require('stream');
 
 
 module.exports = IrcCommandHandler;
 
 
 function IrcCommandHandler(connection, network_info) {
-    stream.Writable.call(this, { objectMode : true });
+    stream.Writable.call(this, { objectMode: true });
 
     // Adds an 'all' event to .emit()
     this.addAllEventName();
@@ -36,7 +36,7 @@ IrcCommandHandler.prototype._write = function(chunk, encoding, callback) {
 };
 
 
-IrcCommandHandler.prototype.dispatch = function (irc_command) {
+IrcCommandHandler.prototype.dispatch = function(irc_command) {
     var command_name = irc_command.command;
 
     // Check if we have a numeric->command name- mapping for this command
@@ -57,7 +57,7 @@ IrcCommandHandler.prototype.requestExtraCaps = function(cap) {
 };
 
 
-IrcCommandHandler.prototype.addHandler = function (command, handler) {
+IrcCommandHandler.prototype.addHandler = function(command, handler) {
     if (typeof handler !== 'function') {
         return false;
     }
@@ -65,7 +65,7 @@ IrcCommandHandler.prototype.addHandler = function (command, handler) {
 };
 
 
-IrcCommandHandler.prototype.emitUnknownCommand = function (command) {
+IrcCommandHandler.prototype.emitUnknownCommand = function(command) {
     this.emit(command.command, {
         command: command.command,
         params: command.params
@@ -90,31 +90,36 @@ IrcCommandHandler.prototype.addAllEventName = function() {
  * [ { mode: '+k', param: 'pass' } ]
  * [ { mode: '-i', param: null } ]
  */
-IrcCommandHandler.prototype.parseModeList = function (mode_string, mode_params) {
-    var chanmodes = this.network.options.CHANMODES || [],
-        prefixes = this.network.options.PREFIX || [],
-        always_param = (chanmodes[0] || '').concat((chanmodes[1] || '')),
-        modes = [],
-        has_param, i, j, add;
+IrcCommandHandler.prototype.parseModeList = function(mode_string, mode_params) {
+    var chanmodes = this.network.options.CHANMODES || [];
+    var prefixes = this.network.options.PREFIX || [];
+    var always_param = (chanmodes[0] || '').concat((chanmodes[1] || ''));
+    var modes = [];
+    var hasParam;
+    var i;
+    var j;
+    var add;
 
-    prefixes = _.reduce(prefixes, function (list, prefix) {
+    prefixes = _.reduce(prefixes, function(list, prefix) {
         list.push(prefix.mode);
         return list;
     }, []);
     always_param = always_param.split('').concat(prefixes);
 
-    has_param = function (mode, add) {
-        if (_.find(always_param, function (m) {
+    hasParam = function(mode, add) {
+        var matchMode = function(m) {
             return m === mode;
-        })) {
+        };
+
+        if (_.find(always_param, matchMode)) {
             return true;
-        } else if (add && _.find((chanmodes[2] || '').split(''), function (m) {
-            return m === mode;
-        })) {
-            return true;
-        } else {
-            return false;
         }
+
+        if (add && _.find((chanmodes[2] || '').split(''), matchMode)) {
+            return true;
+        }
+
+        return false;
     };
 
     j = 0;
@@ -127,7 +132,7 @@ IrcCommandHandler.prototype.parseModeList = function (mode_string, mode_params) 
                 add = false;
                 break;
             default:
-                if (has_param(mode_string[i], add)) {
+                if (hasParam(mode_string[i], add)) {
                     modes.push({mode: (add ? '+' : '-') + mode_string[i], param: mode_params[j]});
                     j++;
                 } else {

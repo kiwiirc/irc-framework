@@ -1,14 +1,14 @@
-var net             = require('net'),
-    tls             = require('tls'),
-    util            = require('util'),
-    DuplexStream    = require('stream').Duplex,
-    Socks           = require('socksjs'),
-    ircLineParser   = require('./irclineparser'),
-    getConnectionFamily = require('./getconnectionfamily'),
-    iconv           = require('iconv-lite');
+var net             = require('net');
+var tls             = require('tls');
+var util            = require('util');
+var DuplexStream    = require('stream').Duplex;
+var Socks           = require('socksjs');
+var ircLineParser   = require('./irclineparser');
+var getConnectionFamily = require('./getconnectionfamily');
+var iconv           = require('iconv-lite');
 
 function Connection(options) {
-    DuplexStream.call(this, { readableObjectMode : true });
+    DuplexStream.call(this, { readableObjectMode: true });
 
     this.options = options || {};
 
@@ -35,10 +35,10 @@ util.inherits(Connection, DuplexStream);
 module.exports = Connection;
 
 Connection.prototype.connect = function() {
-    var socket_connect_event_name = 'connect',
-        that = this,
-        options = this.options,
-        dest_addr;
+    var socket_connect_event_name = 'connect';
+    var that = this;
+    var options = this.options;
+    var dest_addr;
 
     if (options.socks) {
         dest_addr = this.socks.host;
@@ -129,35 +129,35 @@ Connection.prototype.connect = function() {
         });
 
         that.socket.on('close', function socketCloseCb(had_error) {
-            var was_connected = that.connected,
-                should_reconnect = false;
-                that.connected = false;
+            var was_connected = that.connected;
+            var should_reconnect = false;
 
-                that.disposeSocket();
+            that.connected = false;
+            that.disposeSocket();
 
-                if (!that.ircd_reconnect) {
-                    that.emit('close', had_error);
-                } else {
-                    if (that.reconnect_attempts && that.reconnect_attempts < 3) {
-                        should_reconnect = true;
-                    } else if (!that.requested_disconnect && was_connected) {
-                        should_reconnect = true;
-                    }
-
-                    if (should_reconnect) {
-                        that.reconnect_attempts += 1;
-                        that.emit('reconnecting');
-                    } else {
-                        that.emit('close', had_error);
-                        that.reconnect_attempts = 0;
-                    }
-
-                    if (should_reconnect) {
-                        that.setTimeout(function () {
-                            that.connect(options);
-                        }, 4000);
-                    }
+            if (!that.ircd_reconnect) {
+                that.emit('close', had_error);
+            } else {
+                if (that.reconnect_attempts && that.reconnect_attempts < 3) {
+                    should_reconnect = true;
+                } else if (!that.requested_disconnect && was_connected) {
+                    should_reconnect = true;
                 }
+
+                if (should_reconnect) {
+                    that.reconnect_attempts += 1;
+                    that.emit('reconnecting');
+                } else {
+                    that.emit('close', had_error);
+                    that.reconnect_attempts = 0;
+                }
+
+                if (should_reconnect) {
+                    that.setTimeout(function() {
+                        that.connect(options);
+                    }, 4000);
+                }
+            }
         });
 
     });
@@ -170,8 +170,8 @@ Connection.prototype._write = function(chunk, encoding, callback) {
 };
 
 Connection.prototype._read = function() {
-    var message,
-        continue_pushing = true;
+    var message;
+    var continue_pushing = true;
 
     this._reading = true;
 
@@ -220,7 +220,7 @@ Connection.prototype.clearTimers = function() {
 /**
  * Close the connection to the IRCd after forcing one last line
  */
-Connection.prototype.end = function (data, callback) {
+Connection.prototype.end = function(data, callback) {
     var that = this;
 
     this.requested_disconnect = true;
@@ -246,7 +246,7 @@ Connection.prototype.end = function (data, callback) {
 /**
  * Clean up this IrcConnection instance and any sockets
  */
-Connection.prototype.dispose = function () {
+Connection.prototype.dispose = function() {
     // If we're still connected, wait until the socket is closed before disposing
     // so that all the events are still correctly triggered
     if (this.socket && this.connected) {
@@ -266,15 +266,15 @@ Connection.prototype.dispose = function () {
  * Return true in case of success
  */
 
-Connection.prototype.setEncoding = function (encoding) {
+Connection.prototype.setEncoding = function(encoding) {
     var encoded_test;
 
     try {
-        encoded_test = iconv.encode("TEST", encoding);
-        //This test is done to check if this encoding also supports
-        //the ASCII charset required by the IRC protocols
-        //(Avoid the use of base64 or incompatible encodings)
-        if (encoded_test == "TEST") { // jshint ignore:line
+        encoded_test = iconv.encode('TEST', encoding);
+        // This test is done to check if this encoding also supports
+        // the ASCII charset required by the IRC protocols
+        // (Avoid the use of base64 or incompatible encodings)
+        if (encoded_test == 'TEST') { // jshint ignore:line
             this.encoding = encoding;
             return true;
         }
@@ -289,23 +289,30 @@ Connection.prototype.setEncoding = function (encoding) {
  * Buffer any data we get from the IRCd until we have complete lines.
  */
 function socketOnData(data) {
-    var data_pos,               // Current position within the data Buffer
-        line_start = 0,
-        lines = [],
-        max_buffer_size = 1024; // 1024 bytes is the maximum length of two RFC1459 IRC messages.
-                                // May need tweaking when IRCv3 message tags are more widespread
+    // Current position within the data Buffer
+    var data_pos;
+
+    var line_start = 0;
+    var lines = [];
+
+    // 1024 bytes is the maximum length of two RFC1459 IRC messages.
+    // May need tweaking when IRCv3 message tags are more widespread
+    var max_buffer_size = 1024;
+
 
     // Split data chunk into individual lines
     for (data_pos = 0; data_pos < data.length; data_pos++) {
-        if (data[data_pos] === 0x0A) { // Check if byte is a line feed
+        // Check if byte is a line feed
+        if (data[data_pos] === 0x0A) {
             lines.push(data.slice(line_start, data_pos));
             line_start = data_pos + 1;
         }
     }
 
-    // No complete lines of data? Check to see if buffering the data would exceed the max buffer size
+    // No complete lines of data? Check to see if buffering the data would exceed the max
+    // buffer size
     if (!lines[0]) {
-        if ((this.held_data ? this.held_data.length : 0 ) + data.length > max_buffer_size) {
+        if ((this.held_data ? this.held_data.length : 0) + data.length > max_buffer_size) {
             // Buffering this data would exeed our max buffer size
             this.emit('error', 'Message buffer too large');
             this.socket.destroy();
@@ -314,7 +321,10 @@ function socketOnData(data) {
 
             // Append the incomplete line to our held_data and wait for more
             if (this.held_data) {
-                this.held_data = Buffer.concat([this.held_data, data], this.held_data.length + data.length);
+                this.held_data = Buffer.concat(
+                    [this.held_data, data],
+                    this.held_data.length + data.length
+                );
             } else {
                 this.held_data = data;
             }
@@ -327,7 +337,10 @@ function socketOnData(data) {
     // If we have an incomplete line held from the previous chunk of data
     // merge it with the first line from this chunk of data
     if (this.hold_last && this.held_data !== null) {
-        lines[0] = Buffer.concat([this.held_data, lines[0]], this.held_data.length + lines[0].length);
+        lines[0] = Buffer.concat(
+            [this.held_data, lines[0]],
+            this.held_data.length + lines[0].length
+        );
         this.hold_last = false;
         this.held_data = null;
     }
@@ -363,11 +376,12 @@ function processIrcLines(irc_con, continue_processing) {
 
     irc_con.reading_buffer = true;
 
-    var lines_per_js_tick = 4,
-        processed_lines = 0,
-        line, message;
+    var lines_per_js_tick = 4;
+    var processed_lines = 0;
+    var line;
+    var message;
 
-    while(processed_lines < lines_per_js_tick && irc_con.read_buffer.length > 0) {
+    while (processed_lines < lines_per_js_tick && irc_con.read_buffer.length > 0) {
         line = iconv.decode(irc_con.read_buffer.shift(), irc_con.encoding);
         if (!line) {
             continue;

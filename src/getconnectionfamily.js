@@ -1,5 +1,5 @@
-var net = require('net'),
-    dns = require('dns');
+var net = require('net');
+var dns = require('dns');
 
 function getConnectionFamily(host, callback) {
     if (net.isIP(host)) {
@@ -15,7 +15,7 @@ function getConnectionFamily(host, callback) {
             } else {
                 dns.resolve6(host, function resolve6Cb(err, addresses) {
                     if (!err) {
-                        callback(null, 'IPv6',addresses[0]);
+                        callback(null, 'IPv6', addresses[0]);
                     } else {
                         callback(err);
                     }

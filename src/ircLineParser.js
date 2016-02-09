@@ -7,11 +7,11 @@ module.exports = parseIrcLine;
 var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
 
 function parseIrcLine(line) {
-    var msg,
-        i,
-        tags = [],
-        tag,
-        msg_obj;
+    var msg;
+    var i;
+    var tags = [];
+    var tag;
+    var msg_obj;
 
     // Parse the complete line, removing any carriage returns
     msg = parse_regex.exec(line.replace(/^\r+|\r+$/, ''));
@@ -32,10 +32,11 @@ function parseIrcLine(line) {
         }
     }
 
+    // Nick value will be in the prefix slot if a full user mask is not used
     msg_obj = {
         tags:       tags,
         prefix:     msg[2],
-        nick:       msg[3] || msg[2],  // Nick will be in the prefix slot if a full user mask is not used
+        nick:       msg[3] || msg[2],
         ident:      msg[4] || '',
         hostname:   msg[5] || '',
         command:    msg[6],

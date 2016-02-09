@@ -1,13 +1,13 @@
-var EventEmitter = require('events').EventEmitter,
-    util = require('util'),
-    _ = require('lodash'),
-    DuplexStream = require('stream').Duplex,
-    MiddlewareHandler = require('middleware-handler'),
-    MiddlewareStream = require('./middlewarestream'),
-    IrcCommandHandler = require('./commands/').CommandHandler,
-    Connection = require('./connection'),
-    NetworkInfo = require('./networkinfo'),
-    User = require('./user');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
+var _ = require('lodash');
+var DuplexStream = require('stream').Duplex;
+var MiddlewareHandler = require('middleware-handler');
+var MiddlewareStream = require('./middlewarestream');
+var IrcCommandHandler = require('./commands/').CommandHandler;
+var Connection = require('./connection');
+var NetworkInfo = require('./networkinfo');
+var User = require('./user');
 
 function IrcClient() {
     EventEmitter.call(this);
@@ -32,9 +32,9 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
     };
 
     var props = Object.keys(defaults);
-    for (var i=0; i<props.length; i++) {
+    for (var i = 0; i < props.length; i++) {
         if (typeof user_options[props[i]] === 'undefined') {
-            user_options[props[i]] = defaults[props[i]];
+            user_options[ props[ i ] ] = defaults[ props[ i ] ];
         }
     }
 
@@ -57,7 +57,7 @@ IrcClient.prototype.connect = function(options) {
     console.log('IrcClient.connect()');
 
     var client = this;
-    
+
     this.options = options;
     this._applyDefaultOptions(this.options);
 
@@ -77,7 +77,7 @@ IrcClient.prototype.connect = function(options) {
     this.command_handler.requestExtraCaps(this.request_extra_caps);
 
     client.addCommandHandlerListeners();
-    
+
     // Proxy some connection events onto this client
     ['reconnecting', 'close'].forEach(function(event_name) {
         client.connection.on(event_name, function() {
@@ -85,7 +85,7 @@ IrcClient.prototype.connect = function(options) {
         });
     });
 
-    this.connection.on('socket connected', function () {
+    this.connection.on('socket connected', function() {
         client.emit('socket connected');
         client.registerToNetwork();
     });
@@ -161,23 +161,23 @@ IrcClient.prototype.registerToNetwork = function() {
     var webirc = this.options.webirc;
 
     if (webirc) {
-        this.connection.write('WEBIRC ' + webirc.password + ' kiwiIRC ' + webirc.hostname + ' ' + webirc.address);
+        this.raw('WEBIRC', webirc.password, 'kiwiIRC', webirc.hostname, webirc.address);
     }
 
-    this.connection.write('CAP LS');
+    this.raw('CAP LS');
 
     if (this.options.password) {
-        this.connection.write('PASS ' + this.password);
+        this.raw('PASS', this.password);
     }
 
-    this.connection.write('NICK ' + this.user.nick);
-    this.connection.write('USER ' + this.user.username + ' 0 * :' + this.user.gecos);
+    this.raw('NICK', this.user.nick);
+    this.raw('USER', this.user.username, 0, '*', this.user.gecos);
 };
 
 
 Object.defineProperty(IrcClient.prototype, 'connected', {
     enumerable: true,
-    get: function () {
+    get: function() {
         return this.connection && this.connection.connected;
     }
 });
@@ -198,8 +198,8 @@ IrcClient.prototype.raw = function(input) {
     }
     console.log('raw()', args);
 
-    if (args[args.length-1].indexOf(' ') > -1) {
-        args[args.length-1] = ':' + args[args.length-1];
+    if (args[args.length - 1].indexOf(' ') > -1) {
+        args[args.length - 1] = ':' + args[args.length - 1];
     }
 
     this.connection.write(args.join(' '));
@@ -264,13 +264,23 @@ IrcClient.prototype.part = function(channel, message) {
 
 IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
     var params = arguments.slice(2);
-    this.raw('PRIVMSG', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
+    this.raw(
+        'PRIVMSG',
+        target,
+        String.fromCharCode(1) + type.toUpperCase(),
+        params.join(' ') + String.fromCharCode(1)
+    );
 };
 
 
 IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
     var params = arguments.slice(2);
-    this.raw('NOTICE', target, String.fromCharCode(1) + type.toUpperCase(), params.join(' ') + String.fromCharCode(1));
+    this.raw(
+        'NOTICE',
+        target,
+        String.fromCharCode(1) + type.toUpperCase(),
+        params.join(' ') + String.fromCharCode(1)
+    );
 };
 
 
@@ -327,7 +337,7 @@ IrcClient.Channel = function IrcChannel(irc_client, channel_name, key) {
 
     this.say = _.partial(irc_client.say.bind(irc_client), channel_name);
     this.notice = _.partial(irc_client.notice.bind(irc_client), channel_name);
-    //this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
+    // this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
     this.part = _.partial(irc_client.part.bind(irc_client), channel_name);
     this.join = _.partial(irc_client.join.bind(irc_client), channel_name);
 
@@ -341,12 +351,21 @@ IrcClient.Channel = function IrcChannel(irc_client, channel_name, key) {
     this.join(key);
 };
 
+/**
+ * Relay messages between this channel to another
+ * @param  {IrcClient.Channel|String} target_chan Target channel
+ * @param  {Object} opts        Extra options
+ *
+ * opts may contain the following properties:
+ * one_way (false) Only relay messages to target_chan, not the reverse
+ * replay_nick (true) Include the sending nick as part of the relayed message
+ */
 IrcClient.Channel.prototype.relay = function(target_chan, opts) {
     opts = _.extend({
-        one_way: false,    // Only relay messages to target_chan, not the reverse
-        replay_nick: true  // Include the sending nick as part of the relayed message
+        one_way: false,
+        replay_nick: true
     }, opts);
-    
+
     if (typeof target_chan === 'string') {
         target_chan = this.irc_client.channel(target_chan);
     }
@@ -383,11 +402,11 @@ IrcClient.Channel.prototype.stream = function(stream_opts) {
 
         read: function() {
             var message;
-            
+
             is_reading = true;
 
             while (read_queue.length > 0) {
-                message = read_queue.shift();               
+                message = read_queue.shift();
                 if (this.push(message) === false) {
                     is_reading = false;
                     break;
@@ -399,7 +418,7 @@ IrcClient.Channel.prototype.stream = function(stream_opts) {
     this.irc_client.on('privmsg', function(event) {
         if (event.target.toLowerCase() === that.name.toLowerCase()) {
             read_queue.push(event);
-            
+
             if (is_reading) {
                 stream._read();
             }
@@ -428,8 +447,8 @@ IrcClient.Channel.prototype.updateUsers = function(cb) {
 function truncateString(str, block_size) {
     block_size = block_size || 350;
 
-    var blocks = [],
-        current_pos;
+    var blocks = [];
+    var current_pos;
 
     for (current_pos = 0; current_pos < str.length; current_pos = current_pos + block_size) {
         blocks.push(str.substr(current_pos, block_size));

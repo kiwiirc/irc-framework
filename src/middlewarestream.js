@@ -1,5 +1,5 @@
-var util            = require('util'),
-    DuplexStream    = require('stream').Duplex;
+var util            = require('util');
+var DuplexStream    = require('stream').Duplex;
 
 module.exports = MiddlewareStream;
 
@@ -9,7 +9,7 @@ module.exports = MiddlewareStream;
  */
 
 function MiddlewareStream(middleware_handler, client) {
-    DuplexStream.call(this, { objectMode : true });
+    DuplexStream.call(this, { objectMode: true });
     this.middleware = middleware_handler;
     this.client = client;
     this.buffer = [];
