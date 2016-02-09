@@ -45,7 +45,7 @@ bot.matchMessage(/^hi/, function(event) {
 });
 ~~~
 
-#### A more fleshed out framework for clients
+#### Channel/buffer objects. Great for building clients
 ~~~javascript
 var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
 bot.connect();
@@ -61,6 +61,10 @@ bot.on('registered', function() {
 	channel.updateUserList(function() {
 		console.log(channel.users);
 	});
+
+	// Or you could even stream the channel messages elsewhere
+	var stream = channel.stream();
+	stream.pipe(process.stdout);
 });
 ~~~
 
