@@ -284,7 +284,16 @@ IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
 };
 
 
-IrcClient.prototype.whois = function(target) {
+IrcClient.prototype.whois = function(target, cb) {
+    var client = this;
+
+    this.on('whois', function onWhois(event) {
+        if (event.nick.toLowerCase() === target.toLowerCase()) {
+            client.removeListener('whois', onWhois);
+            cb(event);
+        }
+    });
+
     this.raw('WHOIS', target);
 };
 
