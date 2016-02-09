@@ -37,6 +37,7 @@ var handlers = {
                 target: target,
                 group: target_group,
                 msg: msg,
+                tags: command.tags,
                 time: time
             });
         }
@@ -57,6 +58,7 @@ var handlers = {
                     hostname: command.hostname,
                     target: command.params[0],
                     msg: msg.substring(8, msg.length - 1),
+                    tags: command.tags,
                     time: time
                 });
 
@@ -98,6 +100,7 @@ var handlers = {
                 hostname: command.hostname,
                 target: command.params[0],
                 msg: msg,
+                tags: command.tags,
                 time: time
             });
         }

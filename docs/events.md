@@ -185,6 +185,7 @@ Also triggers a **message** event with .type = 'notice'
     target: target,
     group: target_group,
     msg: msg,
+    tags: command.tags,
     time: time
 }
 ~~~
@@ -200,6 +201,7 @@ Also triggers a **message** event with .type = 'action'
     hostname: command.hostname,
     target: command.params[0],
     msg: msg.substring(8, msg.length - 1),
+    tags: command.tags,
     time: time
 }
 ~~~
@@ -215,6 +217,7 @@ Also triggers a **message** event with .type = 'privmsg'
     hostname: command.hostname,
     target: command.params[0],
     msg: msg,
+    tags: command.tags,
     time: time
 }
 ~~~
