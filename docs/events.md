@@ -20,13 +20,45 @@ client.on('registered', function(event) {
 
 
 #### Registration
-**registered**
+**registered** / **connected**
 
 Once the client has connected and successfully registered on the IRC network. This is a good place to start joining channels.
 ~~~javascript
 {
     nick: nick
 }
+~~~
+
+
+**reconnecting**
+
+The client has disconnected from the network and will now automatically re-connect (if enabled).
+~~~javascript
+{ }
+~~~
+
+
+**close**
+
+The client has disconnected from the network and failed to auto reconnect (if enabled).
+~~~javascript
+{ }
+~~~
+
+
+**socket connected**
+
+The client has a connected socket to the network. Network registration will automatically start at this point.
+~~~javascript
+{ }
+~~~
+
+
+**socket close**
+
+The client has disconnected from the network.
+~~~javascript
+{ }
 ~~~
 
 
