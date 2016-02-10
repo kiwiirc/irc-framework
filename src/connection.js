@@ -84,7 +84,7 @@ Connection.prototype.connect = function() {
             });
         } else {
             console.log('Connecting directly to ' + ircd_host + ':' + ircd_port);
-            if (options.tls) {
+            if (options.tls || options.ssl) {
                 that.socket = tls.connect({
                     host: ircd_host,
                     port: ircd_port,
