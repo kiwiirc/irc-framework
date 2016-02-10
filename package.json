@@ -35,6 +35,7 @@
     "messaging"
   ],
   "author": "prawnsalad",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kiwiirc/irc-framework/issues"
   },
