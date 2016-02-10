@@ -197,6 +197,11 @@ IrcClient.prototype.raw = function(input) {
     } else {
         args = Array.prototype.slice.call(arguments, 0);
     }
+
+    args = args.filter(function(item) {
+        return (typeof item === 'number' || typeof item === 'string');
+    });
+
     console.log('raw()', args);
 
     if (args[args.length - 1].indexOf(' ') > -1) {
