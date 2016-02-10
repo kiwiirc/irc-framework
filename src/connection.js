@@ -14,7 +14,12 @@ function Connection(options) {
 
     this.connected = false;
     this.requested_disconnect = false;
+
+    this.auto_reconnect = options.auto_reconnect || false;
     this.reconnect_attempts = 0;
+
+    // When an IRC connection was successfully registered.
+    this.registered = false;
 
     this.read_buffer = [];
     this.reading_buffer = false;
@@ -33,6 +38,10 @@ function Connection(options) {
 util.inherits(Connection, DuplexStream);
 
 module.exports = Connection;
+
+Connection.prototype.registeredSuccessfully = function() {
+    this.registered = Date.now();
+};
 
 Connection.prototype.connect = function() {
     var socket_connect_event_name = 'connect';
@@ -131,21 +140,34 @@ Connection.prototype.connect = function() {
         that.socket.on('close', function socketCloseCb(had_error) {
             var was_connected = that.connected;
             var should_reconnect = false;
+            var safely_registered = false;
+            var registered_ms_ago = Date.now() - that.server.registered;
+
+            // Some networks use aKills which kill a user after succesfully
+            // registering instead of a ban, so we must wait some time after
+            // being registered to be sure that we are connected properly.
+            safely_registered = that.server.registered !== false && registered_ms_ago > 10000;
 
             that.connected = false;
             that.disposeSocket();
 
-            if (!that.ircd_reconnect) {
+            if (!that.auto_reconnect) {
                 that.emit('close', had_error);
             } else {
+                // If trying to reconnect, continue with it
                 if (that.reconnect_attempts && that.reconnect_attempts < 3) {
                     should_reconnect = true;
-                } else if (!that.requested_disconnect && was_connected) {
+
+                // If we were originally connected OK, reconnect
+                } else if (was_connected && safely_registered) {
                     should_reconnect = true;
+
+                } else {
+                    should_reconnect = false;
                 }
 
                 if (should_reconnect) {
-                    that.reconnect_attempts += 1;
+                    that.reconnect_attempts++;
                     that.emit('reconnecting');
                 } else {
                     that.emit('close', had_error);
