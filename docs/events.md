@@ -65,8 +65,8 @@ The client has disconnected from the network.
 **server options**
 ~~~javascript
 {
-    options: this.network.options,
-    cap: this.network.cap.enabled
+    options: { ... },
+    cap: { ... }
 }
 ~~~
 
@@ -75,8 +75,8 @@ The client has disconnected from the network.
 **channel info**
 ~~~javascript
 {
-    channel: channel,
-    modes: modes
+    channel: '#channel',
+    modes: [ ... ]
 }
 ~~~
 
@@ -84,8 +84,8 @@ The client has disconnected from the network.
 **channel info**
 ~~~javascript
 {
-    channel: channel,
-    created_at: parseInt(command.params[2], 10)
+    channel: '#channel',
+    created_at: 000000000
 }
 ~~~
 
@@ -93,8 +93,8 @@ The client has disconnected from the network.
 **channel info**
 ~~~javascript
 {
-    channel: channel,
-    url: command.params[command.params.length - 1]
+    channel: '#channel',
+    url: 'http://channel-website.com/'
 }
 ~~~
 
@@ -102,8 +102,8 @@ The client has disconnected from the network.
 **userlist**
 ~~~javascript
 {
-    channel: command.params[1],
-    users: cache.members
+    channel: '#channel',
+    users: [ ... ]
 }
 ~~~
 
@@ -111,8 +111,8 @@ The client has disconnected from the network.
 **banlist**
 ~~~javascript
 {
-    channel: command.params[1],
-    bans: cache.bans
+    channel: '#channel',
+    bans: [ ... ]
 }
 ~~~
 
@@ -120,13 +120,13 @@ The client has disconnected from the network.
 **topic**
 ~~~javascript
 {
-    channel: command.params[1],
+    channel: '#channel',
     // topic will be empty if one is not set
-    topic: command.params[command.params.length - 1],
+    topic: 'The channel topic',
 
     // If the topic has just been changed, the following is also available
-    nick: 'nick of the person changing the topic',
-    time: time
+    nick: 'prawnsalad',
+    time: 000000000
 }
 ~~~
 
@@ -134,23 +134,25 @@ The client has disconnected from the network.
 **topicsetby**
 ~~~javascript
 {
-    nick: command.params[2],
-    channel: command.params[1],
-    when: command.params[3]
+    nick: 'prawnsalad',
+    channel: '#channel',
+    when: 000000000
 }
 ~~~
 
 
 **join**
+
+The account name will only be available on supported networks.
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    gecos: command.params[command.params - 1],
-    channel: channel,
-    time: time,
-    account: extended-join cap enabled + user is logged in this account
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    gecos: 'prawns real name',
+    channel: '#channel',
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -158,12 +160,12 @@ The client has disconnected from the network.
 **part**
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    channel: channel,
-    message: message,
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    channel: '#channel',
+    message: 'My part message',
+    time: 000000000
 }
 ~~~
 
@@ -171,13 +173,13 @@ The client has disconnected from the network.
 **kick**
 ~~~javascript
 {
-    kicked: command.params[1],
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    channel: command.params[0],
-    message: command.params[command.params.length - 1],
-    time: time
+    kicked: 'someabuser',
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    channel: '#channel',
+    message: 'Reason why someabuser was kicked',
+    time: 000000000
 }
 ~~~
 
@@ -185,11 +187,11 @@ The client has disconnected from the network.
 **quit**
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    message: command.params[command.params.length - 1],
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    message: 'Reason why I'm leaving IRC,
+    time: 000000000
 }
 ~~~
 
@@ -197,8 +199,8 @@ The client has disconnected from the network.
 **invited**
 ~~~javascript
 {
-    nick: command.params[0],
-    channel: command.params[1]
+    nick: 'inviteduser',
+    channel: '#channel'
 }
 ~~~
 
@@ -207,18 +209,19 @@ The client has disconnected from the network.
 #### Messaging
 **notice**
 
-Also triggers a **message** event with .type = 'notice'
+Also triggers a **message** event with .type = 'notice'. from_server indicates is this notice was
+sent from the server or a user.
 ~~~javascript
 {
-    from_server: command.prefix === this.network.server ? true : false,
-    nick: command.nick || undefined,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: target,
-    group: target_group,
-    msg: msg,
-    tags: command.tags,
-    time: time
+    from_server: false,
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    target: '#channel',
+    group: '@',
+    msg: 'A message to all channel ops',
+    tags: [],
+    time: 000000000
 }
 ~~~
 
@@ -228,13 +231,13 @@ Also triggers a **message** event with .type = 'notice'
 Also triggers a **message** event with .type = 'action'
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: command.params[0],
-    msg: msg.substring(8, msg.length - 1),
-    tags: command.tags,
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    target: '#channel',
+    msg: 'slaps someuser around a bit with a large trout',
+    tags: [],
+    time: 000000000
 }
 ~~~
 
@@ -244,13 +247,13 @@ Also triggers a **message** event with .type = 'action'
 Also triggers a **message** event with .type = 'privmsg'
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: command.params[0],
-    msg: msg,
-    tags: command.tags,
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    target: '#channel',
+    msg: 'Hello everybody',
+    tags: [],
+    time: 000000000
 }
 ~~~
 
@@ -258,12 +261,12 @@ Also triggers a **message** event with .type = 'privmsg'
 **ctcp response**
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: target,
-    msg: msg.substring(1, msg.length - 1),
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    target: 'someuser',
+    msg: 'VERSION kiwiirc',
+    time: 000000000
 }
 ~~~
 
@@ -271,13 +274,13 @@ Also triggers a **message** event with .type = 'privmsg'
 **ctcp request**
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    target: command.params[0],
-    type: (msg.substring(1, msg.length - 1).split(' ') || [null])[0],
-    msg: msg.substring(1, msg.length - 1),
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    target: 'someuser',
+    type: 'VERSION',
+    msg: 'VERSION and remaining text',
+    time: 000000000
 }
 ~~~
 
@@ -286,10 +289,10 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~javascript
 {
     from_server: false,
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    msg: command.params[command.params.length - 1]
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    msg: 'This is a server-wide message'
 }
 ~~~
 
@@ -298,11 +301,11 @@ Also triggers a **message** event with .type = 'privmsg'
 **nick**
 ~~~javascript
 {
-    nick: command.nick,
-    ident: command.ident,
-    hostname: command.hostname,
-    newnick: command.params[0],
-    time: time
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'isp.manchester.net',
+    newnick: 'prawns_new_nick',
+    time: 000000000
 }
 ~~~
 
@@ -310,9 +313,9 @@ Also triggers a **message** event with .type = 'privmsg'
 **away**
 ~~~javascript
 {
-    nick: command.nick,
-    msg: command.params[command.params.length - 1],
-    time: time
+    nick: 'prawnsalad',
+    msg: 'Time to go eat some food.',
+    time: 000000000
 }
 ~~~
 
@@ -321,8 +324,8 @@ Also triggers a **message** event with .type = 'privmsg'
 **nick in use**
 ~~~javascript
 {
-    nick: command.params[1],
-    reason: command.params[command.params.length - 1]
+    nick: 'attempted_nick',
+    reason: 'That nickname is already in use'
 }
 ~~~
 
@@ -330,8 +333,8 @@ Also triggers a **message** event with .type = 'privmsg'
 **nick invalid**
 ~~~javascript
 {
-    nick: command.params[1],
-    reason: command.params[command.params.length - 1]
+    nick: 'attempted@nick',
+    reason: 'That is an invalid nick'
 }
 ~~~
 
@@ -343,9 +346,9 @@ Not all of these options will be available. Some will be missing depending on th
 ~~~javascript
 {
 	away: 'away message',
-	nick: '',
-	user: '',
-	host: '',
+	nick: 'prawnsalad',
+	user: 'prawn',
+	host: 'manchester.isp.net',
 	actuallhost: 'sometimes set when using webirc',
 	helpop: 'is available for help',
 	bot: 'is a bot',
@@ -365,9 +368,14 @@ Not all of these options will be available. Some will be missing depending on th
 
 
 **whowas**
+
+If the requested user was not found, error will contain 'no_such_nick'.
 ~~~javascript
 {
-    nick: command.params[1],
-    error: 'no_such_nick'
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    host: 'manchester.isp.net',
+    real_name: 'prawns real name',
+    error: ''
 }
 ~~~
