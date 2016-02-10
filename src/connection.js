@@ -110,13 +110,13 @@ Connection.prototype.connect = function() {
         (that.socket.socket || that.socket).on('connect', rawSocketConnect);
         that.socket.on(socket_connect_event_name, socketFullyConnected);
 
+        // Called when the socket is connected and before any TLS handshaking if applicable.
+        // This is when it's ideal to read socket pairs for identd.
         function rawSocketConnect() {
-            // TLS connections have the actual socket as a property
-            var is_tls = (typeof this.socket !== 'undefined');
-
-            // TODO: This is where it's safe to read socket pairs for identd
+            that.emit('raw socket connected');
         }
 
+        // Called when the socket is connected and ready to start sending/receiving data.
         function socketFullyConnected() {
             that.connected = true;
             that.emit('socket connected');
@@ -151,8 +151,11 @@ Connection.prototype.connect = function() {
             that.connected = false;
             that.disposeSocket();
 
+            that.emit('socket close', had_error);
+
             if (!that.auto_reconnect) {
                 that.emit('close', had_error);
+
             } else {
                 // If trying to reconnect, continue with it
                 if (that.reconnect_attempts && that.reconnect_attempts < 3) {
