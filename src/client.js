@@ -168,7 +168,7 @@ IrcClient.prototype.registerToNetwork = function() {
     this.raw('CAP LS');
 
     if (this.options.password) {
-        this.raw('PASS', this.password);
+        this.raw('PASS', this.options.password);
     }
 
     this.raw('NICK', this.user.nick);

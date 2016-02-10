@@ -141,12 +141,12 @@ Connection.prototype.connect = function() {
             var was_connected = that.connected;
             var should_reconnect = false;
             var safely_registered = false;
-            var registered_ms_ago = Date.now() - that.server.registered;
+            var registered_ms_ago = Date.now() - that.registered;
 
             // Some networks use aKills which kill a user after succesfully
             // registering instead of a ban, so we must wait some time after
             // being registered to be sure that we are connected properly.
-            safely_registered = that.server.registered !== false && registered_ms_ago > 10000;
+            safely_registered = that.registered !== false && registered_ms_ago > 10000;
 
             that.connected = false;
             that.disposeSocket();
