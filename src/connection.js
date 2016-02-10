@@ -59,7 +59,7 @@ Connection.prototype.connect = function() {
 
     this.requested_disconnect = false;
 
-    if (!this.options.encoding || !this.setEncoding(this.options.encoding)) {
+    if (!options.encoding || !this.setEncoding(options.encoding)) {
         this.setEncoding('utf8');
     }
 
