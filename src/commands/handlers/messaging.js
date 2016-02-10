@@ -15,6 +15,7 @@ var handlers = {
                 ident: command.ident,
                 hostname: command.hostname,
                 target: target,
+                type: (msg.substring(1, msg.length - 1).split(' ') || [null])[0],
                 msg: msg.substring(1, msg.length - 1),
                 time: time
             });
