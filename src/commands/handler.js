@@ -155,7 +155,6 @@ IrcCommandHandler.prototype.parseModeList = function(mode_string, mode_params) {
  */
 function destroyCacheFn(cache, id) {
     return function() {
-        console.log('removing cache', id);
         delete cache[id];
     };
 }
@@ -168,7 +167,6 @@ IrcCommandHandler.prototype.cache = function(id) {
     cache = this._caches[id];
 
     if (!cache) {
-        console.log('creating cache', id);
         cache = Object.defineProperty({}, 'destroy', {
             enumerable: false,
             configurable: false,

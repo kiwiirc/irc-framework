@@ -54,8 +54,6 @@ IrcClient.prototype.use = function(middleware_fn) {
 
 
 IrcClient.prototype.connect = function(options) {
-    console.log('IrcClient.connect()');
-
     var client = this;
 
     this.options = options;
@@ -130,7 +128,7 @@ IrcClient.prototype.proxyIrcEvents = function() {
 
         client.parsed_middleware.handle([event_name, event_arg, client], function(err) {
             if (err) {
-                console.error('Middleware error', err.stack);
+                //console.error('Middleware error', err.stack);
                 return;
             }
 
@@ -201,8 +199,6 @@ IrcClient.prototype.raw = function(input) {
     args = args.filter(function(item) {
         return (typeof item === 'number' || typeof item === 'string');
     });
-
-    console.log('raw()', args);
 
     if (args[args.length - 1].indexOf(' ') > -1) {
         args[args.length - 1] = ':' + args[args.length - 1];

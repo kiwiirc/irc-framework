@@ -177,7 +177,7 @@ var handlers = {
 
     RPL_UMODEIS: function(command) {
         // this.connection.umodes = the modes
-        console.log('IMPLEMENT ME: umodes setting on connection');
+        // TODO: this
     }
 };
 

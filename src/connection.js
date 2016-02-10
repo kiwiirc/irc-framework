@@ -69,7 +69,6 @@ Connection.prototype.connect = function() {
         var ircd_port = options.port || 6667;
 
         if (options.socks) {
-            console.log('Connecting via socks to ' + options.host + ':' + ircd_port);
             that.socket = Socks.connect({
                 host: options.host,
                 port: ircd_port,
@@ -83,7 +82,6 @@ Connection.prototype.connect = function() {
                 localAddress: outgoing_addr
             });
         } else {
-            console.log('Connecting directly to ' + ircd_host + ':' + ircd_port);
             if (options.tls || options.ssl) {
                 that.socket = tls.connect({
                     host: ircd_host,
@@ -190,7 +188,7 @@ Connection.prototype.connect = function() {
 
 Connection.prototype._write = function(chunk, encoding, callback) {
     var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
-    console.log('Raw C:', chunk.toString());
+    //console.log('Raw C:', chunk.toString());
     return this.socket.write(encoded_buffer, callback);
 };
 
@@ -412,7 +410,7 @@ function processIrcLines(irc_con, continue_processing) {
             continue;
         }
 
-        console.log('Raw S:', line.replace(/^\r+|\r+$/, ''));
+        //console.log('Raw S:', line.replace(/^\r+|\r+$/, ''));
 
         message = ircLineParser(line);
 
