@@ -23,8 +23,12 @@ Todo:
 
 #### A simple and low-boilerplate framework to build IRC bots.
 ~~~javascript
-var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
-bot.connect();
+var bot = new IRC.Client();
+bot.connect({
+	host: 'irc.freenode.net',
+	port: 6667,
+	nick: 'prawnsbot'
+});
 
 bot.on('message', function(event) {
   	if (event.msg.indexOf('hello') === 0) {
@@ -47,8 +51,12 @@ bot.matchMessage(/^hi/, function(event) {
 
 #### Channel/buffer objects. Great for building clients
 ~~~javascript
-var bot = new IRC.Client('irc.freenode.net', 6667, 'prawnsbot');
-bot.connect();
+var bot = new IRC.Client();
+bot.connect({
+	host: 'irc.freenode.net',
+	port: 6667,
+	nick: 'prawnsbot'
+});
 
 var buffers = [];
 bot.on('registered', function() {
