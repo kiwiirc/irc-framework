@@ -123,25 +123,25 @@ var handlers = {
 
 
     JOIN: function(command) {
-        var time = command.getServerTime();
         var channel;
+        var gecos_idx = 1;
+        var data = {};
 
         if (typeof command.params[0] === 'string' && command.params[0] !== '') {
             channel = command.params[0];
         }
 
-        var data = {
-            nick: command.nick,
-            ident: command.ident,
-            hostname: command.hostname,
-            gecos: command.params[command.params - 1],
-            channel: channel,
-            time: time
-        };
-
         if (this.network.cap.isEnabled('extended-join')) {
             data.account = command.params[1] === '*' ? false : command.params[1];
+            gecos_idx = 2;
         }
+
+        data.nick = command.nick;
+        data.ident = command.ident;
+        data.hostname = command.hostname;
+        data.gecos = command.params[gecos_idx] || '';
+        data.channel = channel;
+        data.time = command.getServerTime();
 
         this.emit('join', data);
     },
