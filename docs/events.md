@@ -16,7 +16,23 @@ client.on('registered', function(event) {
 });
 ~~~
 
-*Note: These also apply when using the parsed events within middleware.*
+Or if you want to use them in your middleware...
+~~~javascript
+function MyMiddleware() {
+    return function(client, raw_events, parsed_events) {
+        parsed_events.use(theMiddleware);
+    }
+
+
+    function theMiddleware(command, event, client, next) {
+        if (command === 'registered') {
+            // ...
+        }
+
+        next();
+    }
+}
+~~~
 
 
 #### Registration
