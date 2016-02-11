@@ -205,7 +205,7 @@ IrcClient.prototype.raw = function(input) {
         return (typeof item === 'number' || typeof item === 'string');
     });
 
-    if (args[args.length - 1].indexOf(' ') > -1) {
+    if (args.length > 1 && args[args.length - 1].indexOf(' ') > -1) {
         args[args.length - 1] = ':' + args[args.length - 1];
     }
 
