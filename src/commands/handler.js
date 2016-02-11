@@ -25,6 +25,7 @@ function IrcCommandHandler(connection, network_info) {
     require('./handlers/user')(this);
     require('./handlers/messaging')(this);
     require('./handlers/misc')(this);
+    require('./handlers/generics')(this);
 }
 
 util.inherits(IrcCommandHandler, stream.Writable);

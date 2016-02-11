@@ -1,0 +1,137 @@
+/*
+
+Generic IRC events. Simply passing selected IRC params into javascript objects
+
+Example
+    ERROR: {              IRC Command to match
+        event: 'error',   Event name to trigger on the cleint instance
+        reason: -1        Property on the triggered event, and which IRC param to should contain
+    },
+*/
+
+var generics = {
+    ERROR: {
+        event: 'error',
+        reason: -1
+    },
+
+    ERR_PASSWDMISMATCH: {
+        event: 'irc_error',
+        error: 'password_mismatch'
+    },
+
+    ERR_LINKCHANNEL: {
+        event: 'channel_redirect',
+        from: 1,
+        to: 1
+    },
+
+    ERR_NOSUCHNICK: {
+        event: 'irc_error',
+        error: 'no_such_nick',
+        nick: 1,
+        reason: -1
+    },
+
+    ERR_CANNOTSENDTOCHAN: {
+        event: 'irc_error',
+        error: 'cannot_send_to_channel',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_TOOMANYCHANNELS: {
+        event: 'irc_error',
+        error: 'too_many_channels',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_USERNOTINCHANNEL: {
+        event: 'irc_error',
+        error: 'user_not_in_channel',
+        nick: 0,
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_NOTONCHANNEL: {
+        event: 'irc_error',
+        error: 'not_on_channel',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_USERONCHANNEL: {
+        event: 'irc_error',
+        error: 'user_on_channel',
+        nick: 1,
+        channel: 2
+    },
+
+    ERR_CHANNELISFULL: {
+        event: 'irc_error',
+        error: 'channel_is_full',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_INVITEONLYCHAN: {
+        event: 'irc_error',
+        error: 'invite_only_channel',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_BANNEDFROMCHAN: {
+        event: 'irc_error',
+        error: 'banned_from_channel',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_BADCHANNELKEY: {
+        event: 'irc_error',
+        error: 'bad_channel_key',
+        channel: 1,
+        reason: -1
+    },
+
+    ERR_CHANOPRIVSNEEDED: {
+        event: 'irc_error',
+        error: 'chanop_privs_needed',
+        channel: 1,
+        reason: -1
+    }
+};
+
+var generic_keys = Object.keys(generics);
+
+module.exports = function AddCommandHandlers(command_controller) {
+    generic_keys.forEach(function(generic_command) {
+        var generic = generics[generic_command];
+
+        command_controller.addHandler(generic_command, function(command) {
+            var event_obj = {};
+            var event_keys = Object.keys(generic);
+            var val;
+
+            for (var i = 0; i < event_keys.length; i++) {
+                if (event_keys[i] === 'event') {
+                    continue;
+                }
+
+                val = generic[event_keys[i]];
+                if (typeof val === 'string') {
+                    event_obj[event_keys[i]] = val;
+                } else if (val >= 0) {
+                    event_obj[event_keys[i]] = command.params[val];
+                } else if (val < 0) {
+                    event_obj[event_keys[i]] = command.params[command.params.length + val];
+                }
+            }
+
+            this.emit(generic.event, event_obj);
+        });
+    });
+};
