@@ -48,6 +48,7 @@ Connection.prototype.connect = function() {
     var that = this;
     var options = this.options;
     var dest_addr;
+    var last_socket_error;
 
     if (options.socks) {
         dest_addr = this.socks.host;
@@ -120,8 +121,9 @@ Connection.prototype.connect = function() {
             that.emit('socket connected');
         }
 
-        that.socket.on('error', function socketErrorCb(event) {
-            that.emit('socket error', event);
+        that.socket.on('error', function socketErrorCb(err) {
+            last_socket_error = err;
+            that.emit('socket error', err);
         });
 
         that.socket.on('readable', function socketReadableCb() {
@@ -152,7 +154,7 @@ Connection.prototype.connect = function() {
             that.emit('socket close', had_error);
 
             if (!that.auto_reconnect) {
-                that.emit('close', had_error);
+                that.emit('close', had_error ? last_socket_error : false);
 
             } else {
                 // If trying to reconnect, continue with it
@@ -171,7 +173,7 @@ Connection.prototype.connect = function() {
                     that.reconnect_attempts++;
                     that.emit('reconnecting');
                 } else {
-                    that.emit('close', had_error);
+                    that.emit('close', had_error ? last_socket_error : false);
                     that.reconnect_attempts = 0;
                 }
 

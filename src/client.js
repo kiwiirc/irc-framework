@@ -79,7 +79,8 @@ IrcClient.prototype.connect = function(options) {
     // Proxy some connection events onto this client
     ['reconnecting', 'close'].forEach(function(event_name) {
         client.connection.on(event_name, function() {
-            client.emit.apply(client, arguments);
+            var args = Array.prototype.slice.call(arguments);
+            client.emit.apply(client, [event_name].concat(args));
         });
     });
 
@@ -152,6 +153,10 @@ IrcClient.prototype.addCommandHandlerListeners = function() {
         client.emit('connected', event);
         client.user.nick = event.nick;
         client.connection.registeredSuccessfully();
+    });
+
+    // Don't let IRC ERROR command kill the node.js process if unhandled
+    commands.on('error', function(event) {
     });
 };
 
