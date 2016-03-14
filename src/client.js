@@ -314,7 +314,7 @@ IrcClient.prototype.match = function(match_regex, cb, message_type) {
     var client = this;
 
     var onMessage = function(event) {
-        if (event.msg.match(match_regex)) {
+        if (event.message.match(match_regex)) {
             cb(event);
         }
     };

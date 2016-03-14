@@ -25,7 +25,7 @@ var handlers = {
 
         this.emit('away', {
             nick: command.nick,
-            msg: command.params[command.params.length - 1],
+            message: command.params[command.params.length - 1],
             time: time
         });
     },

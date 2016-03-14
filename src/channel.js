@@ -65,11 +65,11 @@ IrcChannel.prototype.stream = function(stream_opts) {
 
         write: function(chunk, encoding, next) {
             // Support piping from one irc buffer to another
-            if (typeof chunk === 'object' && typeof chunk.msg === 'string') {
+            if (typeof chunk === 'object' && typeof chunk.message === 'string') {
                 if (stream_opts.replay_nicks) {
-                    chunk = '<' + chunk.nick + '> ' + chunk.msg;
+                    chunk = '<' + chunk.nick + '> ' + chunk.message;
                 } else {
-                    chunk = chunk.msg;
+                    chunk = chunk.message;
                 }
             }
 

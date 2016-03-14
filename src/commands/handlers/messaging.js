@@ -4,19 +4,19 @@ var util = require('util');
 var handlers = {
     NOTICE: function(command) {
         var time = command.getServerTime();
-        var msg = command.params[command.params.length - 1];
+        var message = command.params[command.params.length - 1];
         var target = command.params[0];
         var target_group;
 
-        if ((msg.charAt(0) === '\01') && (msg.charAt(msg.length - 1) === '\01')) {
+        if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
             // It's a CTCP response
             this.emit('ctcp response', {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
                 target: target,
-                type: (msg.substring(1, msg.length - 1).split(' ') || [null])[0],
-                msg: msg.substring(1, msg.length - 1),
+                type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
+                message: message.substring(1, message.length - 1),
                 time: time
             });
         } else {
@@ -37,7 +37,7 @@ var handlers = {
                 hostname: command.hostname,
                 target: target,
                 group: target_group,
-                msg: msg,
+                message: message,
                 tags: command.tags,
                 time: time
             });
@@ -47,37 +47,37 @@ var handlers = {
 
     PRIVMSG: function(command) {
         var time = command.getServerTime();
-        var msg = command.params[command.params.length - 1];
+        var message = command.params[command.params.length - 1];
 
-        if ((msg.charAt(0) === '\01') && (msg.charAt(msg.length - 1) === '\01')) {
+        if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
             // CTCP request
-            if (msg.substr(1, 6) === 'ACTION') {
+            if (message.substr(1, 6) === 'ACTION') {
 
                 this.emit('action', {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
                     target: command.params[0],
-                    msg: msg.substring(8, msg.length - 1),
+                    message: message.substring(8, message.length - 1),
                     tags: command.tags,
                     time: time
                 });
 
-            } else if (msg.substr(1, 7) === 'VERSION') {
+            } else if (message.substr(1, 7) === 'VERSION') {
                 this.connection.write(util.format(
                     'NOTICE %s :\01VERSION %s\01',
                     command.nick,
                     'node.js irc-framework'
                 ));
 
-            } else if (msg.substr(1, 6) === 'SOURCE') {
+            } else if (message.substr(1, 6) === 'SOURCE') {
                 this.connection.write(util.format(
                     'NOTICE %s :\01SOURCE %s\01',
                     command.nick,
                     'https://www.kiwiirc.com/'
                 ));
 
-            } else if (msg.substr(1, 10) === 'CLIENTINFO') {
+            } else if (message.substr(1, 10) === 'CLIENTINFO') {
                 this.connection.write(util.format(
                     'NOTICE %s :\01CLIENTINFO SOURCE VERSION\01',
                     command.nick
@@ -89,8 +89,8 @@ var handlers = {
                     ident: command.ident,
                     hostname: command.hostname,
                     target: command.params[0],
-                    type: (msg.substring(1, msg.length - 1).split(' ') || [null])[0],
-                    msg: msg.substring(1, msg.length - 1),
+                    type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
+                    message: message.substring(1, message.length - 1),
                     time: time
                 });
             }
@@ -100,7 +100,7 @@ var handlers = {
                 ident: command.ident,
                 hostname: command.hostname,
                 target: command.params[0],
-                msg: msg,
+                message: message,
                 tags: command.tags,
                 time: time
             });
@@ -114,7 +114,7 @@ var handlers = {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            msg: command.params[command.params.length - 1]
+            message: command.params[command.params.length - 1]
         });
     }
 };
