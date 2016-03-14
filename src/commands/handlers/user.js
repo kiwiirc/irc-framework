@@ -71,6 +71,7 @@ var handlers = {
         cache.nick = command.params[1];
         cache.user = command.params[2];
         cache.host = command.params[3];
+        cache.real_name = command.params[5];
     },
 
     RPL_WHOISHELPOP: function(command) {
@@ -126,9 +127,8 @@ var handlers = {
     },
 
     RPL_WHOISHOST: function(command) {
-        var nick = command.params[1];
-        var cache = this.cache('whois.' + nick);
-        cache.host = command.params[command.params.length - 1];
+        // Ignore this command as we get the host from RPL_WHOISUSER and it contains junk
+        // anyway
     },
 
     RPL_WHOISSECURE: function(command) {
