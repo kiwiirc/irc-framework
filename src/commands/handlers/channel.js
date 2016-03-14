@@ -42,16 +42,15 @@ var handlers = {
         }
 
         _.each(members, function(member) {
-            var i = 0;
             var j = 0;
             var modes = [];
 
-            // Make sure we have some prefixes already
+            // If we have prefixes, strip them from the nick and keep them separate
             if (that.network.options.PREFIX) {
                 for (j = 0; j < that.network.options.PREFIX.length; j++) {
-                    if (member.charAt(i) === that.network.options.PREFIX[j].symbol) {
+                    if (member[0] === that.network.options.PREFIX[j].symbol) {
                         modes.push(that.network.options.PREFIX[j].mode);
-                        i++;
+                        member = member.substring(1);
                     }
                 }
             }
