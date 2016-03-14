@@ -9,6 +9,11 @@ var handlers = {
 
     RPL_LISTEND: function() {
         var cache = this.cache('chanlist');
+        if (cache.channels.length) {
+            this.emit('channel list', cache.channels);
+            cache.channels = [];
+        }
+
         cache.destroy();
         this.emit('channel list end');
     },
@@ -21,7 +26,7 @@ var handlers = {
             topic: command.params[3] || ''
         });
 
-        if (cache.channels >= 50) {
+        if (cache.channels.length >= 50) {
             this.emit('channel list', cache.channels);
             cache.channels = [];
         }
