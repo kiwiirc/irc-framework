@@ -235,7 +235,7 @@ sent from the server or a user.
     hostname: 'manchester.isp.net',
     target: '#channel',
     group: '@',
-    msg: 'A message to all channel ops',
+    message: 'A message to all channel ops',
     tags: [],
     time: 000000000
 }
@@ -251,7 +251,7 @@ Also triggers a **message** event with .type = 'action'
     ident: 'prawn',
     hostname: 'manchester.isp.net',
     target: '#channel',
-    msg: 'slaps someuser around a bit with a large trout',
+    message: 'slaps someuser around a bit with a large trout',
     tags: [],
     time: 000000000
 }
@@ -267,7 +267,7 @@ Also triggers a **message** event with .type = 'privmsg'
     ident: 'prawn',
     hostname: 'manchester.isp.net',
     target: '#channel',
-    msg: 'Hello everybody',
+    message: 'Hello everybody',
     tags: [],
     time: 000000000
 }
@@ -281,7 +281,7 @@ Also triggers a **message** event with .type = 'privmsg'
     ident: 'prawn',
     hostname: 'manchester.isp.net',
     target: 'someuser',
-    msg: 'VERSION kiwiirc',
+    message: 'VERSION kiwiirc',
     time: 000000000
 }
 ~~~
@@ -295,7 +295,7 @@ Also triggers a **message** event with .type = 'privmsg'
     hostname: 'manchester.isp.net',
     target: 'someuser',
     type: 'VERSION',
-    msg: 'VERSION and remaining text',
+    message: 'VERSION and remaining text',
     time: 000000000
 }
 ~~~
@@ -308,7 +308,7 @@ Also triggers a **message** event with .type = 'privmsg'
     nick: 'prawnsalad',
     ident: 'prawn',
     hostname: 'manchester.isp.net',
-    msg: 'This is a server-wide message'
+    message: 'This is a server-wide message'
 }
 ~~~
 
@@ -330,7 +330,7 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~javascript
 {
     nick: 'prawnsalad',
-    msg: 'Time to go eat some food.',
+    message: 'Time to go eat some food.',
     time: 000000000
 }
 ~~~
@@ -366,6 +366,7 @@ Not all of these options will be available. Some will be missing depending on th
 	user: 'prawn',
 	host: 'manchester.isp.net',
 	actuallhost: 'sometimes set when using webirc',
+    real_name: 'A real prawn',
 	helpop: 'is available for help',
 	bot: 'is a bot',
 	server: 'irc.server.net',
