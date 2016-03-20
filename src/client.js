@@ -193,6 +193,11 @@ Object.defineProperty(IrcClient.prototype, 'connected', {
  * Client API
  */
 IrcClient.prototype.raw = function(input) {
+    this.connection.write(this.rawString.apply(this, arguments));
+};
+
+
+IrcClient.prototype.rawString = function(input) {
     var args;
 
     if (input.constructor === Array) {
@@ -209,12 +214,12 @@ IrcClient.prototype.raw = function(input) {
         args[args.length - 1] = ':' + args[args.length - 1];
     }
 
-    this.connection.write(args.join(' '));
+    return args.join(' ');
 };
 
 
 IrcClient.prototype.quit = function(message) {
-    this.raw('QUIT', message);
+    this.connection.end(this.rawString('QUIT', message));
 };
 
 
