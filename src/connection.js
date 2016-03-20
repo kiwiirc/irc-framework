@@ -189,6 +189,10 @@ Connection.prototype.connect = function() {
 };
 
 Connection.prototype._write = function(chunk, encoding, callback) {
+    if (!this.connected) {
+        return 0;
+    }
+
     var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
     //console.log('Raw C:', chunk.toString());
     return this.socket.write(encoded_buffer, callback);
