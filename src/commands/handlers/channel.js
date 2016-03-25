@@ -215,6 +215,20 @@ var handlers = {
     },
 
 
+    INVITE: function(command) {
+        var time = command.getServerTime();
+
+        this.emit('invite', {
+            nick: command.nick,
+            ident: command.ident,
+            hostname: command.hostname,
+            invited: command.params[0],
+            channel: command.params[1],
+            time: time
+        });
+    },
+
+
     RPL_INVITING: function(command) {
         this.emit('invited', {
             nick: command.params[0],
