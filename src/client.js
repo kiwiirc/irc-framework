@@ -275,7 +275,7 @@ IrcClient.prototype.part = function(channel, message) {
 
 
 IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
-    var params = arguments.slice(2);
+    var params = Array.prototype.slice.call(arguments, 2);
     this.raw(
         'PRIVMSG',
         target,
@@ -286,7 +286,7 @@ IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
 
 
 IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
-    var params = arguments.slice(2);
+    var params = Array.prototype.slice.call(arguments, 2);
     this.raw(
         'NOTICE',
         target,
