@@ -296,6 +296,11 @@ IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
 };
 
 
+IrcClient.prototype.action = function(target, message) {
+    this.ctcpRequest(target, 'ACTION', message);
+};
+
+
 IrcClient.prototype.whois = function(target, cb) {
     var client = this;
 
