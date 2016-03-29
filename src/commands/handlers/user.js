@@ -11,7 +11,7 @@ var handlers = {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            newnick: command.params[0],
+            new_nick: command.params[0],
             time: time
         });
     },
