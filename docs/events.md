@@ -320,7 +320,7 @@ Also triggers a **message** event with .type = 'privmsg'
     nick: 'prawnsalad',
     ident: 'prawn',
     hostname: 'isp.manchester.net',
-    newnick: 'prawns_new_nick',
+    new_nick: 'prawns_new_nick',
     time: 000000000
 }
 ~~~
