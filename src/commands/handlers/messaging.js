@@ -48,6 +48,18 @@ var handlers = {
     PRIVMSG: function(command) {
         var time = command.getServerTime();
         var message = command.params[command.params.length - 1];
+        var target = command.params[0];
+        var target_group;
+
+        // Support '@#channel' formats
+        _.find(this.network.options.PREFIX, function(prefix) {
+            if (prefix.symbol === target[0]) {
+                target_group = target[0];
+                target = target.substring(1);
+            }
+
+            return true;
+        });
 
         if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
             // CTCP request
@@ -57,7 +69,8 @@ var handlers = {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
-                    target: command.params[0],
+                    target: target,
+                    group: target_group,
                     message: message.substring(8, message.length - 1),
                     tags: command.tags,
                     time: time
@@ -88,7 +101,8 @@ var handlers = {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
-                    target: command.params[0],
+                    target: target,
+                    group: target_group,
                     type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
                     message: message.substring(1, message.length - 1),
                     time: time
@@ -99,7 +113,8 @@ var handlers = {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
-                target: command.params[0],
+                target: target,
+                group: target_group,
                 message: message,
                 tags: command.tags,
                 time: time
