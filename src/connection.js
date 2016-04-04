@@ -65,7 +65,7 @@ Connection.prototype.connect = function() {
     }
 
     getConnectionFamily(dest_addr, function getConnectionFamilyCb(err, family, host) {
-        var outgoing_addr = this.localAddress || '0.0.0.0';
+        var outgoing_addr = that.localAddress || '0.0.0.0';
         var ircd_host = host;
         var ircd_port = options.port || 6667;
 
