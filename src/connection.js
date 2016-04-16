@@ -6,6 +6,7 @@ var Socks           = require('socksjs');
 var ircLineParser   = require('./irclineparser');
 var getConnectionFamily = require('./getconnectionfamily');
 var iconv           = require('iconv-lite');
+var _               = require('lodash');
 
 function Connection(options) {
     DuplexStream.call(this, { readableObjectMode: true });
@@ -235,15 +236,31 @@ Connection.prototype.disposeSocket = function() {
  * Create and keep track of all timers so they can be easily removed
  */
 Connection.prototype.setTimeout = function(/*fn, length, argN */) {
-    var tmr = setTimeout.apply(null, arguments);
+    var that = this;
+    var tmr = null;
+    var callback = arguments[0];
+    
+    arguments[0] = function() {
+       _.pull(that._timers, tmr);
+       callback.apply(null, arguments);
+    };
+    
+    tmr = setTimeout.apply(null, arguments);
     this._timers.push(tmr);
     return tmr;
+};
+
+Connection.prototype.clearTimeout = function(tmr) {
+	clearTimeout(tmr);
+	_.pull(this._timers, tmr); 
 };
 
 Connection.prototype.clearTimers = function() {
     this._timers.forEach(function(tmr) {
         clearTimeout(tmr);
     });
+    
+    this._timers = [];
 };
 
 /**
