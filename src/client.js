@@ -77,7 +77,7 @@ IrcClient.prototype.connect = function(options) {
     client.addCommandHandlerListeners();
 
     // Proxy some connection events onto this client
-    ['reconnecting', 'close'].forEach(function(event_name) {
+    ['reconnecting', 'close', 'raw socket connected'].forEach(function(event_name) {
         client.connection.on(event_name, function() {
             var args = Array.prototype.slice.call(arguments);
             client.emit.apply(client, [event_name].concat(args));

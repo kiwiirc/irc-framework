@@ -112,7 +112,7 @@ Connection.prototype.connect = function() {
         // Called when the socket is connected and before any TLS handshaking if applicable.
         // This is when it's ideal to read socket pairs for identd.
         function rawSocketConnect() {
-            that.emit('raw socket connected');
+            that.emit('raw socket connected', (that.socket.socket || that.socket));
         }
 
         // Called when the socket is connected and ready to start sending/receiving data.
