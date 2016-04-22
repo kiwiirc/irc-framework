@@ -221,11 +221,14 @@ Connection.prototype.pushCommandBuffer = function(command) {
 };
 
 Connection.prototype.disposeSocket = function() {
-    // If we're still connected, wait until the socket is closed before disposing
-    // so that all the events are still correctly triggered
     if (this.socket && this.connected) {
-        this.end();
-        return;
+        this.requested_disconnect = true;
+        this.socket.destroy();
+    }
+
+    if (this.socket) {
+        this.socket.removeAllListeners();
+        this.socket = null;
     }
 
     this.clearTimers();
@@ -263,32 +266,10 @@ Connection.prototype.end = function(data, callback) {
         return;
     }
 
+    this.disposeSocket();
     DuplexStream.prototype.end.call(this, callback);
-
-    if (this.socket) {
-        this.socket.destroy();
-        this.socket = null;
-    }
 };
 
-
-/**
- * Clean up this IrcConnection instance and any sockets
- */
-Connection.prototype.dispose = function() {
-    // If we're still connected, wait until the socket is closed before disposing
-    // so that all the events are still correctly triggered
-    if (this.socket && this.connected) {
-        this.end();
-        return;
-    }
-
-    if (this.socket) {
-        this.disposeSocket();
-    }
-
-    this.clearTimers();
-};
 
 /**
  * Set a new encoding for this connection
