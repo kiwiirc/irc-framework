@@ -76,26 +76,6 @@ var handlers = {
                     time: time
                 });
 
-            } else if (message.substr(1, 7) === 'VERSION') {
-                this.connection.write(util.format(
-                    'NOTICE %s :\01VERSION %s\01',
-                    command.nick,
-                    'node.js irc-framework'
-                ));
-
-            } else if (message.substr(1, 6) === 'SOURCE') {
-                this.connection.write(util.format(
-                    'NOTICE %s :\01SOURCE %s\01',
-                    command.nick,
-                    'https://www.kiwiirc.com/'
-                ));
-
-            } else if (message.substr(1, 10) === 'CLIENTINFO') {
-                this.connection.write(util.format(
-                    'NOTICE %s :\01CLIENTINFO SOURCE VERSION\01',
-                    command.nick
-                ));
-
             } else {
                 this.emit('ctcp request', {
                     nick: command.nick,
