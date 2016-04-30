@@ -28,7 +28,8 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         nick: 'ircbot',
         username: 'ircbot',
         gecos: 'ircbot',
-        encoding: 'utf8'
+        encoding: 'utf8',
+        auto_reconnect: true
     };
 
     var props = Object.keys(defaults);
@@ -63,7 +64,7 @@ IrcClient.prototype.connect = function(options) {
         this.connection.end();
     }
 
-    this.connection = new Connection(options);
+    this.connection = new Connection(this.options);
     this.network = new NetworkInfo();
     this.user = new User({
         nick: options.nick,

@@ -147,45 +147,43 @@ Connection.prototype.connect = function() {
             // Some networks use aKills which kill a user after succesfully
             // registering instead of a ban, so we must wait some time after
             // being registered to be sure that we are connected properly.
-            safely_registered = that.registered !== false && registered_ms_ago > 10000;
+            safely_registered = that.registered !== false && registered_ms_ago > 5000;
 
             that.connected = false;
             that.disposeSocket();
+            that.clearTimers();
 
             that.emit('socket close', had_error);
 
-            if (!that.auto_reconnect) {
-                that.emit('close', had_error ? last_socket_error : false);
+            if (that.requested_disconnect || !that.auto_reconnect) {
+                should_reconnect = false;
+
+            // If trying to reconnect, continue with it
+            } else if (that.reconnect_attempts && that.reconnect_attempts < 3) {
+                should_reconnect = true;
+
+            // If we were originally connected OK, reconnect
+            } else if (was_connected && safely_registered) {
+                should_reconnect = true;
 
             } else {
-                // If trying to reconnect, continue with it
-                if (that.reconnect_attempts && that.reconnect_attempts < 3) {
-                    should_reconnect = true;
+                should_reconnect = false;
+            }
 
-                // If we were originally connected OK, reconnect
-                } else if (was_connected && safely_registered) {
-                    should_reconnect = true;
+            if (should_reconnect) {
+                that.reconnect_attempts++;
+                that.emit('reconnecting');
+            } else {
+                that.emit('close', had_error ? last_socket_error : false);
+                that.reconnect_attempts = 0;
+            }
 
-                } else {
-                    should_reconnect = false;
-                }
-
-                if (should_reconnect) {
-                    that.reconnect_attempts++;
-                    that.emit('reconnecting');
-                } else {
-                    that.emit('close', had_error ? last_socket_error : false);
-                    that.reconnect_attempts = 0;
-                }
-
-                if (should_reconnect) {
-                    that.setTimeout(function() {
-                        that.connect(options);
-                    }, 4000);
-                }
+            if (should_reconnect) {
+                that.setTimeout(function() {
+                    that.connect();
+                }, 4000);
             }
         });
-
     });
 };
 
@@ -231,8 +229,6 @@ Connection.prototype.disposeSocket = function() {
         this.socket.removeAllListeners();
         this.socket = null;
     }
-
-    this.clearTimers();
 };
 
 /**
@@ -272,19 +268,17 @@ Connection.prototype.clearTimers = function() {
 Connection.prototype.end = function(data, callback) {
     var that = this;
 
-    this.requested_disconnect = true;
-
     if (this.connected && data) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
         this.write(data, function() {
-            that.end();
+            that.requested_disconnect = true;
+            that.socket.end();
         });
 
         return;
     }
 
     this.disposeSocket();
-    DuplexStream.prototype.end.call(this, callback);
 };
 
 
