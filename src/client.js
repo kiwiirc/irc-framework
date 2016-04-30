@@ -166,7 +166,7 @@ IrcClient.prototype.registerToNetwork = function() {
     var webirc = this.options.webirc;
 
     if (webirc) {
-        this.raw('WEBIRC', webirc.password, 'kiwiIRC', webirc.hostname, webirc.address);
+        this.raw('WEBIRC', webirc.password, webirc.username, webirc.hostname, webirc.address);
     }
 
     this.raw('CAP LS');
