@@ -35,12 +35,12 @@ function IrcChannel(irc_client, channel_name, key) {
  *
  * opts may contain the following properties:
  * one_way (false) Only relay messages to target_chan, not the reverse
- * replay_nick (true) Include the sending nick as part of the relayed message
+ * replay_nicks (true) Include the sending nick as part of the relayed message
  */
 IrcChannel.prototype.relay = function(target_chan, opts) {
     opts = _.extend({
         one_way: false,
-        replay_nick: true
+        replay_nicks: true
     }, opts);
 
     if (typeof target_chan === 'string') {
