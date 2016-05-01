@@ -80,6 +80,13 @@ var handlers = {
     },
 
 
+    PONG: function(command) {
+        this.emit('pong', {
+            message: command.params[1]
+        });
+    },
+
+
     MODE: function(command) {
         // Check if we have a server-time
         var time = command.getServerTime();

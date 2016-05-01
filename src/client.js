@@ -29,7 +29,9 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         username: 'ircbot',
         gecos: 'ircbot',
         encoding: 'utf8',
-        auto_reconnect: true
+        auto_reconnect: true,
+        ping_interval: 30,
+        ping_timeout: 120
     };
 
     var props = Object.keys(defaults);
@@ -88,6 +90,7 @@ IrcClient.prototype.connect = function(options) {
     this.connection.on('socket connected', function() {
         client.emit('socket connected');
         client.registerToNetwork();
+        client.startPeriodicPing();
     });
 
     // IRC command routing
@@ -113,6 +116,8 @@ IrcClient.prototype.proxyIrcEvents = function() {
     var client = this;
 
     this.command_handler.on('all', function(event_name, event_arg) {
+        client.resetPingTimer();
+        
         // Add a reply() function to selected message events
         if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
             event_arg.reply = function(message) {
@@ -180,6 +185,49 @@ IrcClient.prototype.registerToNetwork = function() {
 };
 
 
+IrcClient.prototype.startPeriodicPing = function() {
+    var that = this;
+    var ping_timer = null;
+    var timeout_timer = null;
+    
+    if(that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
+        return;
+    }
+    
+    function scheduleNextPing() {
+        ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
+    }
+    
+    function resetPingTimer() {
+        if(ping_timer) {
+            that.connection.clearTimeout(ping_timer);
+        }
+        
+        if(timeout_timer) {
+            that.connection.clearTimeout(timeout_timer);
+        }
+        
+        scheduleNextPing();
+    }
+    
+    function pingServer() {
+        timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout*1000);
+        that.ping();
+    }
+    
+    function pingTimeout() {
+        that.emit('ping timeout');
+        that.quit('Ping timeout (' + that.options.ping_timeout + ' seconds)');
+    }
+    
+    this.resetPingTimer = resetPingTimer;
+    scheduleNextPing();
+};
+
+
+IrcClient.prototype.resetPingTimer = function() {};
+
+
 Object.defineProperty(IrcClient.prototype, 'connected', {
     enumerable: true,
     get: function() {
@@ -221,6 +269,11 @@ IrcClient.prototype.rawString = function(input) {
 
 IrcClient.prototype.quit = function(message) {
     this.connection.end(this.rawString('QUIT', message));
+};
+
+
+IrcClient.prototype.ping = function(message) {
+    this.raw('PING', message || '*');
 };
 
 
