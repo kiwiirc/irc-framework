@@ -361,7 +361,9 @@ IrcClient.prototype.whois = function(target, cb) {
     this.on('whois', function onWhois(event) {
         if (event.nick.toLowerCase() === target.toLowerCase()) {
             client.removeListener('whois', onWhois);
-            cb(event);
+            if (typeof cb === 'function') {
+                cb(event);
+            }
         }
     });
 
