@@ -62,6 +62,14 @@ The client has disconnected from the network and failed to auto reconnect (if en
 ~~~
 
 
+**socket close**
+
+The client has disconnected from the network.
+~~~javascript
+{ }
+~~~
+
+
 **socket connected**
 
 The client has a connected socket to the network. Network registration will automatically start at this point.
@@ -70,9 +78,9 @@ The client has a connected socket to the network. Network registration will auto
 ~~~
 
 
-**socket close**
+**raw socket connected**
 
-The client has disconnected from the network.
+The client has a raw connected socket to the network but not yet completed any TLS handshakes yet. This is a good place to read any TCP port information for things like identd.
 ~~~javascript
 { }
 ~~~
