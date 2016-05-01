@@ -1,4 +1,5 @@
-var _ = require('lodash');
+var _ = require('lodash'),
+    Cap = require('../cap');
 
 var handlers = {
 	RPL_WELCOME: function(command) {
@@ -57,8 +58,62 @@ var handlers = {
         });
     },
 
+    CAP: function (command) {
+        var that = this,
+            request_caps = [],
+            capabilities = command.params[command.params.length - 1]
+                .split(' ')
+                .map(function(cap) {
+                    return new Cap(cap);
+                }),
+            want = _
+                .chain(_.keys(this.wanted_caps))
+                .union(_.keys(this.request_extra_caps))
+                .map(function (key) {
+                    return _.mergeWith(that.wanted_caps[key], that.request_extra_caps[key], function (wV, eV) {
+                        if (_.isArray(wV)) {
+                            return _(wV.concat(eV)).uniq();
+                        }
+                    });
+                })
+                .value();
 
-    CAP: function(command) {
+        if (this.connection.password) {
+            want.push(Cap.Wanted('sasl', ['PLAIN'], function (cap_value, wanted_value) {
+                return !!_.find(cap_value.split(','), wanted_value);
+            }));
+        }
+
+        switch(command.params[1]) {
+            case 'LS':
+                request_caps = _(capabilities)
+                    .intersectionWith(want, Cap.matches)
+                    .difference(this.network.cap.enabled, 'name')
+                    .value();
+
+                if (request_caps.length > 0) {
+                    this.network.cap.requested = request_caps;
+                    this.connection.write(_(request_caps).reduce(function (memo, cap) {
+                        return memo += ((memo[memo.length-1]===':')?'':' ') + cap.name;
+                    }, 'CAP REQ :'));
+                } else if (this.network.cap.negotiating) {
+                    this.connection.write('CAP END');
+                    this.network.cap.negotiating = false;
+                }
+
+                break;
+            case 'ACK':
+                break;
+            case 'NAK':
+                break;
+            case 'NEW':
+                break;
+            case 'DEL':
+                break;
+        }
+    },
+
+    /*CAP: function(command) {
         var request_caps = [];
 
         // TODO: capability modifiers
@@ -133,7 +188,7 @@ var handlers = {
                 // should we do anything here?
                 break;
         }
-    },
+    },*/
 
 
     AUTHENTICATE: function(command) {

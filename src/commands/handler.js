@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var irc_numerics = require('./numerics');
 var IrcCommand = require('./command');
+var Cap = require('./cap');
 var util = require('util');
 var stream = require('stream');
 
@@ -18,6 +19,15 @@ function IrcCommandHandler(connection, network_info) {
     this.network = network_info;
     this.handlers = [];
 
+    this.wanted_caps = [
+        new Cap.Wanted('multi-prefix'),
+        new Cap.Wanted('away-notify'),
+        new Cap.Wanted('server-time'),
+        new Cap.Wanted('extended-join'),
+        new Cap.Wanted('znc.in/server-time-iso'),
+        new Cap.Wanted('znc.in/server-time'),
+        new Cap.Wanted('twitch.tv/membership')
+    ];
     this.request_extra_caps = [];
 
     require('./handlers/registration')(this);

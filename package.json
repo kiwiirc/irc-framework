@@ -6,7 +6,7 @@
   "dependencies": {
     "es6-set": "^0.1.3",
     "iconv-lite": "^0.4.11",
-    "lodash": "^3.10.1",
+    "lodash": "^4.0.0",
     "socksjs": "^0.5.0",
     "middleware-handler": "^0.2.0"
   },
@@ -20,9 +20,9 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "npm run lint && npm run coverage -- -R dot",
+    "test": "npm run lint && npm run coverage -- -R dot --recursive",
     "lint": "jshint src/ examples/ test/ || true",
-    "unit-test": "mocha",
+    "unit-test": "mocha --recursive",
     "coverage": "istanbul cover --include-all-sources _mocha --"
   },
   "repository": {

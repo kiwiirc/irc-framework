@@ -4,6 +4,7 @@ var _ = require('lodash');
 var MiddlewareHandler = require('middleware-handler');
 var MiddlewareStream = require('./middlewarestream');
 var IrcCommandHandler = require('./commands/').CommandHandler;
+var Cap = require('./commands/cap');
 var Connection = require('./connection');
 var NetworkInfo = require('./networkinfo');
 var User = require('./user');
@@ -45,8 +46,8 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
 };
 
 
-IrcClient.prototype.requestCap = function(cap) {
-    this.request_extra_caps = this.request_extra_caps.concat(cap);
+IrcClient.prototype.requestCap = function(cap, acceptable_values, acceptable_value_comparator) {
+    this.request_extra_caps = this.request_extra_caps.concat(new Cap.wanted(cap, acceptable_values, acceptable_value_comparator));
 };
 
 
