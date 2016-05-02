@@ -264,7 +264,7 @@ IrcClient.prototype.rawString = function(input) {
         return (typeof item === 'number' || typeof item === 'string');
     });
 
-    if (args.length > 1 && args[args.length - 1].indexOf(' ') > -1) {
+    if (args.length > 1 && args[args.length - 1].match(/^:|\s/)) {
         args[args.length - 1] = ':' + args[args.length - 1];
     }
 
