@@ -338,7 +338,7 @@ IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
     this.raw(
         'PRIVMSG',
         target,
-        String.fromCharCode(1) + type.toUpperCase(),
+        String.fromCharCode(1) + type.toUpperCase() + ' ' +
         params.join(' ') + String.fromCharCode(1)
     );
 };
@@ -349,7 +349,7 @@ IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
     this.raw(
         'NOTICE',
         target,
-        String.fromCharCode(1) + type.toUpperCase(),
+        String.fromCharCode(1) + type.toUpperCase() + ' ' +
         params.join(' ') + String.fromCharCode(1)
     );
 };
