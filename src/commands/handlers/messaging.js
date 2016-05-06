@@ -7,6 +7,7 @@ var handlers = {
         var message = command.params[command.params.length - 1];
         var target = command.params[0];
         var target_group;
+        var notice_from_server = false;
 
         if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
             // It's a CTCP response
@@ -30,8 +31,13 @@ var handlers = {
                 return true;
             });
 
+            notice_from_server = (
+                command.prefix === this.network.server ||
+                !this.connection.registered
+            );
+
             this.emit('notice', {
-                from_server: command.prefix === this.network.server ? true : false,
+                from_server: notice_from_server,
                 nick: command.nick || undefined,
                 ident: command.ident,
                 hostname: command.hostname,
