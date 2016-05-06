@@ -11,7 +11,8 @@ Example
 
 var generics = {
     ERROR: {
-        event: 'error',
+        event: 'irc_error',
+        error: 'irc',
         reason: -1
     },
 
