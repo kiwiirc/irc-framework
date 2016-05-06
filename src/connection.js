@@ -29,10 +29,6 @@ function Connection(options) {
 
     this.localAddress = this.options.localAddress;
 
-    // Buffers for data sent from the IRCd
-    this.hold_last = false;
-    this.held_data = null;
-
     this._timers = [];
 }
 
