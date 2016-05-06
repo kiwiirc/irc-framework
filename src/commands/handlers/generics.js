@@ -11,13 +11,13 @@ Example
 
 var generics = {
     ERROR: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'irc',
         reason: -1
     },
 
     ERR_PASSWDMISMATCH: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'password_mismatch'
     },
 
@@ -28,28 +28,28 @@ var generics = {
     },
 
     ERR_NOSUCHNICK: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'no_such_nick',
         nick: 1,
         reason: -1
     },
 
     ERR_CANNOTSENDTOCHAN: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'cannot_send_to_channel',
         channel: 1,
         reason: -1
     },
 
     ERR_TOOMANYCHANNELS: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'too_many_channels',
         channel: 1,
         reason: -1
     },
 
     ERR_USERNOTINCHANNEL: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'user_not_in_channel',
         nick: 0,
         channel: 1,
@@ -57,49 +57,49 @@ var generics = {
     },
 
     ERR_NOTONCHANNEL: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'not_on_channel',
         channel: 1,
         reason: -1
     },
 
     ERR_USERONCHANNEL: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'user_on_channel',
         nick: 1,
         channel: 2
     },
 
     ERR_CHANNELISFULL: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'channel_is_full',
         channel: 1,
         reason: -1
     },
 
     ERR_INVITEONLYCHAN: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'invite_only_channel',
         channel: 1,
         reason: -1
     },
 
     ERR_BANNEDFROMCHAN: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'banned_from_channel',
         channel: 1,
         reason: -1
     },
 
     ERR_BADCHANNELKEY: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'bad_channel_key',
         channel: 1,
         reason: -1
     },
 
     ERR_CHANOPRIVSNEEDED: {
-        event: 'irc_error',
+        event: 'irc error',
         error: 'chanop_privs_needed',
         channel: 1,
         reason: -1
