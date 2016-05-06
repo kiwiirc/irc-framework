@@ -3,6 +3,7 @@ var tls             = require('tls');
 var util            = require('util');
 var DuplexStream    = require('stream').Duplex;
 var Socks           = require('socksjs');
+var TerminatedStream = require('./terminatedstream');
 var ircLineParser   = require('./irclineparser');
 var getConnectionFamily = require('./getconnectionfamily');
 var iconv           = require('iconv-lite');
@@ -127,16 +128,13 @@ Connection.prototype.connect = function() {
             that.emit('socket error', err);
         });
 
-        that.socket.on('readable', function socketReadableCb() {
-            var data;
-
-            while (data !== null) {
-                data = that.socket.read();
-                if (data !== null) {
-                    socketOnData.call(that, data);
-                }
-            }
-        });
+        // 1024 bytes is the maximum length of two RFC1459 IRC messages.
+        // May need tweaking when IRCv3 message tags are more widespread
+        that.socket.pipe(new TerminatedStream({max_buffer_size: 1024}))
+            .on('data', (line) => {
+                that.read_buffer.push(line);
+                that.processReadBuffer();
+            });
 
         that.socket.on('close', function socketCloseCb(had_error) {
             var was_connected = that.connected;
@@ -306,109 +304,31 @@ Connection.prototype.setEncoding = function(encoding) {
 };
 
 
-/**
- * Buffer any data we get from the IRCd until we have complete lines.
- */
-function socketOnData(data) {
-    // Current position within the data Buffer
-    var data_pos;
-
-    var line_start = 0;
-    var lines = [];
-
-    // 1024 bytes is the maximum length of two RFC1459 IRC messages.
-    // May need tweaking when IRCv3 message tags are more widespread
-    var max_buffer_size = 1024;
-
-
-    // Split data chunk into individual lines
-    for (data_pos = 0; data_pos < data.length; data_pos++) {
-        // Check if byte is a line feed
-        if (data[data_pos] === 0x0A) {
-            lines.push(data.slice(line_start, data_pos));
-            line_start = data_pos + 1;
-        }
-    }
-
-    // No complete lines of data? Check to see if buffering the data would exceed the max
-    // buffer size
-    if (!lines[0]) {
-        if ((this.held_data ? this.held_data.length : 0) + data.length > max_buffer_size) {
-            // Buffering this data would exeed our max buffer size
-            this.emit('error', 'Message buffer too large');
-            this.socket.destroy();
-
-        } else {
-
-            // Append the incomplete line to our held_data and wait for more
-            if (this.held_data) {
-                this.held_data = Buffer.concat(
-                    [this.held_data, data],
-                    this.held_data.length + data.length
-                );
-            } else {
-                this.held_data = data;
-            }
-        }
-
-        // No complete lines to process..
-        return;
-    }
-
-    // If we have an incomplete line held from the previous chunk of data
-    // merge it with the first line from this chunk of data
-    if (this.hold_last && this.held_data !== null) {
-        lines[0] = Buffer.concat(
-            [this.held_data, lines[0]],
-            this.held_data.length + lines[0].length
-        );
-        this.hold_last = false;
-        this.held_data = null;
-    }
-
-    // If the last line of data in this chunk is not complete, hold it so
-    // it can be merged with the first line from the next chunk
-    if (line_start < data_pos) {
-        if ((data.length - line_start) > max_buffer_size) {
-            // Buffering this data would exeed our max buffer size
-            this.emit('error', 'Message buffer too large');
-            this.socket.destroy();
-            return;
-        }
-
-        this.hold_last = true;
-        this.held_data = new Buffer(data.length - line_start);
-        data.copy(this.held_data, 0, line_start);
-    }
-
-    this.read_buffer = this.read_buffer.concat(lines);
-    processIrcLines(this);
-}
 
 /**
  * Process the messages recieved from the IRCd that are buffered on an IrcConnection object
  * Will only process 4 lines per JS tick so that node can handle any other events while
  * handling a large buffer
  */
-function processIrcLines(irc_con, continue_processing) {
-    if (irc_con.reading_buffer && !continue_processing) {
+Connection.prototype.processReadBuffer = function(continue_processing) {
+    // If we already have the read buffer being iterated through, don't start
+    // another one.
+    if (this.reading_buffer && !continue_processing) {
         return;
     }
-
-    irc_con.reading_buffer = true;
 
     var lines_per_js_tick = 4;
     var processed_lines = 0;
     var line;
     var message;
 
-    while (processed_lines < lines_per_js_tick && irc_con.read_buffer.length > 0) {
-        line = iconv.decode(irc_con.read_buffer.shift(), irc_con.encoding);
+    this.reading_buffer = true;
+
+    while (processed_lines < lines_per_js_tick && this.read_buffer.length > 0) {
+        line = iconv.decode(this.read_buffer.shift(), this.encoding);
         if (!line) {
             continue;
         }
-
-        //console.log('Raw S:', line.replace(/^\r+|\r+$/, ''));
 
         message = ircLineParser(line);
 
@@ -417,14 +337,15 @@ function processIrcLines(irc_con, continue_processing) {
             continue;
         }
 
-        irc_con.pushCommandBuffer(message);
+        this.pushCommandBuffer(message);
 
         processed_lines++;
     }
 
-    if (irc_con.read_buffer.length > 0) {
-        irc_con.setTimeout(processIrcLines, 1, irc_con, true);
+    // If we still have items left in our buffer then continue reading them in a few ticks
+    if (this.read_buffer.length > 0) {
+        this.setTimeout(processReadBuffer.bind(this), 1, true);
     } else {
-        irc_con.reading_buffer = false;
+        this.reading_buffer = false;
     }
 }
