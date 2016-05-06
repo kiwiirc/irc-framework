@@ -5,7 +5,6 @@ var DuplexStream    = require('stream').Duplex;
 var Socks           = require('socksjs');
 var TerminatedStream = require('./terminatedstream');
 var ircLineParser   = require('./irclineparser');
-var getConnectionFamily = require('./getconnectionfamily');
 var iconv           = require('iconv-lite');
 var _               = require('lodash');
 
@@ -46,142 +45,132 @@ Connection.prototype.registeredSuccessfully = function() {
 };
 
 Connection.prototype.connect = function() {
-    var socket_connect_event_name = 'connect';
     var that = this;
+    var socket_connect_event_name = 'connect';
     var options = this.options;
-    var dest_addr;
     var last_socket_error;
-
-    if (options.socks) {
-        dest_addr = this.socks.host;
-    } else {
-        dest_addr = options.host;
-    }
+    var outgoing_addr = that.localAddress || '0.0.0.0';
+    var ircd_host = options.host;
+    var ircd_port = options.port || 6667;
 
     this.disposeSocket();
-
     this.requested_disconnect = false;
 
     if (!options.encoding || !this.setEncoding(options.encoding)) {
         this.setEncoding('utf8');
     }
 
-    getConnectionFamily(dest_addr, function getConnectionFamilyCb(err, family, host) {
-        var outgoing_addr = that.localAddress || '0.0.0.0';
-        var ircd_host = host;
-        var ircd_port = options.port || 6667;
-
-        if (options.socks) {
-            that.socket = Socks.connect({
-                host: options.host,
+    if (options.socks) {
+        that.socket = Socks.connect({
+            host: ircd_host,
+            port: ircd_port,
+            ssl: options.tls,
+            rejectUnauthorized: options.rejectUnauthorized
+        }, {
+            host: options.socks.host,
+            port: options.socks.port || 8080,
+            user: options.socks.user,
+            pass: options.socks.pass,
+            localAddress: outgoing_addr
+        });
+    } else {
+        if (options.tls || options.ssl) {
+            that.socket = tls.connect({
+                host: ircd_host,
                 port: ircd_port,
-                ssl: options.tls,
-                rejectUnauthorized: options.rejectUnauthorized
-            }, {
-                host: host,
-                port: options.socks.port || 8080,
-                user: options.socks.user,
-                pass: options.socks.pass,
+                rejectUnauthorized: options.rejectUnauthorized,
                 localAddress: outgoing_addr
             });
+
+            socket_connect_event_name = 'secureConnect';
+
         } else {
-            if (options.tls || options.ssl) {
-                that.socket = tls.connect({
-                    host: ircd_host,
-                    port: ircd_port,
-                    rejectUnauthorized: options.rejectUnauthorized,
-                    localAddress: outgoing_addr
-                });
-
-                socket_connect_event_name = 'secureConnect';
-
-            } else {
-                that.socket = net.connect({
-                    host: ircd_host,
-                    port: ircd_port,
-                    localAddress: outgoing_addr
-                });
-
-                socket_connect_event_name = 'connect';
-            }
-        }
-
-        // We need the raw socket connect event.
-        // node.js 0.12 no longer has a .socket property.
-        (that.socket.socket || that.socket).on('connect', rawSocketConnect);
-        that.socket.on(socket_connect_event_name, socketFullyConnected);
-
-        // Called when the socket is connected and before any TLS handshaking if applicable.
-        // This is when it's ideal to read socket pairs for identd.
-        function rawSocketConnect() {
-            that.emit('raw socket connected', (that.socket.socket || that.socket));
-        }
-
-        // Called when the socket is connected and ready to start sending/receiving data.
-        function socketFullyConnected() {
-            that.connected = true;
-            that.emit('socket connected');
-        }
-
-        that.socket.on('error', function socketErrorCb(err) {
-            last_socket_error = err;
-            that.emit('socket error', err);
-        });
-
-        // 1024 bytes is the maximum length of two RFC1459 IRC messages.
-        // May need tweaking when IRCv3 message tags are more widespread
-        that.socket.pipe(new TerminatedStream({max_buffer_size: 1024}))
-            .on('data', (line) => {
-                that.read_buffer.push(line);
-                that.processReadBuffer();
+            that.socket = net.connect({
+                host: ircd_host,
+                port: ircd_port,
+                localAddress: outgoing_addr
             });
 
-        that.socket.on('close', function socketCloseCb(had_error) {
-            var was_connected = that.connected;
-            var should_reconnect = false;
-            var safely_registered = false;
-            var registered_ms_ago = Date.now() - that.registered;
+            socket_connect_event_name = 'connect';
+        }
+    }
 
-            // Some networks use aKills which kill a user after succesfully
-            // registering instead of a ban, so we must wait some time after
-            // being registered to be sure that we are connected properly.
-            safely_registered = that.registered !== false && registered_ms_ago > 5000;
+    // We need the raw socket connect event.
+    // node.js 0.12 no longer has a .socket property.
+    (that.socket.socket || that.socket).on('connect', rawSocketConnect);
+    that.socket.on(socket_connect_event_name, socketFullyConnected);
 
-            that.connected = false;
-            that.disposeSocket();
-            that.clearTimers();
+    // Called when the socket is connected and before any TLS handshaking if applicable.
+    // This is when it's ideal to read socket pairs for identd.
+    function rawSocketConnect() {
+        that.emit('raw socket connected', (that.socket.socket || that.socket));
+    }
 
-            that.emit('socket close', had_error);
+    // Called when the socket is connected and ready to start sending/receiving data.
+    function socketFullyConnected() {
+        that.connected = true;
+        last_socket_error = null;
+        that.emit('socket connected');
+    }
 
-            if (that.requested_disconnect || !that.auto_reconnect) {
-                should_reconnect = false;
+    that.socket.on('error', function socketErrorCb(err) {
+        last_socket_error = err;
+        that.emit('socket error', err);
+    });
 
-            // If trying to reconnect, continue with it
-            } else if (that.reconnect_attempts && that.reconnect_attempts < 3) {
-                should_reconnect = true;
-
-            // If we were originally connected OK, reconnect
-            } else if (was_connected && safely_registered) {
-                should_reconnect = true;
-
-            } else {
-                should_reconnect = false;
-            }
-
-            if (should_reconnect) {
-                that.reconnect_attempts++;
-                that.emit('reconnecting');
-            } else {
-                that.emit('close', had_error ? last_socket_error : false);
-                that.reconnect_attempts = 0;
-            }
-
-            if (should_reconnect) {
-                that.setTimeout(function() {
-                    that.connect();
-                }, 4000);
-            }
+    // 1024 bytes is the maximum length of two RFC1459 IRC messages.
+    // May need tweaking when IRCv3 message tags are more widespread
+    that.socket.pipe(new TerminatedStream({max_buffer_size: 1024}))
+        .on('data', (line) => {
+            that.read_buffer.push(line);
+            that.processReadBuffer();
         });
+
+    that.socket.on('close', function socketCloseCb(had_error) {
+        var was_connected = that.connected;
+        var should_reconnect = false;
+        var safely_registered = false;
+        var registered_ms_ago = Date.now() - that.registered;
+
+        // Some networks use aKills which kill a user after succesfully
+        // registering instead of a ban, so we must wait some time after
+        // being registered to be sure that we are connected properly.
+        safely_registered = that.registered !== false && registered_ms_ago > 5000;
+
+        that.connected = false;
+        that.disposeSocket();
+        that.clearTimers();
+
+        that.emit('socket close', had_error);
+
+        if (that.requested_disconnect || !that.auto_reconnect) {
+            should_reconnect = false;
+
+        // If trying to reconnect, continue with it
+        } else if (that.reconnect_attempts && that.reconnect_attempts < 3) {
+            should_reconnect = true;
+
+        // If we were originally connected OK, reconnect
+        } else if (was_connected && safely_registered) {
+            should_reconnect = true;
+
+        } else {
+            should_reconnect = false;
+        }
+
+        if (should_reconnect) {
+            that.reconnect_attempts++;
+            that.emit('reconnecting');
+        } else {
+            that.emit('close', last_socket_error ? true : false);
+            that.reconnect_attempts = 0;
+        }
+
+        if (should_reconnect) {
+            that.setTimeout(function() {
+                that.connect();
+            }, 4000);
+        }
     });
 };
 
