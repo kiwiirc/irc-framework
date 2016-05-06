@@ -29,6 +29,7 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         username: 'ircbot',
         gecos: 'ircbot',
         encoding: 'utf8',
+        version: 'node.js irc-framework',
         auto_reconnect: true,
         ping_interval: 30,
         ping_timeout: 120

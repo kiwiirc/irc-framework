@@ -80,19 +80,12 @@ var handlers = {
                 this.connection.write(util.format(
                     'NOTICE %s :\01VERSION %s\01',
                     command.nick,
-                    'node.js irc-framework'
-                ));
-
-            } else if (message.substr(1, 6) === 'SOURCE') {
-                this.connection.write(util.format(
-                    'NOTICE %s :\01SOURCE %s\01',
-                    command.nick,
-                    'https://www.kiwiirc.com/'
+                    this.connection.options.version
                 ));
 
             } else if (message.substr(1, 10) === 'CLIENTINFO') {
                 this.connection.write(util.format(
-                    'NOTICE %s :\01CLIENTINFO SOURCE VERSION\01',
+                    'NOTICE %s :\01CLIENTINFO VERSION\01',
                     command.nick
                 ));
 
