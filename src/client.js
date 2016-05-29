@@ -358,7 +358,16 @@ IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
 
 
 IrcClient.prototype.action = function(target, message) {
-    this.ctcpRequest(target, 'ACTION', message);
+    var that = this;
+
+    // Maximum length of target + message we can send to the IRC server is 500 characters
+    // but we need to leave extra room for the sender prefix so the entire message can
+    // be sent from the IRCd to the target without being truncated.
+    var blocks = truncateString(message, 350);
+
+    blocks.forEach(function(block) {
+        that.ctcpRequest(target, 'ACTION', block);
+    });
 };
 
 
