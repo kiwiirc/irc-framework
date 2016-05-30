@@ -117,7 +117,7 @@ Connection.prototype.connect = function() {
     // 1024 bytes is the maximum length of two RFC1459 IRC messages.
     // May need tweaking when IRCv3 message tags are more widespread
     that.socket.pipe(new TerminatedStream({max_buffer_size: 1024}))
-        .on('data', (line) => {
+        .on('data', function(line) {
             that.read_buffer.push(line);
             that.processReadBuffer();
         });
