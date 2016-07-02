@@ -37,9 +37,7 @@ util.inherits(Connection, DuplexStream);
 module.exports = Connection;
 
 Connection.prototype.debugOut = function(out) {
-    if (this.options.debug) {
-        this.emit('debug', out);
-    }
+    this.emit('debug', out);
 };
 
 Connection.prototype.registeredSuccessfully = function() {
