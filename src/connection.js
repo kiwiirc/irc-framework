@@ -17,6 +17,8 @@ function Connection(options) {
     this.requested_disconnect = false;
 
     this.auto_reconnect = options.auto_reconnect || false;
+    this.auto_reconnect_wait = options.auto_reconnect_wait || 4000;
+    this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
     this.reconnect_attempts = 0;
 
     // When an IRC connection was successfully registered.
@@ -155,7 +157,7 @@ Connection.prototype.connect = function() {
             should_reconnect = false;
 
         // If trying to reconnect, continue with it
-        } else if (that.reconnect_attempts && that.reconnect_attempts < 3) {
+        } else if (that.reconnect_attempts && that.reconnect_attempts < that.auto_reconnect_max_retries) {
             should_reconnect = true;
 
         // If we were originally connected OK, reconnect
@@ -168,7 +170,11 @@ Connection.prototype.connect = function() {
 
         if (should_reconnect) {
             that.reconnect_attempts++;
-            that.emit('reconnecting');
+            that.emit('reconnecting', {
+                attempt: that.reconnect_attempts,
+                max_retries: that.auto_reconnect_max_retries,
+                wait: that.auto_reconnect_wait
+            });
         } else {
             that.emit('close', last_socket_error ? true : false);
             that.reconnect_attempts = 0;
@@ -178,7 +184,7 @@ Connection.prototype.connect = function() {
             that.debugOut('Scheduling reconnect');
             that.setTimeout(function() {
                 that.connect();
-            }, 4000);
+            }, that.auto_reconnect_wait);
         }
     });
 };
