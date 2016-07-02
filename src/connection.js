@@ -36,6 +36,12 @@ util.inherits(Connection, DuplexStream);
 
 module.exports = Connection;
 
+Connection.prototype.debugOut = function(out) {
+    if (this.options.debug) {
+        this.emit('debug', out);
+    }
+};
+
 Connection.prototype.registeredSuccessfully = function() {
     this.registered = Date.now();
 };
@@ -49,6 +55,8 @@ Connection.prototype.connect = function() {
     var ircd_host = options.host;
     var ircd_port = options.port || 6667;
 
+    this.debugOut('Connection.connect()');
+
     this.disposeSocket();
     this.requested_disconnect = false;
 
@@ -57,6 +65,7 @@ Connection.prototype.connect = function() {
     }
 
     if (options.socks) {
+        this.debugOut('Using SOCKS proxy');
         that.socket = Socks.connect({
             host: ircd_host,
             port: ircd_port,
@@ -99,17 +108,20 @@ Connection.prototype.connect = function() {
     // Called when the socket is connected and before any TLS handshaking if applicable.
     // This is when it's ideal to read socket pairs for identd.
     function rawSocketConnect() {
+        that.debugOut('Raw socket connected');
         that.emit('raw socket connected', (that.socket.socket || that.socket));
     }
 
     // Called when the socket is connected and ready to start sending/receiving data.
     function socketFullyConnected() {
+        that.debugOut('Socket fully connected');
         that.connected = true;
         last_socket_error = null;
         that.emit('socket connected');
     }
 
     that.socket.on('error', function socketErrorCb(err) {
+        that.debugOut('Socket error ' + err.message);
         last_socket_error = err;
         that.emit('socket error', err);
     });
@@ -132,6 +144,8 @@ Connection.prototype.connect = function() {
         // registering instead of a ban, so we must wait some time after
         // being registered to be sure that we are connected properly.
         safely_registered = that.registered !== false && registered_ms_ago > 5000;
+
+        that.debugOut('Socket closed. was_connected=' + was_connected + ' safely_registered=' + safely_registered + ' requested_disconnect='+that.requested_disconnect);
 
         that.connected = false;
         that.disposeSocket();
@@ -163,6 +177,7 @@ Connection.prototype.connect = function() {
         }
 
         if (should_reconnect) {
+            that.debugOut('Scheduling reconnect');
             that.setTimeout(function() {
                 that.connect();
             }, 4000);
@@ -203,6 +218,8 @@ Connection.prototype.pushCommandBuffer = function(command) {
 };
 
 Connection.prototype.disposeSocket = function() {
+    this.debugOut('Connection.disposeSocket() connected=' + this.connected);
+
     if (this.socket && this.connected) {
         this.requested_disconnect = true;
         this.socket.destroy();
@@ -251,6 +268,8 @@ Connection.prototype.clearTimers = function() {
 Connection.prototype.end = function(data, callback) {
     var that = this;
 
+    this.debugOut('Connection.end() connected=' + this.connected + ' with data=' + !!data);
+
     if (this.connected && data) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
         this.write(data, function() {
@@ -272,6 +291,8 @@ Connection.prototype.end = function(data, callback) {
 
 Connection.prototype.setEncoding = function(encoding) {
     var encoded_test;
+
+    this.debugOut('Connection.setEncoding() encoding=' + encoding);
 
     try {
         encoded_test = iconv.encode('TEST', encoding);
