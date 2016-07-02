@@ -31,12 +31,12 @@ bot.connect({
 });
 
 bot.on('message', function(event) {
-  	if (event.msg.indexOf('hello') === 0) {
+  	if (event.message.indexOf('hello') === 0) {
   		  event.reply('Hi!');
   	}
   	
-  	if (event.msg.match(/^!join /)) {
-  	    var to_join = event.msg.split(' ');
+  	if (event.message.match(/^!join /)) {
+  	    var to_join = event.message.split(' ');
   		event.reply('Joining ' + to_join + '..');
   		bot.join(to_join);
   	}
