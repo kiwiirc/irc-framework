@@ -321,6 +321,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
             // A malformed IRC line
             continue;
         }
+        this.emit('raw', line);
 
         this.pushCommandBuffer(message);
 
