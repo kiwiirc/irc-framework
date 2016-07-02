@@ -87,6 +87,7 @@ IrcClient.prototype.connect = function(options) {
         'socket close',
         'socket error',
         'raw socket connected',
+        'debug'
     ].forEach(function(event_name) {
         client.connection.on(event_name, function() {
             var args = Array.prototype.slice.call(arguments);
