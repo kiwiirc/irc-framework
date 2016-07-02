@@ -31,6 +31,8 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         encoding: 'utf8',
         version: 'node.js irc-framework',
         auto_reconnect: true,
+        auto_reconnect_wait: 4000,
+        auto_reconnect_max_retries: 3,
         ping_interval: 30,
         ping_timeout: 120
     };
