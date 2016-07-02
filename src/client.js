@@ -388,6 +388,17 @@ IrcClient.prototype.whois = function(target, cb) {
 };
 
 
+/**
+ * Explicitely start a channel list, avoiding potential issues with broken IRC servers not sending RPL_LISTSTART
+ */
+IrcClient.prototype.list = function(/* paramN */) {
+    var args = Array.prototype.slice(arguments, 0);
+    this.command_handler.cache('chanlist').channels = [];
+    args.unshift('LIST');
+    this.raw(args);
+};
+
+
 IrcClient.prototype.channel = function(channel_name) {
     return new Channel(this, channel_name);
 };

@@ -2,13 +2,13 @@ var _ = require('lodash');
 
 var handlers = {
     RPL_LISTSTART: function() {
-        var cache = this.cache('chanlist');
+        var cache = getChanListCache(this);
         cache.channels = [];
         this.emit('channel list start');
     },
 
     RPL_LISTEND: function() {
-        var cache = this.cache('chanlist');
+        var cache = getChanListCache(this);
         if (cache.channels.length) {
             this.emit('channel list', cache.channels);
             cache.channels = [];
@@ -19,7 +19,7 @@ var handlers = {
     },
 
     RPL_LIST: function(command) {
-        var cache = this.cache('chanlist');
+        var cache = getChanListCache(this);
         cache.channels.push({
             channel: command.params[1],
             num_users: parseInt(command.params[2], 10),
@@ -129,3 +129,14 @@ module.exports = function AddCommandHandlers(command_controller) {
         command_controller.addHandler(handler_command, handler);
     });
 };
+
+function getChanListCache(that) {
+    var cache = that.cache('chanlist');
+
+    // fix some IRC networks 
+    if (!cache.channels) {
+        cache.channels = [];
+    }
+
+    return cache;
+}
