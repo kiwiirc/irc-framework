@@ -51,7 +51,7 @@ Connection.prototype.connect = function() {
     var socket_connect_event_name = 'connect';
     var options = this.options;
     var last_socket_error;
-    var outgoing_addr = that.localAddress || '0.0.0.0';
+    var outgoing_addr = that.localAddress;
     var ircd_host = options.host;
     var ircd_port = options.port || 6667;
 
@@ -342,6 +342,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
             // A malformed IRC line
             continue;
         }
+        this.emit('raw', line);
 
         this.pushCommandBuffer(message);
 

@@ -87,7 +87,8 @@ IrcClient.prototype.connect = function(options) {
         'socket close',
         'socket error',
         'raw socket connected',
-        'debug'
+        'debug',
+        'raw'
     ].forEach(function(event_name) {
         client.connection.on(event_name, function() {
             var args = Array.prototype.slice.call(arguments);
@@ -267,7 +268,7 @@ IrcClient.prototype.rawString = function(input) {
         return (typeof item === 'number' || typeof item === 'string');
     });
 
-    if (args.length > 1 && args[args.length - 1].indexOf(' ') > -1) {
+    if (args.length > 1 && args[args.length - 1].match(/^:|\s/)) {
         args[args.length - 1] = ':' + args[args.length - 1];
     }
 
@@ -385,6 +386,17 @@ IrcClient.prototype.whois = function(target, cb) {
     });
 
     this.raw('WHOIS', target);
+};
+
+
+/**
+ * Explicitely start a channel list, avoiding potential issues with broken IRC servers not sending RPL_LISTSTART
+ */
+IrcClient.prototype.list = function(/* paramN */) {
+    var args = Array.prototype.slice(arguments, 0);
+    this.command_handler.cache('chanlist').channels = [];
+    args.unshift('LIST');
+    this.raw(args);
 };
 
 
