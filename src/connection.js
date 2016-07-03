@@ -190,7 +190,7 @@ Connection.prototype.connect = function() {
 };
 
 Connection.prototype._write = function(chunk, encoding, callback) {
-    if (!this.connected) {
+    if (!this.connected || this.requested_disconnect) {
         return 0;
     }
 
