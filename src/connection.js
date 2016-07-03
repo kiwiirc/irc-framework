@@ -115,6 +115,7 @@ Connection.prototype.connect = function() {
     // Called when the socket is connected and ready to start sending/receiving data.
     function socketFullyConnected() {
         that.debugOut('Socket fully connected');
+        that.reconnect_attempts = 0;
         that.connected = true;
         last_socket_error = null;
         that.emit('socket connected');
