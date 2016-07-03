@@ -24,6 +24,7 @@ module.exports = class TerminatedStream extends stream.Transform {
 		var term_len = this.terminator_len;
 		var last_terminator = -1;
 		var found_terminator = false;
+		var remaining_len = 0;
 
 		for (var i=0; i<buffer.length; i++) {
 			found_terminator = false;
@@ -46,7 +47,8 @@ module.exports = class TerminatedStream extends stream.Transform {
 			}
 		}
 
-		if (this.opts.max_buffer_size > 0 && buffer.length > this.opts.max_buffer_size) {
+		remaining_len = buffer.length - (last_terminator === -1 ? 0 : last_terminator);
+		if (this.opts.max_buffer_size > 0 && remaining_len > this.opts.max_buffer_size) {
 			this.emit('buffer_overflow');
 			this.buffer = new Buffer(0);
 
