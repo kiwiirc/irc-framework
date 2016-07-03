@@ -50,6 +50,7 @@ module.exports = class TerminatedStream extends stream.Transform {
 		remaining_len = buffer.length - (last_terminator === -1 ? 0 : last_terminator);
 		if (this.opts.max_buffer_size > 0 && remaining_len > this.opts.max_buffer_size) {
 			this.emit('buffer_overflow');
+			this.emit('debug', 'TerminatedStream buffer overflow. remaining_len=' + remaining_len + ' max_buffer_size=' + this.opts.max_buffer_size + ' last_terminator=' + last_terminator);
 			this.buffer = new Buffer(0);
 
 		} else if (last_terminator !== -1) {
