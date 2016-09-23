@@ -167,9 +167,9 @@ IrcClient.prototype.addCommandHandlerListeners = function() {
     });
 
     commands.on('registered', function(event) {
-        client.emit('connected', event);
         client.user.nick = event.nick;
         client.connection.registeredSuccessfully();
+        client.emit('connected', event);
     });
 
     // Don't let IRC ERROR command kill the node.js process if unhandled
