@@ -178,6 +178,13 @@ var handlers = {
     RPL_UMODEIS: function(command) {
         // this.connection.umodes = the modes
         // TODO: this
+    },
+
+    RPL_HOSTCLOACKING: function(command) {
+        this.emit('displayed host', {
+            nick: command.params[0],
+            host: command.params[1]
+        });
     }
 };
 
