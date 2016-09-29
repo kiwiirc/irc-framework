@@ -5,6 +5,7 @@ var DuplexStream    = require('stream').Duplex;
 var Socks           = require('socksjs');
 var TerminatedStream = require('./terminatedstream');
 var ircLineParser   = require('./irclineparser');
+var forceUTF8       = require('./forceUTF8');
 var iconv           = require('iconv-lite');
 var _               = require('lodash');
 
@@ -194,9 +195,11 @@ Connection.prototype._write = function(chunk, encoding, callback) {
     if (!this.connected || this.requested_disconnect) {
         return 0;
     }
-
-    var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
-    //console.log('Raw C:', chunk.toString());
+    if(typeof this.write_encoding !== 'undefined'){
+        var encoded_buffer = iconv.encode(chunk + '\r\n', this.write_encoding);
+    } else {
+        var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
+    }
     return this.socket.write(encoded_buffer, callback);
 };
 
@@ -298,8 +301,44 @@ Connection.prototype.setEncoding = function(encoding) {
     var encoded_test;
 
     this.debugOut('Connection.setEncoding() encoding=' + encoding);
-
+    /* 
+    format styles
+    utf8 - reading and writing use same encoding
+    utf8:auto - reading and writing use same encoding, reading autocorrects coding error
+    iso-8859-1/utf8 - reading latin1 and writing utf8 encoding
+    iso-8859-1:auto/write - reading latin1 and autocorrects, writes on utf8 encoding 
+    */
+    var types=encoding.split("/")
+    var read_encoding=''
+    var write_encoding=''
+    var force_encoding=false
+    if(types.length===2){
+        read_encoding=types[0];
+        write_encoding=types[1];
+        encoding=read_encoding;
+    }
+    
+    var auto=encoding.split(":")
+    if(auto.length===2){
+        read_encoding=auto[0]
+        encoding=read_encoding
+        if(auto[1].toUpperCase()==='AUTO'){
+            this.force_encoding=true
+        }
+    }
+    
     try {
+        if(write_encoding.length){
+            encoded_test = iconv.encode('TEST', write_encoding);
+            // This test is done to check if this encoding also supports
+            // the ASCII charset required by the IRC protocols
+            // (Avoid the use of base64 or incompatible encodings)
+            if (encoded_test == 'TEST') { // jshint ignore:line
+                this.write_encoding = write_encoding;
+            }
+        }
+        
+        
         encoded_test = iconv.encode('TEST', encoding);
         // This test is done to check if this encoding also supports
         // the ASCII charset required by the IRC protocols
@@ -336,7 +375,11 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
     this.reading_buffer = true;
 
     while (processed_lines < lines_per_js_tick && this.read_buffer.length > 0) {
-        line = iconv.decode(this.read_buffer.shift(), this.encoding);
+        var data=this.read_buffer.shift()
+        line = iconv.decode(data, this.encoding);
+        if(this.force_encoding){
+            line=forceUTF8(line);
+        }
         if (!line) {
             continue;
         }
