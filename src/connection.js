@@ -227,11 +227,11 @@ Connection.prototype.disposeSocket = function() {
 
     if (this.socket && this.connected) {
         this.requested_disconnect = true;
-        this.socket.destroy();
     }
 
     if (this.socket) {
         this.socket.removeAllListeners();
+        this.socket.destroy();
         this.socket = null;
     }
 };
