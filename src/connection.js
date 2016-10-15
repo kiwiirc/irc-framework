@@ -1,15 +1,10 @@
-var net             = require('net');
-var tls             = require('tls');
-var util            = require('util');
-var DuplexStream    = require('stream').Duplex;
-var Socks           = require('socksjs');
-var TerminatedStream = require('./terminatedstream');
-var ircLineParser   = require('./irclineparser');
-var iconv           = require('iconv-lite');
+var EventEmitter    = require('eventemitter3');
 var _               = require('lodash');
+var TransportNet    = require('./transports/net');
+var ircLineParser   = require('./irclineparser');
 
 function Connection(options) {
-    DuplexStream.call(this, { readableObjectMode: true });
+    EventEmitter.call(this);
 
     this.options = options || {};
 
@@ -29,12 +24,12 @@ function Connection(options) {
 
     this.read_command_buffer = [];
 
-    this.localAddress = this.options.localAddress;
+    this.transport = null;
 
     this._timers = [];
 }
 
-util.inherits(Connection, DuplexStream);
+_.extend(Connection.prototype, EventEmitter.prototype);
 
 module.exports = Connection;
 
@@ -46,96 +41,46 @@ Connection.prototype.registeredSuccessfully = function() {
     this.registered = Date.now();
 };
 
-Connection.prototype.connect = function() {
+Connection.prototype.connect = function(options) {
     var that = this;
-    var socket_connect_event_name = 'connect';
-    var options = this.options;
-    var last_socket_error;
-    var outgoing_addr = that.localAddress;
-    var ircd_host = options.host;
-    var ircd_port = options.port || 6667;
+    var transport;
 
-    this.debugOut('Connection.connect()');
+    if (options) {
+        this.options = options;
+    }
 
-    this.disposeSocket();
-    this.requested_disconnect = false;
+    options = this.options;
+    transport = this.transport = new TransportNet(options);
 
     if (!options.encoding || !this.setEncoding(options.encoding)) {
         this.setEncoding('utf8');
     }
 
-    if (options.socks) {
-        this.debugOut('Using SOCKS proxy');
-        that.socket = Socks.connect({
-            host: ircd_host,
-            port: ircd_port,
-            ssl: options.tls,
-            rejectUnauthorized: options.rejectUnauthorized
-        }, {
-            host: options.socks.host,
-            port: options.socks.port || 8080,
-            user: options.socks.user,
-            pass: options.socks.pass,
-            localAddress: outgoing_addr
-        });
-    } else {
-        if (options.tls || options.ssl) {
-            that.socket = tls.connect({
-                host: ircd_host,
-                port: ircd_port,
-                rejectUnauthorized: options.rejectUnauthorized,
-                localAddress: outgoing_addr
-            });
+    // Some transports may emit extra events
+    transport.on('extra', function(/*event_name, argN*/) {
+        that.emit.apply(that, arguments);
+    });
 
-            socket_connect_event_name = 'secureConnect';
+    transport.on('open', socketOpen);
+    transport.on('line', socketLine);
+    transport.on('close', socketClose);
 
-        } else {
-            that.socket = net.connect({
-                host: ircd_host,
-                port: ircd_port,
-                localAddress: outgoing_addr
-            });
-
-            socket_connect_event_name = 'connect';
-        }
-    }
-
-    // We need the raw socket connect event.
-    // node.js 0.12 no longer has a .socket property.
-    (that.socket.socket || that.socket).on('connect', rawSocketConnect);
-    that.socket.on(socket_connect_event_name, socketFullyConnected);
-
-    // Called when the socket is connected and before any TLS handshaking if applicable.
-    // This is when it's ideal to read socket pairs for identd.
-    function rawSocketConnect() {
-        that.debugOut('Raw socket connected');
-        that.emit('raw socket connected', (that.socket.socket || that.socket));
-    }
+    transport.connect();
 
     // Called when the socket is connected and ready to start sending/receiving data.
-    function socketFullyConnected() {
+    function socketOpen() {
         that.debugOut('Socket fully connected');
         that.reconnect_attempts = 0;
         that.connected = true;
-        last_socket_error = null;
         that.emit('socket connected');
     }
 
-    that.socket.on('error', function socketErrorCb(err) {
-        that.debugOut('Socket error ' + err.message);
-        last_socket_error = err;
-        that.emit('socket error', err);
-    });
+    function socketLine(line) {
+        that.read_buffer.push(line);
+        that.processReadBuffer();
+    }
 
-    // 1024 bytes is the maximum length of two RFC1459 IRC messages.
-    // May need tweaking when IRCv3 message tags are more widespread
-    that.socket.pipe(new TerminatedStream({max_buffer_size: 1024}))
-        .on('data', (line) => {
-            that.read_buffer.push(line);
-            that.processReadBuffer();
-        });
-
-    that.socket.on('close', function socketCloseCb(had_error) {
+    function socketClose(err) {
         var was_connected = that.connected;
         var should_reconnect = false;
         var safely_registered = false;
@@ -149,10 +94,9 @@ Connection.prototype.connect = function() {
         that.debugOut('Socket closed. was_connected=' + was_connected + ' safely_registered=' + safely_registered + ' requested_disconnect='+that.requested_disconnect);
 
         that.connected = false;
-        that.disposeSocket();
         that.clearTimers();
 
-        that.emit('socket close', had_error);
+        that.emit('socket close', err);
 
         if (that.requested_disconnect || !that.auto_reconnect) {
             should_reconnect = false;
@@ -177,7 +121,7 @@ Connection.prototype.connect = function() {
                 wait: that.auto_reconnect_wait
             });
         } else {
-            that.emit('close', last_socket_error ? true : false);
+            that.emit('close', err ? true : false);
             that.reconnect_attempts = 0;
         }
 
@@ -187,54 +131,17 @@ Connection.prototype.connect = function() {
                 that.connect();
             }, that.auto_reconnect_wait);
         }
-    });
+    }
 };
 
-Connection.prototype._write = function(chunk, encoding, callback) {
+Connection.prototype.write = function(data, callback) {
     if (!this.connected || this.requested_disconnect) {
         return 0;
     }
 
-    var encoded_buffer = iconv.encode(chunk + '\r\n', this.encoding);
-    //console.log('Raw C:', chunk.toString());
-    return this.socket.write(encoded_buffer, callback);
+    return this.transport.writeLine(data, callback);
 };
 
-Connection.prototype._read = function() {
-    var message;
-    var continue_pushing = true;
-
-    this._reading = true;
-
-    while (continue_pushing && this.read_command_buffer.length > 0) {
-        message = this.read_command_buffer.shift();
-        continue_pushing = this.push(message);
-        if (!continue_pushing) {
-            this._reading = false;
-        }
-    }
-};
-
-Connection.prototype.pushCommandBuffer = function(command) {
-    this.read_command_buffer.push(command);
-    if (this._reading) {
-        this._read();
-    }
-};
-
-Connection.prototype.disposeSocket = function() {
-    this.debugOut('Connection.disposeSocket() connected=' + this.connected);
-
-    if (this.socket && this.connected) {
-        this.requested_disconnect = true;
-        this.socket.destroy();
-    }
-
-    if (this.socket) {
-        this.socket.removeAllListeners();
-        this.socket = null;
-    }
-};
 
 /**
  * Create and keep track of all timers so they can be easily removed
@@ -279,45 +186,29 @@ Connection.prototype.end = function(data, callback) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
         this.write(data, function() {
             that.requested_disconnect = true;
-            that.socket.end();
+            that.end();
         });
 
         return;
     }
 
-    this.disposeSocket();
-};
-
-
-/**
- * Set a new encoding for this connection
- * Return true in case of success
- */
-
-Connection.prototype.setEncoding = function(encoding) {
-    var encoded_test;
-
-    this.debugOut('Connection.setEncoding() encoding=' + encoding);
-
-    try {
-        encoded_test = iconv.encode('TEST', encoding);
-        // This test is done to check if this encoding also supports
-        // the ASCII charset required by the IRC protocols
-        // (Avoid the use of base64 or incompatible encodings)
-        if (encoded_test == 'TEST') { // jshint ignore:line
-            this.encoding = encoding;
-            return true;
-        }
-        return false;
-    } catch (err) {
-        return false;
+    if (this.transport) {
+        this.transport.close();
     }
 };
 
 
+Connection.prototype.setEncoding = function(encoding) {
+    this.debugOut('Connection.setEncoding() encoding=' + encoding);
+
+    if (this.transport) {
+        return this.transport.setEncoding(encoding);
+    }
+};
+
 
 /**
- * Process the messages recieved from the IRCd that are buffered on an IrcConnection object
+ * Process the buffered messages recieved from the IRCd
  * Will only process 4 lines per JS tick so that node can handle any other events while
  * handling a large buffer
  */
@@ -336,7 +227,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
     this.reading_buffer = true;
 
     while (processed_lines < lines_per_js_tick && this.read_buffer.length > 0) {
-        line = iconv.decode(this.read_buffer.shift(), this.encoding);
+        line = this.read_buffer.shift();
         if (!line) {
             continue;
         }
@@ -348,16 +239,17 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
             continue;
         }
         this.emit('raw', line);
-
-        this.pushCommandBuffer(message);
+        this.emit('message', message);
 
         processed_lines++;
     }
 
     // If we still have items left in our buffer then continue reading them in a few ticks
     if (this.read_buffer.length > 0) {
-        this.setTimeout(processReadBuffer.bind(this), 1, true);
+        this.setTimeout(() => {
+            this.processReadBuffer(true);
+        }, 1);
     } else {
         this.reading_buffer = false;
     }
-}
+};

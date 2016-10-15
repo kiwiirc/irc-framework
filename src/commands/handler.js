@@ -1,15 +1,14 @@
 var _ = require('lodash');
+var EventEmitter = require('eventemitter3');
 var irc_numerics = require('./numerics');
 var IrcCommand = require('./command');
-var util = require('util');
-var stream = require('stream');
 
 
 module.exports = IrcCommandHandler;
 
 
 function IrcCommandHandler(connection, network_info) {
-    stream.Writable.call(this, { objectMode: true });
+    EventEmitter.call(this);
 
     // Adds an 'all' event to .emit()
     this.addAllEventName();
@@ -28,16 +27,11 @@ function IrcCommandHandler(connection, network_info) {
     require('./handlers/generics')(this);
 }
 
-util.inherits(IrcCommandHandler, stream.Writable);
+_.extend(IrcCommandHandler.prototype, EventEmitter.prototype);
 
 
-IrcCommandHandler.prototype._write = function(chunk, encoding, callback) {
-    this.dispatch(new IrcCommand(chunk.command.toUpperCase(), chunk));
-    callback();
-};
-
-
-IrcCommandHandler.prototype.dispatch = function(irc_command) {
+IrcCommandHandler.prototype.dispatch = function(message) {
+    var irc_command = new IrcCommand(message.command.toUpperCase(), message);
     var command_name = irc_command.command;
 
     // Check if we have a numeric->command name- mapping for this command

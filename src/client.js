@@ -1,8 +1,6 @@
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
+var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
 var MiddlewareHandler = require('middleware-handler');
-var MiddlewareStream = require('./middlewarestream');
 var IrcCommandHandler = require('./commands/').CommandHandler;
 var Connection = require('./connection');
 var NetworkInfo = require('./networkinfo');
@@ -19,7 +17,7 @@ function IrcClient() {
     this.request_extra_caps = [];
 }
 
-util.inherits(IrcClient, EventEmitter);
+_.extend(IrcClient.prototype, EventEmitter.prototype);
 
 module.exports = IrcClient;
 
@@ -105,9 +103,15 @@ IrcClient.prototype.connect = function(options) {
     });
 
     // IRC command routing
-    this.connection
-        .pipe(new MiddlewareStream(this.raw_middleware, this))
-        .pipe(this.command_handler);
+    this.connection.on('message', function(message) {
+        client.raw_middleware.handle([message.command, message, client], function(err) {
+            if (err) {
+                return;
+            }
+
+            client.command_handler.dispatch(message);
+        });
+    });
 
     // Proxy the command handler events onto the client object, with some added sugar
     this.proxyIrcEvents();
