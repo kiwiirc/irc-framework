@@ -4,7 +4,7 @@
  *     .connect({host, port, tls/ssl, localAddress})
  *     .writeLine(line, cb)
  *     .close(optional_error)
- *     .connected
+ *     .isConnected()
  * Events:
  *     line
  *     open
@@ -18,13 +18,17 @@ var EventEmitter    = require('events').EventEmitter;
 var Socks           = require('socksjs');
 var iconv           = require('iconv-lite');
 
+var SOCK_DISCONNECTED = 0;
+var SOCK_CONNECTING = 1;
+var SOCK_CONNECTED = 2;
+
 function Connection(options) {
     EventEmitter.call(this);
 
     this.options = options || {};
 
     this.socket = null;
-    this.connected = false;
+    this.state = SOCK_DISCONNECTED;
     this.last_socket_error = null;
     this.socket_events = [];
 
@@ -36,8 +40,12 @@ util.inherits(Connection, EventEmitter);
 
 module.exports = Connection;
 
+Connection.prototype.isConnected = function() {
+    return this.state === SOCK_CONNECTED;
+};
+
 Connection.prototype.writeLine = function writeLine(line, cb) {
-	if (this.socket && this.connected) {
+	if (this.socket && this.isConnected()) {
 		if (this.encoding !== 'utf8') {
 			this.socket.write(iconv.encode(line + '\n', this.encoding), cb);
 		} else {
@@ -77,6 +85,9 @@ Connection.prototype.connect = function() {
     if (!options.encoding || !this.setEncoding(options.encoding)) {
         this.setEncoding('utf8');
     }
+
+    this.state = SOCK_CONNECTING;
+    this.debugOut('Connecting socket..');
 
     if (options.socks) {
         this.debugOut('Using SOCKS proxy');
@@ -130,21 +141,21 @@ Connection.prototype.connect = function() {
 // This is when it's ideal to read socket pairs for identd.
 Connection.prototype.onSocketRawConnected = function onSocketRawConnected() {
     this.debugOut('socketRawConnected()');
+    this.state = SOCK_CONNECTED;
     this.emit('extra', 'raw socket connected', (this.socket.socket || this.socket));
 };
 
 // Called when the socket is connected and ready to start sending/receiving data.
 Connection.prototype.onSocketFullyConnected = function onSocketFullyConnected() {
     this.debugOut('socketFullyConnected()');
-    this.connected = true;
     this.last_socket_error = null;
     this.emit('open');
 };
 
 Connection.prototype.onSocketClose = function onSocketClose() {
 	this.debugOut('socketClose()');
-    this.connected = false;
-    this.emit('close', this.last_socket_error);
+    this.state = SOCK_DISCONNECTED;
+    this.emit('close', this.last_socket_error ? this.last_socket_error : false);
 };
 
 Connection.prototype.onSocketError = function onSocketError(err) {
@@ -175,9 +186,9 @@ Connection.prototype.onSocketData = function onSocketData(data) {
 
 
 Connection.prototype.disposeSocket = function() {
-    this.debugOut('Connection.disposeSocket() connected=' + this.connected);
+    this.debugOut('disposeSocket() connected=' + this.isConnected());
 
-    if (this.socket && this.connected) {
+    if (this.socket && this.state !== SOCK_DISCONNECTED) {
         this.socket.destroy();
     }
 
@@ -189,8 +200,13 @@ Connection.prototype.disposeSocket = function() {
 
 
 Connection.prototype.close = function() {
-    if (this.socket && this.connected) {
+    // Cleanly close the socket if we can
+    if (this.socket && this.state === SOCK_CONNECTING) {
+        this.debugOut('close() destroying');
         this.socket.destroy();
+    } else if (this.socket && this.state === SOCK_CONNECTED) {
+        this.debugOut('close() ending');
+        this.socket.end();
     }
 };
 
