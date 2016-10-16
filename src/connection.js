@@ -186,12 +186,13 @@ Connection.prototype.end = function(data, callback) {
     if (this.connected && data) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
         this.write(data, function() {
-            that.requested_disconnect = true;
             that.end();
         });
 
         return;
     }
+
+    this.requested_disconnect = true;
 
     if (this.transport) {
         this.transport.close();
