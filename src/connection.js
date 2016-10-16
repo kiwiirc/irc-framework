@@ -64,6 +64,7 @@ Connection.prototype.connect = function(options) {
     transport.on('open', socketOpen);
     transport.on('line', socketLine);
     transport.on('close', socketClose);
+    transport.on('debug', out => this.debugOut(out));
 
     transport.connect();
 

@@ -55,7 +55,7 @@ Connection.prototype.writeLine = function writeLine(line, cb) {
 };
 
 Connection.prototype.debugOut = function(out) {
-    this.emit('debug', out);
+    this.emit('debug', 'NetTransport ' + out);
 };
 
 Connection.prototype._bindEvent = function _bindEvent(obj, event, fn) {
@@ -77,7 +77,7 @@ Connection.prototype.connect = function() {
     var ircd_port = options.port || 6667;
     var socket = null;
 
-    this.debugOut('Connection.connect()');
+    this.debugOut('connect()');
 
     this.disposeSocket();
     this.requested_disconnect = false;
