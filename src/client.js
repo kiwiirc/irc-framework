@@ -7,6 +7,10 @@ var NetworkInfo = require('./networkinfo');
 var User = require('./user');
 var Channel = require('./channel');
 
+var default_transport = null;
+
+module.exports = IrcClient;
+
 function IrcClient() {
     EventEmitter.call(this);
 
@@ -19,7 +23,9 @@ function IrcClient() {
 
 _.extend(IrcClient.prototype, EventEmitter.prototype);
 
-module.exports = IrcClient;
+IrcClient.setDefaultTransport = function(transport) {
+    default_transport = transport;
+};
 
 IrcClient.prototype._applyDefaultOptions = function(user_options) {
     var defaults = {
@@ -32,7 +38,8 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         auto_reconnect_wait: 4000,
         auto_reconnect_max_retries: 3,
         ping_interval: 30,
-        ping_timeout: 120
+        ping_timeout: 120,
+        transport: default_transport
     };
 
     var props = Object.keys(defaults);

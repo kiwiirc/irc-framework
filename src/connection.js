@@ -1,6 +1,5 @@
 var EventEmitter    = require('eventemitter3');
 var _               = require('lodash');
-var TransportNet    = require('./transports/net');
 var ircLineParser   = require('./irclineparser');
 
 function Connection(options) {
@@ -50,7 +49,7 @@ Connection.prototype.connect = function(options) {
     }
 
     options = this.options;
-    transport = this.transport = new TransportNet(options);
+    transport = this.transport = new options.transport(options);
 
     if (!options.encoding || !this.setEncoding(options.encoding)) {
         this.setEncoding('utf8');
@@ -77,6 +76,7 @@ Connection.prototype.connect = function(options) {
     }
 
     function socketLine(line) {
+        that.debugOut('[incoming line] ' + line);
         that.read_buffer.push(line);
         that.processReadBuffer();
     }
