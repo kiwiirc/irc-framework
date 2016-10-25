@@ -63,7 +63,9 @@ Connection.prototype.connect = function(options) {
     transport.on('open', socketOpen);
     transport.on('line', socketLine);
     transport.on('close', socketClose);
-    transport.on('debug', out => this.debugOut(out));
+    transport.on('debug', function (out) {
+        that.debugOut(out);
+    });
 
     transport.connect();
 
@@ -221,6 +223,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
         return;
     }
 
+    var that = this;
     var lines_per_js_tick = 4;
     var processed_lines = 0;
     var line;
@@ -248,8 +251,8 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
 
     // If we still have items left in our buffer then continue reading them in a few ticks
     if (this.read_buffer.length > 0) {
-        this.setTimeout(() => {
-            this.processReadBuffer(true);
+        this.setTimeout(function() {
+            that.processReadBuffer(true);
         }, 1);
     } else {
         this.reading_buffer = false;
