@@ -19,6 +19,8 @@ function IrcClient() {
     this.parsed_middleware = new MiddlewareHandler();
 
     this.request_extra_caps = [];
+
+    this.options = null;
 }
 
 _.extend(IrcClient.prototype, EventEmitter.prototype);
@@ -67,7 +69,15 @@ IrcClient.prototype.use = function(middleware_fn) {
 IrcClient.prototype.connect = function(options) {
     var client = this;
 
-    this.options = options;
+    // Use the previous options object if we're calling .connect() again
+    if (!options && !this.options) {
+        throw new Error('Options object missing from IrcClient.connect()');
+    } else if (!options) {
+        options = this.options;
+    } else {
+        this.options = options;
+    }
+
     this._applyDefaultOptions(this.options);
 
     if (this.connection && this.connection.connected) {
