@@ -64,7 +64,7 @@ var handlers = {
         var cache = this.cache('names.' + command.params[1]);
         this.emit('userlist', {
             channel: command.params[1],
-            users: cache.members
+            users: cache.members || []
         });
         cache.destroy();
     },
