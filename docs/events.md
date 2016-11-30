@@ -343,6 +343,20 @@ Also triggers a **message** event with .type = 'privmsg'
 }
 ~~~
 
+**ison**
+~~~javascript
+{
+    nicks: 'nick1 nick2 nick3',
+}
+~~~
+
+
+**not enough parameters for ison**
+~~~javascript
+{
+    reason: 'not enough parameters for ison'
+}
+~~~
 
 
 **nick in use**

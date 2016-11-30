@@ -45,6 +45,11 @@ var handlers = {
         });
     },
 
+    ERR_NOTENOUGHPARAMS: function(command) {
+        this.emit('not enough parameters for ison', {
+            reason: "not enough parameters for ison"
+        });
+    },
 
     RPL_ENDOFWHOIS: function(command) {
         var nick = command.params[1];
@@ -57,6 +62,12 @@ var handlers = {
 
         this.emit('whois', cache);
         cache.destroy();
+    },
+
+    RPL_ISON: function(command) {
+        this.emit('ison', {
+            nicks: command.params[command.params.length - 1]
+        });
     },
 
     RPL_AWAY: function(command) {
