@@ -11,7 +11,7 @@ var default_transport = null;
 
 module.exports = IrcClient;
 
-function IrcClient() {
+function IrcClient(options) {
     EventEmitter.call(this);
 
     // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
@@ -20,7 +20,7 @@ function IrcClient() {
 
     this.request_extra_caps = [];
 
-    this.options = null;
+    this.options = options || null;
 }
 
 _.extend(IrcClient.prototype, EventEmitter.prototype);
