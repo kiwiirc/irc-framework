@@ -142,6 +142,8 @@ Connection.prototype.write = function(data, callback) {
         return 0;
     }
 
+    this.debugOut('[outgoing line] ' + data);
+    this.emit('raw', data, false);
     return this.transport.writeLine(data, callback);
 };
 
@@ -243,7 +245,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
             // A malformed IRC line
             continue;
         }
-        this.emit('raw', line);
+        this.emit('raw', line, true);
         this.emit('message', message);
 
         processed_lines++;
