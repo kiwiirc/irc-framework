@@ -18,7 +18,7 @@ Todo:
 * Implement an event proxy for `Channel` objects to enable `channel.on('event', ..)`.
 * ~~Do something nice with all the commands in commands/misc.js, maybe even delete them and expect the application to handle these via the `raw` event.~~
 * ~~Rename `commands/` to `command_handlers/`~~
-* Implement some form of debugging. Look into the `debug` module?
+* ~~Implement some form of debugging. Look into the `debug` module?~~
 
 
 #### A simple and low-boilerplate framework to build IRC bots.
