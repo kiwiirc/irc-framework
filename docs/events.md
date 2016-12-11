@@ -95,6 +95,25 @@ The client has a raw connected socket to the network but not yet completed any T
 ~~~
 
 
+#### Raw connection and debugging
+**raw**
+
+A valid raw line sent or received from the IRC server.
+~~~javascript
+{
+    line: ':server.ircd.net 265 prawnsalad :Current Local Users: 214  Max: 411',
+    from_server: true
+}
+~~~
+
+
+**debug**
+
+Debugging messages if debug is set to true when connecting.
+~~~javascript
+'Socket fully connected'
+~~~
+
 #### Channels
 **channel info**
 ~~~javascript
