@@ -120,8 +120,8 @@ IrcClient.prototype.connect = function(options) {
     });
 
     // IRC command routing
-    this.connection.on('message', function(message) {
-        client.raw_middleware.handle([message.command, message, client], function(err) {
+    this.connection.on('message', function(message, raw_line) {
+        client.raw_middleware.handle([message.command, message, raw_line, client], function(err) {
             if (err) {
                 return;
             }

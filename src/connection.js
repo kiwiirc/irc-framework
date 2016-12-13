@@ -246,7 +246,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
             continue;
         }
         this.emit('raw', { line: line, from_server: true });
-        this.emit('message', message);
+        this.emit('message', message, line);
 
         processed_lines++;
     }
