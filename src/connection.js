@@ -79,7 +79,6 @@ Connection.prototype.connect = function(options) {
     }
 
     function socketLine(line) {
-        that.debugOut('[incoming line] ' + line);
         that.read_buffer.push(line);
         that.processReadBuffer();
     }
@@ -143,7 +142,6 @@ Connection.prototype.write = function(data, callback) {
         return 0;
     }
 
-    this.debugOut('[outgoing line] ' + data);
     this.emit('raw', { line: data, from_server: false });
     return this.transport.writeLine(data, callback);
 };
