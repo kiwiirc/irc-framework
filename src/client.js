@@ -99,6 +99,7 @@ IrcClient.prototype.connect = function(options) {
 
     // Proxy some connection events onto this client
     [
+        'connecting',
         'reconnecting',
         'close',
         'socket close',

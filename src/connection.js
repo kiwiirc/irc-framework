@@ -67,6 +67,7 @@ Connection.prototype.connect = function(options) {
         that.debugOut(out);
     });
 
+    this.emit('connecting');
     transport.connect();
 
     // Called when the socket is connected and ready to start sending/receiving data.
