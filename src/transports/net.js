@@ -94,7 +94,7 @@ Connection.prototype.connect = function() {
         socket = this.socket = Socks.connect({
             host: ircd_host,
             port: ircd_port,
-            ssl: options.tls,
+            ssl: options.tls || options.ssl,
             rejectUnauthorized: options.rejectUnauthorized
         }, {
             host: options.socks.host,
