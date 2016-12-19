@@ -109,7 +109,7 @@ A valid raw line sent or received from the IRC server.
 
 **debug**
 
-Debugging messages if debug is set to true when connecting.
+Debugging messages.
 ~~~javascript
 'Socket fully connected'
 ~~~
