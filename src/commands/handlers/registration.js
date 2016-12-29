@@ -82,7 +82,7 @@ var handlers = {
             .uniq()
             .value();
 
-        if (this.connection.password) {
+        if (this.connection.options.password) {
             want.push('sasl');
         }
 
@@ -137,9 +137,9 @@ var handlers = {
 
 
     AUTHENTICATE: function(command) {
-        var auth_str = this.connection.nick + '\0' +
-            this.connection.nick + '\0' +
-            this.connection.password;
+        var auth_str = this.connection.options.nick + '\0' +
+            this.connection.options.nick + '\0' +
+            this.connection.options.password;
         var b = new Buffer(auth_str, 'utf8');
         var b64 = b.toString('base64');
 
