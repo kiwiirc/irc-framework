@@ -156,8 +156,6 @@ Connection.prototype.onSocketError = function onSocketError(err) {
 };
 
 Connection.prototype.onSocketData = function onSocketData(data) {
-	this.debugOut('socketData()');
-
 	this.incoming_buffer += iconv.decode(data, this.encoding);
 
 	var lines = this.incoming_buffer.split('\n');
