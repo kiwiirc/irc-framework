@@ -1,14 +1,5 @@
 /**
  * TCP / TLS transport
- * Implements:
- *     .connect({host, port, tls/ssl, localAddress})
- *     .writeLine(line, cb)
- *     .close(optional_error)
- *     .isConnected()
- * Events:
- *     line
- *     open
- *     close
  */
 
 var net             = require('net');

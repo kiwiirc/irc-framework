@@ -1,5 +1,5 @@
 /**
- * The default irc-frameework interface for nodejs
+ * The default irc-framework interface for nodejs
  * Usage: var IrcFramework = require('irc-framework');
  */
 
