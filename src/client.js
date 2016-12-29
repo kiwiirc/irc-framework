@@ -370,22 +370,22 @@ IrcClient.prototype.part = function(channel, message) {
 
 IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
     var params = Array.prototype.slice.call(arguments, 2);
+    params.unshift(type.toUpperCase());
     this.raw(
         'PRIVMSG',
         target,
-        String.fromCharCode(1) + type.toUpperCase() + ' ' +
-        params.join(' ') + String.fromCharCode(1)
+        String.fromCharCode(1) + params.join(' ') + String.fromCharCode(1)
     );
 };
 
 
 IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
     var params = Array.prototype.slice.call(arguments, 2);
+    params.unshift(type.toUpperCase());
     this.raw(
         'NOTICE',
         target,
-        String.fromCharCode(1) + type.toUpperCase() + ' ' +
-        params.join(' ') + String.fromCharCode(1)
+        String.fromCharCode(1) + params.join(' ') + String.fromCharCode(1)
     );
 };
 
