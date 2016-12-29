@@ -369,8 +369,11 @@ IrcClient.prototype.part = function(channel, message) {
 
 
 IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
-    var params = Array.prototype.slice.call(arguments, 2);
-    params.unshift(type.toUpperCase());
+    var params = Array.prototype.slice.call(arguments, 1);
+
+    // make sure the CTCP type is uppercased
+    params[0] = params[0].toUpperCase();
+
     this.raw(
         'PRIVMSG',
         target,
@@ -380,8 +383,11 @@ IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
 
 
 IrcClient.prototype.ctcpResponse = function(target, type /*, paramN*/) {
-    var params = Array.prototype.slice.call(arguments, 2);
-    params.unshift(type.toUpperCase());
+    var params = Array.prototype.slice.call(arguments, 1);
+
+    // make sure the CTCP type is uppercased
+    params[0] = params[0].toUpperCase();
+
     this.raw(
         'NOTICE',
         target,
