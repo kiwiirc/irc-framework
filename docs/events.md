@@ -178,6 +178,8 @@ Debugging messages.
 ~~~javascript
 {
     nick: 'prawnsalad',
+    user: 'prawnsalad',
+    host: 'unaffiliated/prawnsalad',
     channel: '#channel',
     when: 000000000
 }
