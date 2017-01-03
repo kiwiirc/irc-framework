@@ -1,5 +1,6 @@
 var _ = require('lodash');
-var Helper = require('../../helper');
+var Helpers = require('../../helpers');
+
 var handlers = {
     RPL_CHANNELMODEIS: function(command) {
         var channel = command.params[1];
@@ -113,7 +114,7 @@ var handlers = {
 
 
     RPL_TOPICWHOTIME: function(command) {
-        var parsed = Helper.parseMask(command.params[2]);
+        var parsed = Helpers.parseMask(command.params[2]);
         this.emit('topicsetby', {
             nick: parsed.nick,
             user: parsed.user,

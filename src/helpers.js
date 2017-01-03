@@ -1,3 +1,5 @@
+'use strict';
+
 var Helper = {
 	parseMask: parseMask,
 };
