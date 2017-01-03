@@ -71,6 +71,7 @@ var handlers = {
         var want = [
             'multi-prefix',
             'away-notify',
+            'invite-notify',
             'account-notify',
             'account-tag',
             'server-time',
