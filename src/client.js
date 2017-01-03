@@ -215,7 +215,7 @@ IrcClient.prototype.registerToNetwork = function() {
         this.raw('WEBIRC', webirc.password, webirc.username, webirc.hostname, webirc.address);
     }
 
-    this.raw('CAP LS');
+    this.raw('CAP LS 302');
 
     if (this.options.password) {
         this.raw('PASS', this.options.password);

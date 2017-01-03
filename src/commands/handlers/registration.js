@@ -60,12 +60,27 @@ var handlers = {
 
     CAP: function(command) {
         var request_caps = [];
+        var capabilities = [];
+        var capability_values = Object.create(null);
 
         // TODO: capability modifiers
         // i.e. - for disable, ~ for requires ACK, = for sticky
         var capabilities = command.params[command.params.length - 1]
             .replace(/(?:^| )[\-~=]/, '')
-            .split(' ');
+            .split(' ')
+            .map(cap => {
+                // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
+                var sep = cap.indexOf('=');
+                if (sep === -1) {
+                    return cap;
+                }
+
+                var cap_name = cap.substr(0, sep);
+                var cap_value = cap.substr(sep + 1);
+
+                capability_values[cap_name] = cap_value;
+                return cap_name;
+            });
 
         // Which capabilities we want to enable
         var want = [
@@ -100,11 +115,18 @@ var handlers = {
                 // Compute which of the available capabilities we want and request them
                 request_caps = _.intersection(capabilities, want);
                 if (request_caps.length > 0) {
-                    this.network.cap.requested = request_caps;
-                    this.connection.write('CAP REQ :' + request_caps.join(' '));
-                } else {
-                    this.connection.write('CAP END');
-                    this.network.cap.negotiating = false;
+                    this.network.cap.requested = this.network.cap.requested.concat(request_caps);
+                }
+
+                // CAP 3.2 multline support. Only send our CAP requests on the last CAP LS
+                // line which will not have * set for params[2]
+                if (command.params[2] !== '*') {
+                    if (request_caps.length > 0) {
+                        this.connection.write('CAP REQ :' + request_caps.join(' '));
+                    } else {
+                        this.connection.write('CAP END');
+                        this.network.cap.negotiating = false;
+                    }
                 }
                 break;
             case 'ACK':
@@ -140,6 +162,12 @@ var handlers = {
                 break;
             case 'LIST':
                 // should we do anything here?
+                break;
+            case 'NEW':
+                // Not supported yet
+                break;
+            case 'DEL':
+                // Not supported yet
                 break;
         }
     },
