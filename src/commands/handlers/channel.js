@@ -45,6 +45,7 @@ var handlers = {
         _.each(members, function(member) {
             var j = 0;
             var modes = [];
+            var user = null;
 
             // If we have prefixes, strip them from the nick and keep them separate
             if (that.network.options.PREFIX) {
@@ -56,7 +57,15 @@ var handlers = {
                 }
             }
 
-            cache.members.push({nick: member, modes: modes});
+            // We may have a full user mask if the userhost-in-names CAP is enabled
+            user = Helpers.parseMask(member);
+
+            cache.members.push({
+                nick: user.nick,
+                ident: user.user,
+                hostname: user.host,
+                modes: modes
+            });
         });
     },
 

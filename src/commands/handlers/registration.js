@@ -75,6 +75,7 @@ var handlers = {
             'account-notify',
             'account-tag',
             'server-time',
+            'userhost-in-names',
             'extended-join',
             'znc.in/server-time-iso',
             'znc.in/server-time',
