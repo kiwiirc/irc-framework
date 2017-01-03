@@ -15,21 +15,31 @@ function IrcCommand(command, data) {
 }
 
 
-IrcCommand.prototype.getServerTime = function() {
-    var time;
-
-    // No tags? No times.
+IrcCommand.prototype.getTag = function(tag_name) {
     if (!this.tags || this.tags.length === 0) {
         return;
     }
 
-    time = _.find(this.tags, function(tag) {
-        return tag.tag === 'time';
+    var tag = _.find(this.tags, function(tag) {
+        return tag.tag === tag_name;
     });
 
-    if (time) {
-        time = time.value;
+    if (!tag) {
+        return;
     }
+
+    // Not all tags have a value, so return true for those to indicate the tag
+    // has been set.
+    if (typeof tag.value === 'undefined') {
+        return true;
+    } else {
+        return tag.value;
+    }
+};
+
+
+IrcCommand.prototype.getServerTime = function() {
+    var time = this.getTag('time');
 
     // Convert the time value to a unixtimestamp
     if (typeof time === 'string') {

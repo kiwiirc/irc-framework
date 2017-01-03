@@ -72,6 +72,7 @@ var handlers = {
             'multi-prefix',
             'away-notify',
             'account-notify',
+            'account-tag',
             'server-time',
             'extended-join',
             'znc.in/server-time-iso',

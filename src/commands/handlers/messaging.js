@@ -45,7 +45,8 @@ var handlers = {
                 group: target_group,
                 message: message,
                 tags: command.tags,
-                time: time
+                time: time,
+                account: command.getTag('account')
             });
         }
     },
@@ -79,7 +80,8 @@ var handlers = {
                     group: target_group,
                     message: message.substring(8, message.length - 1),
                     tags: command.tags,
-                    time: time
+                    time: time,
+                    account: command.getTag('account')
                 });
 
             } else if (message.substr(1, 7) === 'VERSION') {
@@ -104,7 +106,8 @@ var handlers = {
                     group: target_group,
                     type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
                     message: message.substring(1, message.length - 1),
-                    time: time
+                    time: time,
+                    account: command.getTag('account')
                 });
             }
         } else {
@@ -116,7 +119,8 @@ var handlers = {
                 group: target_group,
                 message: message,
                 tags: command.tags,
-                time: time
+                time: time,
+                account: command.getTag('account')
             });
         }
     },
@@ -128,7 +132,8 @@ var handlers = {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            message: command.params[command.params.length - 1]
+            message: command.params[command.params.length - 1],
+            account: command.getTag('account')
         });
     }
 };
