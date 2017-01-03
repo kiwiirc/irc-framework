@@ -439,3 +439,18 @@ If the requested user was not found, error will contain 'no_such_nick'.
     error: ''
 }
 ~~~
+
+
+**user updated**
+
+Only on supporting IRC servers with CHGHOST capabilities and 'enable_chghost' set in the connection options.
+~~~javascript
+{
+    nick: 'prawnsalad',
+    ident: 'prawns_old_ident',
+    hostname: 'prawns.old.hostname',
+    new_user: 'prawns_new_ident',
+    new_host: 'prawns_new_host',
+    time: time
+}
+~~~

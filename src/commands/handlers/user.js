@@ -35,6 +35,23 @@ var handlers = {
         });        
     },
 
+    // If the chghost CAP is enabled and 'enable_chghost' option is true
+    CHGHOST: function(command) {
+        var time;
+
+        // Check if we have a server-time
+        time = command.getServerTime();
+
+        this.emit('user updated', {
+            nick: command.nick,
+            ident: command.ident,
+            hostname: command.hostname,
+            new_ident: command.params[0],
+            new_host: command.params[0],
+            time: time
+        });
+    },
+
     AWAY: function(command) {
         var time;
 

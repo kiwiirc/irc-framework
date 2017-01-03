@@ -36,6 +36,7 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         gecos: 'ircbot',
         encoding: 'utf8',
         version: 'node.js irc-framework',
+        enable_chghost: false,
         auto_reconnect: true,
         auto_reconnect_wait: 4000,
         auto_reconnect_max_retries: 3,

@@ -89,6 +89,9 @@ var handlers = {
         if (this.connection.options.password) {
             want.push('sasl');
         }
+        if (this.connection.options.enable_chghost) {
+            want.push('chghost');
+        }
 
         switch (command.params[1]) {
             case 'LS':
