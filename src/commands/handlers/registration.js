@@ -81,17 +81,19 @@ var handlers = {
             'znc.in/server-time',
             'twitch.tv/membership'
         ];
-        want = _(want)
-            .concat(this.request_extra_caps)
-            .uniq()
-            .value();
 
+        // Optional CAPs depending on settings
         if (this.connection.options.password) {
             want.push('sasl');
         }
         if (this.connection.options.enable_chghost) {
             want.push('chghost');
         }
+
+        want = _(want)
+            .concat(this.request_extra_caps)
+            .uniq()
+            .value();
 
         switch (command.params[1]) {
             case 'LS':
