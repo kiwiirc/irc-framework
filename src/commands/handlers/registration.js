@@ -71,6 +71,7 @@ var handlers = {
         var want = [
             'multi-prefix',
             'away-notify',
+            'account-notify',
             'server-time',
             'extended-join',
             'znc.in/server-time-iso',

@@ -353,6 +353,20 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~
 
 
+**account**
+
+`account` will be `false` if the user has logged out.
+~~~javascript
+{
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'isp.manchester.net',
+    account: 'prawns_account_name',
+    time: 000000000
+}
+~~~
+
+
 **away**
 ~~~javascript
 {

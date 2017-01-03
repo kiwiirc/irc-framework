@@ -16,6 +16,24 @@ var handlers = {
         });
     },
 
+    ACCOUNT: function(command) {
+        var time;
+
+        // Check if we have a server-time
+        time = command.getServerTime();
+
+        var account = command.params[0] === '*' ?
+            false :
+            command.params[0];
+
+        this.emit('account', {
+            nick: command.nick,
+            ident: command.ident,
+            hostname: command.hostname,
+            account: account,
+            time: time
+        });        
+    },
 
     AWAY: function(command) {
         var time;
