@@ -32,6 +32,25 @@ _.extend(IrcCommandHandler.prototype, EventEmitter.prototype);
 
 IrcCommandHandler.prototype.dispatch = function(message) {
     var irc_command = new IrcCommand(message.command.toUpperCase(), message);
+
+    // Batched commands will be collected and executed as a transaction
+    var batch_id = irc_command.getTag('batch');
+    if (batch_id) {
+        var cache = this.cache('batch.' + batch_id);
+        if (cache) {
+            cache.commands.push(irc_command);
+        } else {
+            // If we don't have this batch ID in cache, it either means that the
+            // server hasn't sent the starting batch command or that the server
+            // has already sent the end batch command.
+        }
+
+    } else {
+        this.executeCommand(irc_command);
+    }
+};
+
+IrcCommandHandler.prototype.executeCommand = function(irc_command) {
     var command_name = irc_command.command;
 
     // Check if we have a numeric->command name- mapping for this command

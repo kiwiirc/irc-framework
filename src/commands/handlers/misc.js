@@ -121,6 +121,47 @@ var handlers = {
         });
 
         cache.destroy();
+    },
+
+    BATCH: function(command) {
+        var that = this;
+        var batch_start = command.params[0].substr(0, 1) === '+';
+        var batch_id = command.params[0].substr(1);
+        var cache;
+        var emit_obj;
+
+        if (!batch_id) {
+            return;
+        }
+
+        if (batch_start) {
+            cache = this.cache('batch.' + batch_id);
+            cache.commands = [];
+            cache.type = command.params[1];
+            cache.params = command.params.slice(2);
+
+        } else {
+            cache = this.cache('batch.' + batch_id);
+            emit_obj = {
+                id: batch_id,
+                type: cache.type,
+                params: cache.params,
+                commands: cache.commands
+            };
+
+            // Destroy the cache object before executing each command. If one
+            // errors out then we don't have the cache object stuck in memory.
+            cache.destroy();
+
+
+            this.emit('batch start', emit_obj);
+            this.emit('batch start ' + emit_obj.type, emit_obj);
+            emit_obj.commands.forEach(function(c) {
+                that.executeCommand(c);
+            });
+            this.emit('batch end', emit_obj);
+            this.emit('batch end ' + emit_obj.type, emit_obj);
+        }
     }
 };
 

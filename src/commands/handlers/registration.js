@@ -84,6 +84,7 @@ var handlers = {
 
         // Which capabilities we want to enable
         var want = [
+            'batch',
             'multi-prefix',
             'away-notify',
             'invite-notify',

@@ -454,3 +454,37 @@ Only on supporting IRC servers with CHGHOST capabilities and 'enable_chghost' se
     time: time
 }
 ~~~
+
+
+
+#### Misc
+**batch start**
+
+On capable networks a set of commands may be batched together. The commands will be
+executed automatically directly after this event as a transaction, each with a tag
+`batch` matching this `event.id` value.
+
+A `batch start <type>` event is also triggered.
+~~~javascript
+{
+    id: 1,
+    type: 'chathistory',
+    params: [],
+    commands: []
+}
+~~~
+
+**batch end**
+
+After a `batch start` event has been triggered along with all its commands, this event
+will be triggered directly after.
+
+A `batch end <type>` event is also triggered.
+~~~javascript
+{
+    id: 1,
+    type: 'chathistory',
+    params: [],
+    commands: []
+}
+~~~
