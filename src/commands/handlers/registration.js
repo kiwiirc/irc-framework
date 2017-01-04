@@ -105,6 +105,9 @@ var handlers = {
         if (this.connection.options.enable_chghost) {
             want.push('chghost');
         }
+        if (this.connection.options.enable_echomessage) {
+            want.push('echo-message');
+        }
 
         want = _(want)
             .concat(this.request_extra_caps)
