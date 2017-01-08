@@ -8,9 +8,7 @@ var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+))
 
 function parseIrcLine(line) {
     var msg;
-    var i;
-    var tags = [];
-    var tag;
+    var tags = Object.create(null);
     var msg_obj;
 
     // Parse the complete line, removing any carriage returns
@@ -23,12 +21,12 @@ function parseIrcLine(line) {
 
     // Extract any tags (msg[1])
     if (msg[1]) {
-        tags = msg[1].split(';');
-
-        for (i = 0; i < tags.length; i++) {
-            tag = tags[i].split('=');
-            tags[i] = {tag: tag[0], value: tag[1]};
-        }
+        msg[1].split(';').forEach(function(tag) {
+            var parts = tag.split('=');
+            tags[parts[0].toLowerCase()] = typeof parts[1] === 'undefined' ?
+                true :
+                parts[1];
+        });
     }
 
     // Nick value will be in the prefix slot if a full user mask is not used
@@ -42,6 +40,7 @@ function parseIrcLine(line) {
         params:     msg[7] ? msg[7].split(/ +/) : []
     };
 
+    // Add the trailing param to the params list
     if (typeof msg[8] !== 'undefined') {
         msg_obj.params.push(msg[8].trimRight());
     }
