@@ -18,6 +18,10 @@ function NetworkInfo() {
         ]
     };
 
+    this.supports = function supports(support_name) {
+        return this.options[support_name.toUpperCase()];
+    };
+
     // Network capabilities
     this.cap = {
         negotiating: false,
