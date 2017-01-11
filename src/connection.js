@@ -10,9 +10,9 @@ function Connection(options) {
     this.connected = false;
     this.requested_disconnect = false;
 
-    this.auto_reconnect = options.auto_reconnect || false;
-    this.auto_reconnect_wait = options.auto_reconnect_wait || 4000;
-    this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
+    this.auto_reconnect = this.options.auto_reconnect || false;
+    this.auto_reconnect_wait = this.options.auto_reconnect_wait || 4000;
+    this.auto_reconnect_max_retries = this.options.auto_reconnect_max_retries || 3;
     this.reconnect_attempts = 0;
 
     // When an IRC connection was successfully registered.

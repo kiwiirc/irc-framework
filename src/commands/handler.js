@@ -67,7 +67,10 @@ IrcCommandHandler.prototype.executeCommand = function(irc_command) {
 
 
 IrcCommandHandler.prototype.requestExtraCaps = function(cap) {
-    this.request_extra_caps = this.request_extra_caps.concat(cap);
+    this.request_extra_caps = _(this.request_extra_caps)
+        .concat(cap)
+        .unique()
+        .value();
 };
 
 

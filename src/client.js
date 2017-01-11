@@ -14,13 +14,10 @@ module.exports = IrcClient;
 function IrcClient(options) {
     EventEmitter.call(this);
 
-    // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
-    this.raw_middleware = new MiddlewareHandler();
-    this.parsed_middleware = new MiddlewareHandler();
-
     this.request_extra_caps = [];
-
     this.options = options || null;
+
+    this.createStructure();
 }
 
 _.extend(IrcClient.prototype, EventEmitter.prototype);
@@ -57,45 +54,18 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
 };
 
 
-IrcClient.prototype.requestCap = function(cap) {
-    this.request_extra_caps = this.request_extra_caps.concat(cap);
-};
-
-
-IrcClient.prototype.use = function(middleware_fn) {
-    middleware_fn(this, this.raw_middleware, this.parsed_middleware);
-    return this;
-};
-
-
-IrcClient.prototype.connect = function(options) {
+IrcClient.prototype.createStructure = function() {
     var client = this;
 
-    // Use the previous options object if we're calling .connect() again
-    if (!options && !this.options) {
-        throw new Error('Options object missing from IrcClient.connect()');
-    } else if (!options) {
-        options = this.options;
-    } else {
-        this.options = options;
-    }
+    // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
+    client.raw_middleware = new MiddlewareHandler();
+    client.parsed_middleware = new MiddlewareHandler();
 
-    this._applyDefaultOptions(this.options);
+    client.connection = new Connection(client.options);
+    client.network = new NetworkInfo();
+    client.user = new User();
 
-    if (this.connection && this.connection.connected) {
-        this.connection.end();
-    }
-
-    this.connection = new Connection(this.options);
-    this.network = new NetworkInfo();
-    this.user = new User({
-        nick: options.nick,
-        username: options.username,
-        gecos: options.gecos
-    });
-
-    this.command_handler = new IrcCommandHandler(this.connection, this.network);
-    this.command_handler.requestExtraCaps(this.request_extra_caps);
+    client.command_handler = new IrcCommandHandler(client.connection, client.network);
 
     client.addCommandHandlerListeners();
 
@@ -116,14 +86,14 @@ IrcClient.prototype.connect = function(options) {
         });
     });
 
-    this.connection.on('socket connected', function() {
+    client.connection.on('socket connected', function() {
         client.emit('socket connected');
         client.registerToNetwork();
         client.startPeriodicPing();
     });
 
     // IRC command routing
-    this.connection.on('message', function(message, raw_line) {
+    client.connection.on('message', function(message, raw_line) {
         client.raw_middleware.handle([message.command, message, raw_line, client], function(err) {
             if (err) {
                 console.log(err.stack);
@@ -135,10 +105,47 @@ IrcClient.prototype.connect = function(options) {
     });
 
     // Proxy the command handler events onto the client object, with some added sugar
-    this.proxyIrcEvents();
+    client.proxyIrcEvents();
+};
+
+
+IrcClient.prototype.requestCap = function(cap) {
+    this.request_extra_caps = this.request_extra_caps.concat(cap);
+};
+
+
+IrcClient.prototype.use = function(middleware_fn) {
+    middleware_fn(this, this.raw_middleware, this.parsed_middleware);
+    return this;
+};
+
+
+IrcClient.prototype.connect = function(options) {
+    var client = this;
+
+    // Use the previous options object if we're calling .connect() again
+    if (!options && !client.options) {
+        throw new Error('Options object missing from IrcClient.connect()');
+    } else if (!options) {
+        options = client.options;
+    } else {
+        client.options = options;
+    }
+
+    client._applyDefaultOptions(options);
+
+    if (client.connection && client.connection.connected) {
+        client.connection.end();
+    }
+
+    client.user.nick = options.nick;
+    client.user.username = options.username;
+    client.user.gecos = options.gecos;
+
+    client.command_handler.requestExtraCaps(client.request_extra_caps);
 
     // Everything is setup and prepared, start connecting
-    this.connection.connect();
+    client.connection.connect(options);
 };
 
 
