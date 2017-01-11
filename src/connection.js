@@ -47,8 +47,11 @@ Connection.prototype.connect = function(options) {
     if (options) {
         this.options = options;
     }
-
     options = this.options;
+
+    if (this.transport) {
+        unbindTransportEvents(this.transport);
+    }
     transport = this.transport = new options.transport(options);
 
     if (!options.encoding || !this.setEncoding(options.encoding)) {
@@ -60,15 +63,28 @@ Connection.prototype.connect = function(options) {
         that.emit.apply(that, arguments);
     });
 
-    transport.on('open', socketOpen);
-    transport.on('line', socketLine);
-    transport.on('close', socketClose);
-    transport.on('debug', function (out) {
-        that.debugOut(out);
-    });
+    bindTransportEvents(transport);
 
     this.emit('connecting');
     transport.connect();
+
+    function bindTransportEvents(transport) {
+        transport.on('open', socketOpen);
+        transport.on('line', socketLine);
+        transport.on('close', socketClose);
+        transport.on('debug', transportDebug);
+    }
+
+    function unbindTransportEvents(transport) {
+        transport.off('open', socketOpen);
+        transport.off('line', socketLine);
+        transport.off('close', socketClose);
+        transport.off('debug', transportDebug);
+    }
+
+    function transportDebug(out) {
+        that.debugOut(out);
+    }
 
     // Called when the socket is connected and ready to start sending/receiving data.
     function socketOpen() {
@@ -124,6 +140,7 @@ Connection.prototype.connect = function(options) {
                 wait: that.auto_reconnect_wait
             });
         } else {
+            unbindTransportEvents(transport);
             that.emit('close', err ? true : false);
             that.reconnect_attempts = 0;
         }
