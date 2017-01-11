@@ -68,7 +68,7 @@ var handlers = {
         var capabilities = command.params[command.params.length - 1]
             .replace(/(?:^| )[\-~=]/, '')
             .split(' ')
-            .map(cap => {
+            .map(function(cap) {
                 // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
                 var sep = cap.indexOf('=');
                 if (sep === -1) {

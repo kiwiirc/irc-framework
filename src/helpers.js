@@ -7,12 +7,12 @@ var Helper = {
 module.exports = Helper;
 
 function parseMask(mask) {
-	let nick = '';
-	let user = '';
-	let host = '';
+	var nick = '';
+	var user = '';
+	var host = '';
 
-	let sep1 = mask.indexOf('!');
-	let sep2 = mask.indexOf('@');
+	var sep1 = mask.indexOf('!');
+	var sep2 = mask.indexOf('@');
 
 	if (sep1 === -1 && sep2 === -1) {
 		// something
@@ -33,8 +33,8 @@ function parseMask(mask) {
 	}
 
 	return {
-		nick,
-		user,
-		host,
-	}
+		nick: nick,
+		user: user,
+		host: host,
+	};
 }
