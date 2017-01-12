@@ -76,10 +76,10 @@ Connection.prototype.connect = function(options) {
     }
 
     function unbindTransportEvents(transport) {
-        transport.off('open', socketOpen);
-        transport.off('line', socketLine);
-        transport.off('close', socketClose);
-        transport.off('debug', transportDebug);
+        transport.removeListener('open', socketOpen);
+        transport.removeListener('line', socketLine);
+        transport.removeListener('close', socketClose);
+        transport.removeListener('debug', transportDebug);
     }
 
     function transportDebug(out) {
@@ -140,7 +140,7 @@ Connection.prototype.connect = function(options) {
                 wait: that.auto_reconnect_wait
             });
         } else {
-            unbindTransportEvents(transport);
+            unbindTransportEvents(that.transport);
             that.emit('close', err ? true : false);
             that.reconnect_attempts = 0;
         }
