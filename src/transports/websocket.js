@@ -52,6 +52,7 @@ Connection.prototype.connect = function() {
     ws_addr += (options.tls || options.ssl) ? 'wss://' : 'ws://';
     ws_addr += options.host;
     ws_addr += options.port ? ':' + options.port : '';
+    ws_addr += options.path ? options.path : '';
 
     socket = this.socket = new WebSocket(ws_addr);
 
