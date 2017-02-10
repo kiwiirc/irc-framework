@@ -436,6 +436,68 @@ IrcClient.prototype.whois = function(target, cb) {
 
 
 /**
+ * WHO requests are queued up to run serially.
+ * This is mostly because networks will only reply serially and it makes
+ * it easier to include the correct replies to callbacks
+ */
+IrcClient.prototype.who = function(target, cb) {
+    if (!this.who_queue) {
+        this.who_queue = [];
+    }
+    this.who_queue.push([target, cb]);
+    this.processNextWhoQueue();
+};
+
+
+IrcClient.prototype.processNextWhoQueue = function() {
+    var client = this;
+
+    // No items in the queue or the queue is already running?
+    if (client.who_queue.length === 0 || client.who_queue.is_running) {
+        return;
+    }
+
+    client.who_queue.is_running = true;
+
+    var this_who = client.who_queue.shift();
+    var target = this_who[0];
+    var cb = this_who[1];
+
+    if (!target || typeof target !== 'string') {
+        if (typeof cb === 'function') {
+            _.defer(cb, {
+                target: target,
+                users: []
+            });
+        }
+
+        // Start the next queued WHO request
+        client.who_queue.is_running = false;
+        _.defer(_.bind(client.processNextWhoQueue, client));
+
+        return;
+    }
+
+    client.on('wholist', function onWho(event) {
+        client.removeListener('wholist', onWho);
+
+        // Start the next queued WHO request
+        client.who_queue.is_running = false;
+        _.defer(_.bind(client.processNextWhoQueue, client));
+
+        if (typeof cb === 'function') {
+            cb({
+                target: target,
+                users: event.users
+            });
+        }
+    });
+
+    client.raw('WHO', target);
+};
+
+
+/**
  * Explicitely start a channel list, avoiding potential issues with broken IRC servers not sending RPL_LISTSTART
  */
 IrcClient.prototype.list = function(/* paramN */) {

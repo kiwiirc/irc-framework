@@ -151,6 +151,15 @@ Debugging messages.
 ~~~
 
 
+**wholist**
+~~~javascript
+{
+    target: '#channel',
+    users: [ ... ]
+}
+~~~
+
+
 **banlist**
 ~~~javascript
 {

@@ -79,6 +79,12 @@ Send an action message (typically /me) to a target.
 Receive information about a user on the network if they exist. Optionally calls
 `cb(event)` with the result if provided.
 
+##### `.who(target [, cb])`
+Receive a list of users on the network that matchs the target. The target may be
+a channel or wildcard nick. Optionally calls `cb(event)` with the result if
+provided. Multiple calls to this function are queued up and run one at a time in
+order.
+
 ##### `.list([, paramN])`
 Request that the IRC server sends a lsit of available channels. Extra parameters
 will be sent.
