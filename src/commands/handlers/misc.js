@@ -88,7 +88,7 @@ var handlers = {
             ident: params[2],
             hostname: params[3],
             server: params[4],
-            real_name: params[7],
+            real_name: realname,
             away: is_away,
             num_hops_away: hops_away
         });
