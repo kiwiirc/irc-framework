@@ -161,19 +161,13 @@ var handlers = {
 
     PART: function(command) {
         var time = command.getServerTime();
-        var channel = command.params[0];
-        var message;
-
-        if (command.params.length > 1) {
-            message = command.params[command.params.length - 1];
-        }
 
         this.emit('part', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            channel: channel,
-            message: message,
+            channel: command.params[0],
+            message: command.params[command.params.length - 1] || '',
             time: time
         });
     },
@@ -188,7 +182,7 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             channel: command.params[0],
-            message: command.params[command.params.length - 1],
+            message: command.params[command.params.length - 1] || '',
             time: time
         });
     },
@@ -201,7 +195,7 @@ var handlers = {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            message: command.params[command.params.length - 1],
+            message: command.params[command.params.length - 1] || '',
             time: time
         });
     },
