@@ -1,6 +1,6 @@
 {
   "name": "irc-framework",
-  "version": "2.5.5",
+  "version": "2.6.0",
   "description": "A better IRC framework for node.js",
   "main": "index.js",
   "dependencies": {
