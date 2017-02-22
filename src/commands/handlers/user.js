@@ -86,7 +86,7 @@ var handlers = {
         var cache = this.cache('whois.' + cache_key);
 
         if (!cache.nick) {
-            cache.nick = nick;
+            cache.nick = command.params[1];
             cache.error = 'not_found';
         }
 
