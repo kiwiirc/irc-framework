@@ -154,6 +154,7 @@ Debugging messages.
 **wholist**
 ~~~javascript
 {
+    target: '#channel',
     users: [ ... ]
 }
 ~~~
