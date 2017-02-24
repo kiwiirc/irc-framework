@@ -98,6 +98,7 @@ var handlers = {
     RPL_ENDOFWHO: function(command) {
         var cache = this.cache('who');
         this.emit('wholist', {
+            target: command.params[1],
             users: cache.members || []
         });
         cache.destroy();
