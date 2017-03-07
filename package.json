@@ -23,7 +23,7 @@
   "scripts": {
     "test": "npm run lint && npm run coverage -- -R dot test/ --recursive",
     "lint": "jshint src/ examples/ test/ || true",
-    "unit-test": "mocha",
+    "unit-test": "mocha --recursive",
     "coverage": "istanbul cover --include-all-sources _mocha --"
   },
   "repository": {
