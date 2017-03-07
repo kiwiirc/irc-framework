@@ -431,7 +431,7 @@ Not all of these options will be available. Some will be missing depending on th
 	registered_nick: 'prawnsalad',
 	account: 'logged on account',
 	secure: true,
-    certfp: 'has client certificate fingerprint xxxxxxxxxxx',
+    certfp: 'has client certificate fingerprint xxxxxxxxxx',
 	special: ''
 }
 ~~~
