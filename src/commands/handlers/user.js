@@ -173,9 +173,12 @@ var handlers = {
     },
 
     RPL_WHOISCERTFP: function(command) {
+        if (typeof command.params[2] !== 'string') {
+            return;
+        }
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
-        cache.certfp = command.params[2];
+        cache.certfp = command.params[2].replace("has client certificate fingerprint ", "");
     },
     
     RPL_WHOISACCOUNT: function(command) {
