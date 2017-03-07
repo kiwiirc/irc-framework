@@ -430,7 +430,8 @@ Not all of these options will be available. Some will be missing depending on th
 	logon: 'logged on at X',
 	registered_nick: 'prawnsalad',
 	account: 'logged on account',
-	secure: 'is using SSL/TLS',
+	secure: true,
+	certfp: 'has client certificate fingerprint xxxxxxxxxx',
 	special: ''
 }
 ~~~

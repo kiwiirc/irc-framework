@@ -61,6 +61,7 @@ module.exports = {
     '259': 'RPL_ADMINEMAIL',
     '265': 'RPL_LOCALUSERS',
     '266': 'RPL_GLOBALUSERS',
+    '276': 'RPL_WHOISCERTFP',
     '290': 'RPL_HELPHDR',
     '291': 'RPL_HELPOP',
     '292': 'RPL_HELPTLR',
