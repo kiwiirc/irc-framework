@@ -1,4 +1,6 @@
 /*globals describe, it */
+/* jshint -W024 */
+/* jshint expr:true */
 var chai = require('chai'),
     expect = chai.expect,
     mocks = require('../../mocks'),

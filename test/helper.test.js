@@ -1,6 +1,7 @@
 "use strict";
+/*globals describe, it */
 let chai = require('chai'),
-    Helper = require('../src/helper'),
+    Helper = require('../src/helpers'),
     expect = chai.expect;
 
 chai.use(require('chai-subset'));

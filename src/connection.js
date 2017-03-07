@@ -170,14 +170,15 @@ Connection.prototype.write = function(data, callback) {
 Connection.prototype.setTimeout = function(/*fn, length, argN */) {
     var that = this;
     var tmr = null;
-    var callback = arguments[0];
+    var args = Array.prototype.slice.call(arguments, 0);
+    var callback = args[0];
     
-    arguments[0] = function() {
+    args[0] = function() {
        _.pull(that._timers, tmr);
-       callback.apply(null, arguments);
+       callback.apply(null, args);
     };
     
-    tmr = setTimeout.apply(null, arguments);
+    tmr = setTimeout.apply(null, args);
     this._timers.push(tmr);
     return tmr;
 };
@@ -242,7 +243,7 @@ Connection.prototype.processReadBuffer = function(continue_processing) {
     }
 
     var that = this;
-    var lines_per_js_tick = 4;
+    var lines_per_js_tick = 40;
     var processed_lines = 0;
     var line;
     var message;

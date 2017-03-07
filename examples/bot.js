@@ -8,7 +8,7 @@ var IRC = require('../');
 function NickservMiddleware() {
 	return function(client, raw_events, parsed_events) {
 		raw_events.use(theMiddleware);
-	}
+	};
 
 
 	function theMiddleware(command, event, client, next) {
@@ -33,7 +33,7 @@ function MyIrcMiddleware() {
 	return function(client, raw_events, parsed_events) {
 		parsed_events.use(theMiddleware);
 		client.requestCap('kiwiirc.com/user');
-	}
+	};
 
 
 	function theMiddleware(command, event, client, next) {

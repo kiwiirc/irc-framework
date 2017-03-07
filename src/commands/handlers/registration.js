@@ -60,7 +60,6 @@ var handlers = {
 
     CAP: function(command) {
         var request_caps = [];
-        var capabilities = [];
         var capability_values = Object.create(null);
 
         // TODO: capability modifiers

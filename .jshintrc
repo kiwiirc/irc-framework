@@ -5,5 +5,6 @@
     "latedef": "nofunc",
     "noarg": true,
     "undef": true,
-    "unused": true
+    "unused": false,
+    "esnext": true
 }

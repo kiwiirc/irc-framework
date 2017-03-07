@@ -54,7 +54,7 @@ Connection.prototype.connect = function() {
     ws_addr += options.port ? ':' + options.port : '';
     ws_addr += options.path ? options.path : '';
 
-    socket = this.socket = new WebSocket(ws_addr);
+    socket = this.socket = new WebSocket(ws_addr); // jshint ignore:line
 
     socket.onopen = _.bind(function() {
         that.onSocketFullyConnected();

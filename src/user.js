@@ -1,5 +1,3 @@
-var Set = require('es6-set');
-
 function User(opts) {
     opts = opts || {};
 
