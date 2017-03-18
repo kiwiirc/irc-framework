@@ -377,6 +377,11 @@ IrcClient.prototype.part = function(channel, message) {
 };
 
 
+IrcClient.prototype.setTopic = function(channel, newTopic) {
+    this.raw('TOPIC', channel, newTopic);
+};
+
+
 IrcClient.prototype.ctcpRequest = function(target, type /*, paramN*/) {
     var params = Array.prototype.slice.call(arguments, 1);
 
