@@ -376,6 +376,33 @@ IrcClient.prototype.part = function(channel, message) {
     this.raw(raw);
 };
 
+IrcClient.prototype.mode = function(channel, mode, arguments) {
+    var raw = ['MODE', channel, mode];
+
+    if (arguments) {
+        raw.push(arguments);
+    }
+
+    this.raw(raw);
+};
+
+IrcClient.prototype.banlist = function(channel, mode) {
+    var raw = ['MODE', channel, 'b'];
+
+    this.raw(raw);
+};
+
+IrcClient.prototype.ban = function(channel, mask) {
+    var raw = ['MODE', channel, '+b', mask];
+
+    this.raw(raw);
+};
+
+IrcClient.prototype.unban = function(channel, mask) {
+    var raw = ['MODE', channel, '-b', mask];
+
+    this.raw(raw);
+};
 
 IrcClient.prototype.setTopic = function(channel, newTopic) {
     this.raw('TOPIC', channel, newTopic);
