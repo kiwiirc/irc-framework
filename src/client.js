@@ -424,8 +424,19 @@ IrcClient.prototype.action = function(target, message) {
 };
 
 
-IrcClient.prototype.whois = function(target, cb) {
+IrcClient.prototype.whois = function(target, _cb) {
     var client = this;
+    var cb;
+    var irc_args = ['WHOIS'];
+
+    // Support whois(target, arg1, arg2, argN, cb)
+    _.each(arguments, function(arg) {
+        if (typeof arg === 'function') {
+            cb = arg;
+        } else {
+            irc_args.push(arg);
+        }
+    });
 
     this.on('whois', function onWhois(event) {
         if (event.nick.toLowerCase() === target.toLowerCase()) {
@@ -436,7 +447,7 @@ IrcClient.prototype.whois = function(target, cb) {
         }
     });
 
-    this.raw('WHOIS', target);
+    this.raw(irc_args);
 };
 
 
