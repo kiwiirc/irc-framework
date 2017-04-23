@@ -17,6 +17,11 @@ function IrcChannel(irc_client, channel_name, key) {
     // this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
     this.part = _.partial(irc_client.part.bind(irc_client), channel_name);
     this.join = _.partial(irc_client.join.bind(irc_client), channel_name);
+    this.mode = _.partial(irc_client.mode.bind(irc_client), channel_name);
+    this.banlist = _.partial(irc_client.banlist.bind(irc_client), channel_name);
+    this.ban = _.partial(irc_client.ban.bind(irc_client), channel_name);
+    this.unban = _.partial(irc_client.unban.bind(irc_client), channel_name);
+
 
     this.users = [];
     irc_client.on('userlist', function(event) {
