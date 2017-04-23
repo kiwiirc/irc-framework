@@ -66,6 +66,7 @@ Connection.prototype.connect = function(options) {
 
     bindTransportEvents(transport);
 
+    this.requested_disconnect = false;
     this.emit('connecting');
     transport.connect();
 
