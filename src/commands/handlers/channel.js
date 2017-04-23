@@ -99,7 +99,7 @@ var handlers = {
         var cache = this.cache('banlist.' + command.params[1]);
         this.emit('banlist', {
             channel: command.params[1],
-            bans: cache.bans
+            bans: cache.bans || []
         });
 
         cache.destroy();
