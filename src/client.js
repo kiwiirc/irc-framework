@@ -377,31 +377,39 @@ IrcClient.prototype.part = function(channel, message) {
     this.raw(raw);
 };
 
-IrcClient.prototype.mode = function(channel, mode, arguments) {
+IrcClient.prototype.mode = function(channel, mode, extra_args) {
     var raw = ['MODE', channel, mode];
 
-    if (arguments) {
-        raw.push(arguments);
+    if (extra_args) {
+        raw.push(extra_args);
     }
 
     this.raw(raw);
 };
 
-IrcClient.prototype.banlist = function(channel, mode) {
+IrcClient.prototype.banlist = function(channel, cb) {
+    var client = this;
     var raw = ['MODE', channel, 'b'];
+
+    this.on('banlist', function onBanlist(event) {
+        if (event.channel.toLowerCase() === channel.toLowerCase()) {
+            client.removeListener('banlist', onBanlist);
+            if (typeof cb === 'function') {
+                cb(event);
+            }
+        }
+    });
 
     this.raw(raw);
 };
 
 IrcClient.prototype.ban = function(channel, mask) {
     var raw = ['MODE', channel, '+b', mask];
-
     this.raw(raw);
 };
 
 IrcClient.prototype.unban = function(channel, mask) {
     var raw = ['MODE', channel, '-b', mask];
-
     this.raw(raw);
 };
 
