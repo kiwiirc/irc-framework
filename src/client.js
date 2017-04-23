@@ -266,7 +266,8 @@ IrcClient.prototype.startPeriodicPing = function() {
     
     function pingTimeout() {
         that.emit('ping timeout');
-        that.quit('Ping timeout (' + that.options.ping_timeout + ' seconds)');
+        var end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
+        that.connection.end(end_msg, true);
     }
     
     this.resetPingTimer = resetPingTimer;

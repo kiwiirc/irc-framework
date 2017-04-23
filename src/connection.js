@@ -10,9 +10,6 @@ function Connection(options) {
     this.connected = false;
     this.requested_disconnect = false;
 
-    this.auto_reconnect = this.options.auto_reconnect || false;
-    this.auto_reconnect_wait = this.options.auto_reconnect_wait || 4000;
-    this.auto_reconnect_max_retries = this.options.auto_reconnect_max_retries || 3;
     this.reconnect_attempts = 0;
 
     // When an IRC connection was successfully registered.
@@ -48,6 +45,10 @@ Connection.prototype.connect = function(options) {
         this.options = options;
     }
     options = this.options;
+
+    this.auto_reconnect = options.auto_reconnect || false;
+    this.auto_reconnect_wait = options.auto_reconnect_wait || 4000;
+    this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
 
     if (this.transport) {
         unbindTransportEvents(this.transport);
@@ -199,21 +200,26 @@ Connection.prototype.clearTimers = function() {
 /**
  * Close the connection to the IRCd after forcing one last line
  */
-Connection.prototype.end = function(data, callback) {
+Connection.prototype.end = function(data, had_error) {
     var that = this;
 
-    this.debugOut('Connection.end() connected=' + this.connected + ' with data=' + !!data);
+    this.debugOut('Connection.end() connected=' + this.connected + ' with data=' + !!data + ' had_error=' + !!had_error);
 
     if (this.connected && data) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
         this.write(data, function() {
-            that.end();
+            that.end(null, had_error);
         });
 
         return;
     }
 
-    this.requested_disconnect = true;
+    // Shutdowns of the connection may be caused by errors like ping timeouts, which
+    // are not requested by the user so we leave requested_disconnect as false to make sure any
+    // reconnects happen.
+    if (!had_error) {
+        this.requested_disconnect = true;
+    }
 
     if (this.transport) {
         this.transport.close();
