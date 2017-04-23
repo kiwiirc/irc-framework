@@ -200,21 +200,23 @@ Connection.prototype.clearTimers = function() {
 /**
  * Close the connection to the IRCd after forcing one last line
  */
-Connection.prototype.end = function(data, callback) {
+Connection.prototype.end = function(data, automatedEnd) {
     var that = this;
 
-    this.debugOut('Connection.end() connected=' + this.connected + ' with data=' + !!data);
+    this.debugOut('Connection.end() connected=' + this.connected + ' with data=' + !!data + ' (automated: ' + automatedEnd + ')');
 
     if (this.connected && data) {
         // Once the last bit of data has been sent, then re-run this function to close the socket
         this.write(data, function() {
-            that.end();
+            that.end(null, automatedEnd);
         });
 
         return;
     }
 
-    this.requested_disconnect = true;
+    if (!automatedEnd) {
+        this.requested_disconnect = true;
+    }
 
     if (this.transport) {
         this.transport.close();
