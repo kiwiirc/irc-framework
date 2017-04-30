@@ -70,8 +70,8 @@ var handlers = {
 
         if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
             // CTCP request
-            if (message.substr(1, 6) === 'ACTION') {
-
+            var ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
+            if (ctcp_command === 'ACTION') {
                 this.emit('action', {
                     nick: command.nick,
                     ident: command.ident,
@@ -84,14 +84,14 @@ var handlers = {
                     account: command.getTag('account')
                 });
 
-            } else if (message.substr(1, 7) === 'VERSION') {
+            } else if (ctcp_command === 'VERSION') {
                 this.connection.write(util.format(
                     'NOTICE %s :\01VERSION %s\01',
                     command.nick,
                     this.connection.options.version
                 ));
 
-            } else if (message.substr(1, 10) === 'CLIENTINFO') {
+            } else if (ctcp_command === 'CLIENTINFO') {
                 this.connection.write(util.format(
                     'NOTICE %s :\01CLIENTINFO VERSION\01',
                     command.nick
@@ -104,7 +104,7 @@ var handlers = {
                     hostname: command.hostname,
                     target: target,
                     group: target_group,
-                    type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
+                    type: (ctcp_command || [null])[0],
                     message: message.substring(1, message.length - 1),
                     time: time,
                     account: command.getTag('account')
