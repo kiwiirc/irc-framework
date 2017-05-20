@@ -83,10 +83,7 @@ IrcCommandHandler.prototype.addHandler = function(command, handler) {
 
 
 IrcCommandHandler.prototype.emitUnknownCommand = function(command) {
-    this.emit('unknown command', {
-        command: command.command,
-        params: command.params
-    });
+    this.emit('unknown command', command);
 };
 
 
