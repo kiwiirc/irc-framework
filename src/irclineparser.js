@@ -26,9 +26,21 @@ function parseIrcLine(line) {
     if (msg[1]) {
         msg[1].split(';').forEach(function(tag) {
             var parts = tag.split('=');
-            tags[parts[0].toLowerCase()] = typeof parts[1] === 'undefined' ?
-                true :
-                parts[1];
+            var key = parts[0].toLowerCase();
+            var value = parts[1];
+            if (key) {
+                if (typeof value === 'string') {
+                    var segs = value.split(/\\\\/g);
+                    segs = segs.map((v) => v.replace(/\\:/g, ';'));
+                    segs = segs.map((v) => v.replace(/\\s/g, ' '));
+                    segs = segs.map((v) => v.replace(/\\n/g, '\n'));
+                    segs = segs.map((v) => v.replace(/\\r/g, '\r'));
+                    value = segs.join('\\');
+                } else {
+                    value = true;
+                }
+                tags[key] = value;
+            }
         });
     }
 
