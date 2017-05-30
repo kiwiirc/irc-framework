@@ -188,9 +188,9 @@ Connection.prototype.disposeSocket = function() {
 };
 
 
-Connection.prototype.close = function() {
+Connection.prototype.close = function(force) {
     // Cleanly close the socket if we can
-    if (this.socket && this.state === SOCK_CONNECTING) {
+    if ((this.socket && this.state === SOCK_CONNECTING) || force) {
         this.debugOut('close() destroying');
         this.socket.destroy();
     } else if (this.socket && this.state === SOCK_CONNECTED) {
