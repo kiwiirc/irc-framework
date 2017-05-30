@@ -9,6 +9,14 @@ module.exports = parseIrcLine;
  */
 var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
 
+var escape_tags_map = {
+    '\\\\': '\\',
+    '\\:':  ';',
+    '\\s':  ' ',
+    '\\n':  '\n',
+    '\\r':  '\r'
+};
+
 function parseIrcLine(line) {
     var msg;
     var tags = Object.create(null);
@@ -26,9 +34,18 @@ function parseIrcLine(line) {
     if (msg[1]) {
         msg[1].split(';').forEach(function(tag) {
             var parts = tag.split('=');
-            tags[parts[0].toLowerCase()] = typeof parts[1] === 'undefined' ?
-                true :
-                parts[1];
+            var key = parts[0].toLowerCase();
+            var value = parts[1];
+            if (key) {
+                if (typeof value === 'string') {
+                    value = value.replace(/\\\\|\\:|\\s|\\n|\\r/gi, function(matched) {
+                        return escape_tags_map[matched] || '';
+                    });
+                } else {
+                    value = true;
+                }
+                tags[key] = value;
+            }
         });
     }
 
