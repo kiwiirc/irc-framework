@@ -172,6 +172,12 @@ var handlers = {
         cache.secure = true;
     },
 
+    RPL_WHOISCERTFP: function(command) {
+        var cache_key = command.params[1].toLowerCase();
+        var cache = this.cache('whois.' + cache_key);
+        cache.certfp = command.params[2];
+    },
+    
     RPL_WHOISACCOUNT: function(command) {
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
