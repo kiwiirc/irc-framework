@@ -160,7 +160,7 @@ IrcClient.prototype.proxyIrcEvents = function() {
 
     this.command_handler.on('all', function(event_name, event_arg) {
         client.resetPingTimer();
-        
+
         // Add a reply() function to selected message events
         if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
             event_arg.reply = function(message) {
@@ -238,38 +238,38 @@ IrcClient.prototype.startPeriodicPing = function() {
     var that = this;
     var ping_timer = null;
     var timeout_timer = null;
-    
+
     if(that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
         return;
     }
-    
+
     function scheduleNextPing() {
         ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
     }
-    
+
     function resetPingTimer() {
         if(ping_timer) {
             that.connection.clearTimeout(ping_timer);
         }
-        
+
         if(timeout_timer) {
             that.connection.clearTimeout(timeout_timer);
         }
-        
+
         scheduleNextPing();
     }
-    
+
     function pingServer() {
         timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout*1000);
         that.ping();
     }
-    
+
     function pingTimeout() {
         that.emit('ping timeout');
         var end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
         that.connection.end(end_msg, true);
     }
-    
+
     this.resetPingTimer = resetPingTimer;
     scheduleNextPing();
 };
