@@ -40,6 +40,7 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         auto_reconnect_max_retries: 3,
         ping_interval: 30,
         ping_timeout: 120,
+        message_max_length: 350,
         transport: default_transport
     };
 
@@ -332,31 +333,29 @@ IrcClient.prototype.changeNick = function(nick) {
 };
 
 
-IrcClient.prototype.say = function(target, message) {
+IrcClient.prototype.sendMessage = function(commandName, target, message) {
     var that = this;
 
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
     // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, 350);
+    var blocks = truncateString(message, this.options.message_max_length);
 
     blocks.forEach(function(block) {
-        that.raw('PRIVMSG', target, block);
+        that.raw(commandName, target, block);
     });
+
+    return blocks;
+};
+
+
+IrcClient.prototype.say = function(target, message) {
+    return this.sendMessage('PRIVMSG', target, message);
 };
 
 
 IrcClient.prototype.notice = function(target, message) {
-    var that = this;
-
-    // Maximum length of target + message we can send to the IRC server is 500 characters
-    // but we need to leave extra room for the sender prefix so the entire message can
-    // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, 350);
-
-    blocks.forEach(function(block) {
-        that.raw('NOTICE', target, block);
-    });
+    return this.sendMessage('NOTICE', target, message);
 };
 
 
@@ -452,11 +451,13 @@ IrcClient.prototype.action = function(target, message) {
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
     // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, 350);
+    var blocks = truncateString(message, this.options.message_max_length);
 
     blocks.forEach(function(block) {
         that.ctcpRequest(target, 'ACTION', block);
     });
+
+    return blocks;
 };
 
 
