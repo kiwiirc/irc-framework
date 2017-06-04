@@ -451,10 +451,16 @@ IrcClient.prototype.action = function(target, message) {
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
     // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, this.options.message_max_length);
+
+    // The block length here is the max, but without the non-content characters:
+    // the command name, the space, and the two SOH chars
+
+    var commandName = 'ACTION';
+    var blockLength = this.options.message_max_length - (commandName.length + 3);
+    var blocks = truncateString(message, blockLength);
 
     blocks.forEach(function(block) {
-        that.ctcpRequest(target, 'ACTION', block);
+        that.ctcpRequest(target, commandName, block);
     });
 
     return blocks;
