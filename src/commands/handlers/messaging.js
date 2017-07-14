@@ -104,7 +104,7 @@ var handlers = {
                     hostname: command.hostname,
                     target: target,
                     group: target_group,
-                    type: (ctcp_command || [null])[0],
+                    type: ctcp_command || null,
                     message: message.substring(1, message.length - 1),
                     time: time,
                     account: command.getTag('account')
