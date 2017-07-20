@@ -65,6 +65,12 @@ var handlers = {
         });
     },
 
+    RPL_ISON: function(command) {
+        this.emit('users online', {
+            nicks: (command.params[command.params.length - 1] || '').split(' '),
+        });
+    },
+
 
     ERR_NICKNAMEINUSE: function(command) {
         this.emit('nick in use', {

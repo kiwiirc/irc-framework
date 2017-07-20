@@ -407,6 +407,14 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~
 
 
++**users online**
+~~~javascript
+{
+    nicks: ['nick1', 'nick2', 'nick3'],
+}
++~~~
+
+
 
 **whois**
 
