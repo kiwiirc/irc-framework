@@ -553,7 +553,7 @@ IrcClient.prototype.processNextWhoQueue = function() {
  * Explicitely start a channel list, avoiding potential issues with broken IRC servers not sending RPL_LISTSTART
  */
 IrcClient.prototype.list = function(/* paramN */) {
-    var args = Array.prototype.slice(arguments, 0);
+    var args = Array.prototype.slice.call(arguments);
     this.command_handler.cache('chanlist').channels = [];
     args.unshift('LIST');
     this.raw(args);
