@@ -223,7 +223,7 @@ Connection.prototype.end = function(data, had_error) {
     }
 
     if (this.transport) {
-        this.transport.close();
+        this.transport.close(!!had_error);
     }
 };
 
