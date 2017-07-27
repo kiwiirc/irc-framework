@@ -71,45 +71,17 @@ var handlers = {
         if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
             // CTCP request
             var ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
-            if (ctcp_command === 'ACTION') {
-                this.emit('action', {
-                    nick: command.nick,
-                    ident: command.ident,
-                    hostname: command.hostname,
-                    target: target,
-                    group: target_group,
-                    message: message.substring(8, message.length - 1),
-                    tags: command.tags,
-                    time: time,
-                    account: command.getTag('account')
-                });
-
-            } else if (ctcp_command === 'VERSION') {
-                this.connection.write(util.format(
-                    'NOTICE %s :\01VERSION %s\01',
-                    command.nick,
-                    this.connection.options.version
-                ));
-
-            } else if (ctcp_command === 'CLIENTINFO') {
-                this.connection.write(util.format(
-                    'NOTICE %s :\01CLIENTINFO VERSION\01',
-                    command.nick
-                ));
-
-            } else {
-                this.emit('ctcp request', {
-                    nick: command.nick,
-                    ident: command.ident,
-                    hostname: command.hostname,
-                    target: target,
-                    group: target_group,
-                    type: ctcp_command || null,
-                    message: message.substring(1, message.length - 1),
-                    time: time,
-                    account: command.getTag('account')
-                });
-            }
+            this.emit('ctcp request', {
+                nick: command.nick,
+                ident: command.ident,
+                hostname: command.hostname,
+                target: target,
+                group: target_group,
+                type: ctcp_command || null,
+                message: message.substring(1, message.length - 1),
+                time: time,
+                account: command.getTag('account')
+            });
         } else {
             this.emit('privmsg', {
                 nick: command.nick,
