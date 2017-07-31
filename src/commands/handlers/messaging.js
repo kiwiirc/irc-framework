@@ -9,7 +9,7 @@ var handlers = {
         var target_group;
         var notice_from_server = false;
 
-        if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
+        if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // It's a CTCP response
             this.emit('ctcp response', {
                 nick: command.nick,
@@ -68,7 +68,7 @@ var handlers = {
             return true;
         });
 
-        if ((message.charAt(0) === '\01') && (message.charAt(message.length - 1) === '\01')) {
+        if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // CTCP request
             var ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
             if (ctcp_command === 'ACTION') {
@@ -86,14 +86,14 @@ var handlers = {
 
             } else if (ctcp_command === 'VERSION') {
                 this.connection.write(util.format(
-                    'NOTICE %s :\01VERSION %s\01',
+                    'NOTICE %s :\x01VERSION %s\x01',
                     command.nick,
                     this.connection.options.version
                 ));
 
             } else if (ctcp_command === 'CLIENTINFO') {
                 this.connection.write(util.format(
-                    'NOTICE %s :\01CLIENTINFO VERSION\01',
+                    'NOTICE %s :\x01CLIENTINFO VERSION\x01',
                     command.nick
                 ));
 
