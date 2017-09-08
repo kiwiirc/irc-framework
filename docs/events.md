@@ -388,6 +388,16 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~
 
 
+**back**
+~~~javascript
+{
+    nick: 'prawnsalad',
+    message: 'You are now back',
+    time: 000000000
+}
+~~~
+
+
 
 **nick in use**
 ~~~javascript

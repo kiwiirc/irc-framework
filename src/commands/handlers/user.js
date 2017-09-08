@@ -65,6 +65,32 @@ var handlers = {
         });
     },
 
+    RPL_NOWAWAY: function(command) {
+        var time;
+
+        // Check if we have a server-time
+        time = command.getServerTime();
+
+        this.emit('away', {
+            nick: command.nick,
+            message: command.params[command.params.length - 1],
+            time: time
+        });
+    },
+
+    RPL_UNAWAY: function(command) {
+        var time;
+
+        // Check if we have a server-time
+        time = command.getServerTime();
+
+        this.emit('back', {
+            nick: command.nick,
+            message: command.params[command.params.length - 1] || '',
+            time: time
+        });
+    },
+
     RPL_ISON: function(command) {
         this.emit('users online', {
             nicks: (command.params[command.params.length - 1] || '').split(' '),
