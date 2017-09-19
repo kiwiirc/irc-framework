@@ -47,7 +47,7 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             new_ident: command.params[0],
-            new_host: command.params[0],
+            new_host: command.params[1],
             time: time
         });
     },
