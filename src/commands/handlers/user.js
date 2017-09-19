@@ -32,7 +32,7 @@ var handlers = {
             hostname: command.hostname,
             account: account,
             time: time
-        });        
+        });
     },
 
     // If the chghost CAP is enabled and 'enable_chghost' option is true
@@ -57,12 +57,20 @@ var handlers = {
 
         // Check if we have a server-time
         time = command.getServerTime();
-
-        this.emit('away', {
-            nick: command.nick,
-            message: command.params[command.params.length - 1],
-            time: time
-        });
+        const message = command.params[command.params.length - 1];
+        if (message === '') { // back
+            this.emit('back', {
+                nick: command.nick,
+                message: '',
+                time: time
+            });
+        } else {
+            this.emit('away', {
+                nick: command.nick,
+                message: message,
+                time: time
+            });
+        }
     },
 
     RPL_NOWAWAY: function(command) {
@@ -86,7 +94,7 @@ var handlers = {
 
         this.emit('back', {
             nick: command.nick,
-            message: command.params[command.params.length - 1] || '',
+            message: command.params[command.params.length - 1] || '', // example: "<nick> is now back."
             time: time
         });
     },

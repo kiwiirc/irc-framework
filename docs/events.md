@@ -398,7 +398,6 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~
 
 
-
 **nick in use**
 ~~~javascript
 {
