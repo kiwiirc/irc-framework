@@ -67,6 +67,8 @@ module.exports = {
     '301': 'RPL_AWAY',
     '303': 'RPL_ISON',
     '304': 'RPL_ZIPSTATS',
+    '305': 'RPL_UNAWAY',
+    '306': 'RPL_NOWAWAY',
     '307': 'RPL_WHOISREGNICK',
     '310': 'RPL_WHOISHELPOP',
     '311': 'RPL_WHOISUSER',
