@@ -416,12 +416,12 @@ Also triggers a **message** event with .type = 'privmsg'
 ~~~
 
 
-+**users online**
+**users online**
 ~~~javascript
 {
     nicks: ['nick1', 'nick2', 'nick3'],
 }
-+~~~
+~~~
 
 
 
@@ -435,7 +435,7 @@ Not all of these options will be available. Some will be missing depending on th
 	user: 'prawn',
 	host: 'manchester.isp.net',
 	actuallhost: 'sometimes set when using webirc',
-    real_name: 'A real prawn',
+	real_name: 'A real prawn',
 	helpop: 'is available for help',
 	bot: 'is a bot',
 	server: 'irc.server.net',
