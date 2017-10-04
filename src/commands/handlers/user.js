@@ -238,7 +238,14 @@ var handlers = {
     RPL_WHOISACTUALLY: function(command) {
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
-        cache.actuallhost = command.params[command.params.length - 1];
+
+        // <source> 338 <target> <nick> <user>@<host> <ip> :Actual user@host, Actual IP
+        var user_host = command.params[command.params.length - 3];
+        var host = user_host.substring(user_host.indexOf("@") + 1);
+        var ip = command.params[command.params.length - 2];
+
+        cache.actualip = ip;
+        cache.actualhost = host;
     },
 
     RPL_WHOWASUSER: function(command) {
