@@ -202,8 +202,19 @@ var handlers = {
     },
 
     RPL_WHOISHOST: function(command) {
-        // Ignore this command as we get the host from RPL_WHOISUSER and it contains junk
-        // anyway
+        var cache_key = command.params[1].toLowerCase();
+        var cache = this.cache('whois.' + cache_key);
+
+        var last_param = command.params[command.params.length - 1];
+        // <source> 378 <target> <nick> :is connecting from <user>@<host> <ip>
+        var match = last_param.match(/.*@([^ ]+) ([^ ]+).*$/);  // https://regex101.com/r/AQz7RE/2
+
+        if (!match) {
+            return;
+        }
+
+        cache.actualip = match[2];
+        cache.actualhost = match[1];
     },
 
     RPL_WHOISSECURE: function(command) {
