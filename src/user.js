@@ -25,7 +25,7 @@ User.prototype.toggleModes = function(modestr) {
             adding = false;
             break;
         default:
-            this.modes[adding ? 'set' : 'delete'](modestr[i]);
+            this.modes[adding ? 'add' : 'delete'](modestr[i]);
         }
     }
 };
