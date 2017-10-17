@@ -198,6 +198,14 @@ IrcClient.prototype.addCommandHandlerListeners = function() {
         }
     });
 
+    commands.on('mode', function(event) {
+        if (client.user.nick === event.nick) {
+            event.modes.forEach(function(mode) {
+                client.user.toggleModes(mode.mode);
+            });
+        }
+    });
+
     commands.on('registered', function(event) {
         client.user.nick = event.nick;
         client.connection.registeredSuccessfully();
