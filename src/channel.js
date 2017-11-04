@@ -41,6 +41,13 @@ function IrcChannel(irc_client, channel_name, key) {
             });
         }
     });
+    irc_client.on('kick', function(event) {
+        if (event.channel === that.name) {
+            that.users = _.filter(that.users, function(o) {
+                return o.nick.toLowerCase() !== event.kicked.toLowerCase();
+            });
+        }
+    });
     irc_client.on('quit', function(event) {
         that.users = _.filter(that.users, function(o) {
             return o.nick.toLowerCase() !== event.nick.toLowerCase();
