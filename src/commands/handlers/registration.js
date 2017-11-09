@@ -85,6 +85,7 @@ var handlers = {
         var want = [
             'batch',
             'multi-prefix',
+            'draft/message-tags-0.2',
             'away-notify',
             'invite-notify',
             'account-notify',
