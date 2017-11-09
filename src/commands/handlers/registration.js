@@ -144,7 +144,11 @@ var handlers = {
                 }
                 if (this.network.cap.enabled.length > 0) {
                     if (this.network.cap.isEnabled('sasl')) {
-                        this.connection.write('AUTHENTICATE PLAIN');
+                        if (this.connection.options.sasl_mechanism === 'AUTHCOOKIE') {
+                            this.connection.write('AUTHENTICATE AUTHCOOKIE');
+                        } else {
+                            this.connection.write('AUTHENTICATE PLAIN');
+                        }
                     } else {
                         this.connection.write('CAP END');
                         this.network.cap.negotiating = false;
