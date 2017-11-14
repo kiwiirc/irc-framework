@@ -326,6 +326,9 @@ Also triggers a **message** event with .type = 'privmsg'
 
 
 **ctcp request**
+
+The `VERSION` CTCP is handled internally and will not trigger this event, unless you set the
+`version` option to `null`
 ~~~javascript
 {
     nick: 'prawnsalad',

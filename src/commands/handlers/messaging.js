@@ -84,7 +84,7 @@ var handlers = {
                     account: command.getTag('account')
                 });
 
-            } else if (ctcp_command === 'VERSION') {
+            } else if (ctcp_command === 'VERSION' && this.connection.options.version) {
                 this.connection.write(util.format(
                     'NOTICE %s :\x01VERSION %s\x01',
                     command.nick,
