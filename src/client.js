@@ -207,10 +207,10 @@ IrcClient.prototype.addCommandHandlerListeners = function() {
     });
 
     commands.on('wholist', function(event) {
-        let us = _.find(event.users, {nick: client.user.nick});
-        if (us) {
-            client.user.username = us.ident;
-            client.user.host = us.hostname;
+        var thisUser = _.find(event.users, {nick: client.user.nick});
+        if (thisUser) {
+            client.user.username = thisUser.ident;
+            client.user.host = thisUser.hostname;
         }
     });
 
