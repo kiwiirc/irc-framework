@@ -437,6 +437,7 @@ Not all of these options will be available. Some will be missing depending on th
 	nick: 'prawnsalad',
 	user: 'prawn',
 	host: 'manchester.isp.net',
+	actualip: 'sometimes set when using webirc, could be the same as actualhost',
 	actuallhost: 'sometimes set when using webirc',
 	real_name: 'A real prawn',
 	helpop: 'is available for help',

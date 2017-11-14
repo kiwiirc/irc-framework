@@ -23,11 +23,43 @@ function IrcChannel(irc_client, channel_name, key) {
     this.unban = _.partial(irc_client.unban.bind(irc_client), channel_name);
 
 
-    this.users = [];
+    that.users = [];
     irc_client.on('userlist', function(event) {
         if (event.channel === that.name) {
-            this.users = event.users;
+            that.users = event.users;
         }
+    });
+    irc_client.on('join', function(event) {
+        if (event.channel === that.name) {
+            that.users.push(event);
+        }
+    });
+    irc_client.on('part', function(event) {
+        if (event.channel === that.name) {
+            that.users = _.filter(that.users, function(o) {
+                return o.nick.toLowerCase() !== event.nick.toLowerCase();
+            });
+        }
+    });
+    irc_client.on('kick', function(event) {
+        if (event.channel === that.name) {
+            that.users = _.filter(that.users, function(o) {
+                return o.nick.toLowerCase() !== event.kicked.toLowerCase();
+            });
+        }
+    });
+    irc_client.on('quit', function(event) {
+        that.users = _.filter(that.users, function(o) {
+            return o.nick.toLowerCase() !== event.nick.toLowerCase();
+        });
+    });
+    irc_client.on('nick', function(event) {
+        _.find(that.users, function(o) {
+            if(o.nick.toLowerCase() === event.nick.toLowerCase()) {
+                o.nick = event.new_nick;
+                return true;
+            }
+        });
     });
 
     this.join(key);
