@@ -66,15 +66,15 @@ function IrcChannel(irc_client, channel_name, key) {
             // There can be multiple modes set at once, loop through
             _.each(event.modes, function(modes) {
                 // Is it a channel mode ?
-                if(modes.param === null) {
+                if (modes.param === null) {
                     // TODO : manage channel mode changes
                 } else { // It's a user mode
                     // Find the user affected
                     _.find(that.users, function(user) {
-                        if(user.nick.toLowerCase() === modes.param.toLowerCase()) {
+                        if (user.nick.toLowerCase() === modes.param.toLowerCase()) {
                             _.each(modes, function(mode) {
-                                if(mode.substring(0,1) === '+') {
-                                    if(user.modes === undefined) {
+                                if (mode.substring(0,1) === '+') {
+                                    if (user.modes === undefined) {
                                         user.modes = [];
                                     }
                                     user.modes.push(mode.substring(1,2));
