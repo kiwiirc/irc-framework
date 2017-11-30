@@ -25,7 +25,7 @@ function IrcChannel(irc_client, channel_name, key) {
 
     that.users = [];
     irc_client.on('userlist', function(event) {
-        if (event.channel === that.name) {
+        if (event.channel.toLowerCase() === that.name.toLowerCase()) {
             that.users = event.users;
         }
     });
@@ -58,6 +58,49 @@ function IrcChannel(irc_client, channel_name, key) {
             if(o.nick.toLowerCase() === event.nick.toLowerCase()) {
                 o.nick = event.new_nick;
                 return true;
+            }
+        });
+    });
+    irc_client.on('mode', function(event) {
+        /* event will be something like:
+        {
+            target: '#prawnsalad',
+            nick: 'ChanServ',
+            modes: [ { mode: '+o', param: 'prawnsalad' } ],
+            time: undefined
+        }
+        */
+
+        if (event.target.toLowerCase() !== that.name.toLowerCase()) {
+            return;
+        }
+
+        // There can be multiple modes set at once, loop through
+        _.each(event.modes, function(mode) {
+            // If this mode has a user prefix then we need to update the user object
+            // eg. +o +h +v
+            let user_prefix = _.find(irc_client.network.options.PREFIX, {
+                mode: mode.mode[1],
+            });
+
+            if (!user_prefix) {
+                // TODO : manage channel mode changes
+            } else { // It's a user mode
+                // Find the user affected
+                let user = _.find(that.users, function(user) {
+                    return user.nick.toLowerCase() === mode.param.toLowerCase();
+                });
+
+                if (!user) {
+                    return;
+                }
+
+                if (mode.mode[0] === '+') {
+                    user.modes = user.modes || [];
+                    user.modes.push(mode.mode[1]);
+                } else {
+                    _.pull(user.modes, mode.mode[1]);
+                }
             }
         });
     });
@@ -145,7 +188,7 @@ IrcChannel.prototype.stream = function(stream_opts) {
 IrcChannel.prototype.updateUsers = function(cb) {
     var that = this;
     this.irc_client.on('userlist', function updateUserList(event) {
-        if (event.channel === that.name) {
+        if (event.channel.toLowerCase() === that.name.toLowerCase()) {
             that.irc_client.removeListener('userlist', updateUserList);
             if (typeof cb === 'function') { cb(this); }
         }
