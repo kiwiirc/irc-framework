@@ -62,35 +62,48 @@ function IrcChannel(irc_client, channel_name, key) {
         });
     });
     irc_client.on('mode', function(event) {
-        if (event.target === that.name) {
-            // There can be multiple modes set at once, loop through
-            _.each(event.modes, function(modes) {
-                // Is it a channel mode ?
-                if (modes.param === null) {
-                    // TODO : manage channel mode changes
-                } else { // It's a user mode
-                    // Find the user affected
-                    _.find(that.users, function(user) {
-                        if (user.nick.toLowerCase() === modes.param.toLowerCase()) {
-                            _.each(modes, function(mode) {
-                                if (mode.substring(0,1) === '+') {
-                                    if (user.modes === undefined) {
-                                        user.modes = [];
-                                    }
-                                    user.modes.push(mode.substring(1,2));
-                                } else if (mode.substring(0,1) === '-') {
-                                    _.pull(user.modes, mode.substring(1,2));
-                                }
-                            });
-
-                            return true;
-                        }
-                    });
-                }
-            });
+        /* event will be something like:
+        {
+            target: '#prawnsalad',
+            nick: 'ChanServ',
+            modes: [ { mode: '+o', param: 'prawnsalad' } ],
+            time: undefined
         }
-    });
+        */
 
+        if (event.target.toLowerCase() !== that.name.toLowerCase()) {
+            return;
+        }
+
+        // There can be multiple modes set at once, loop through
+        _.each(event.modes, function(mode) {
+            // If this mode has a user prefix then we need to update the user object
+            // eg. +o +h +v
+            let user_prefix = _.find(irc_client.network.options.PREFIX, {
+                mode: mode.mode[1],
+            });
+
+            if (!user_prefix) {
+                // TODO : manage channel mode changes
+            } else { // It's a user mode
+                // Find the user affected
+                let user = _.find(that.users, function(user) {
+                    return user.nick.toLowerCase() === mode.param.toLowerCase();
+                });
+
+                if (!user) {
+                    return;
+                }
+
+                if (mode.mode[0] === '+') {
+                    user.modes = user.modes || [];
+                    user.modes.push(mode.mode[1]);
+                } else {
+                    _.pull(user.modes, mode.mode[1]);
+                }
+            }
+        });
+    });
 
     this.join(key);
 }
