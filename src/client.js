@@ -40,6 +40,7 @@ IrcClient.prototype._applyDefaultOptions = function(user_options) {
         auto_reconnect_max_retries: 3,
         ping_interval: 30,
         ping_timeout: 120,
+        message_max_length: 350,
         transport: default_transport
     };
 
@@ -160,7 +161,7 @@ IrcClient.prototype.proxyIrcEvents = function() {
 
     this.command_handler.on('all', function(event_name, event_arg) {
         client.resetPingTimer();
-        
+
         // Add a reply() function to selected message events
         if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
             event_arg.reply = function(message) {
@@ -254,38 +255,38 @@ IrcClient.prototype.startPeriodicPing = function() {
     var that = this;
     var ping_timer = null;
     var timeout_timer = null;
-    
+
     if(that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
         return;
     }
-    
+
     function scheduleNextPing() {
         ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
     }
-    
+
     function resetPingTimer() {
         if(ping_timer) {
             that.connection.clearTimeout(ping_timer);
         }
-        
+
         if(timeout_timer) {
             that.connection.clearTimeout(timeout_timer);
         }
-        
+
         scheduleNextPing();
     }
-    
+
     function pingServer() {
         timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout*1000);
         that.ping();
     }
-    
+
     function pingTimeout() {
         that.emit('ping timeout');
         var end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
         that.connection.end(end_msg, true);
     }
-    
+
     this.resetPingTimer = resetPingTimer;
     scheduleNextPing();
 };
@@ -348,31 +349,29 @@ IrcClient.prototype.changeNick = function(nick) {
 };
 
 
-IrcClient.prototype.say = function(target, message) {
+IrcClient.prototype.sendMessage = function(commandName, target, message) {
     var that = this;
 
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
     // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, 350);
+    var blocks = truncateString(message, this.options.message_max_length);
 
     blocks.forEach(function(block) {
-        that.raw('PRIVMSG', target, block);
+        that.raw(commandName, target, block);
     });
+
+    return blocks;
+};
+
+
+IrcClient.prototype.say = function(target, message) {
+    return this.sendMessage('PRIVMSG', target, message);
 };
 
 
 IrcClient.prototype.notice = function(target, message) {
-    var that = this;
-
-    // Maximum length of target + message we can send to the IRC server is 500 characters
-    // but we need to leave extra room for the sender prefix so the entire message can
-    // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, 350);
-
-    blocks.forEach(function(block) {
-        that.raw('NOTICE', target, block);
-    });
+    return this.sendMessage('NOTICE', target, message);
 };
 
 
@@ -468,11 +467,19 @@ IrcClient.prototype.action = function(target, message) {
     // Maximum length of target + message we can send to the IRC server is 500 characters
     // but we need to leave extra room for the sender prefix so the entire message can
     // be sent from the IRCd to the target without being truncated.
-    var blocks = truncateString(message, 350);
+
+    // The block length here is the max, but without the non-content characters:
+    // the command name, the space, and the two SOH chars
+
+    var commandName = 'ACTION';
+    var blockLength = this.options.message_max_length - (commandName.length + 3);
+    var blocks = truncateString(message, blockLength);
 
     blocks.forEach(function(block) {
-        that.ctcpRequest(target, 'ACTION', block);
+        that.ctcpRequest(target, commandName, block);
     });
+
+    return blocks;
 };
 
 
