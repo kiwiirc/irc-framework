@@ -1,3 +1,5 @@
+'use strict';
+
 function User(opts) {
     opts = opts || {};
 

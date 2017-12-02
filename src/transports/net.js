@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * TCP / TLS transport
  */

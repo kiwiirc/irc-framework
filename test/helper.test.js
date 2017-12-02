@@ -1,4 +1,5 @@
-"use strict";
+'use strict';
+
 /*globals describe, it */
 let chai = require('chai'),
     Helper = require('../src/helpers'),

@@ -1,3 +1,5 @@
+'use strict';
+
 var sinon = require('sinon'),
     _ = require('lodash');
 

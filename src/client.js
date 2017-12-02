@@ -1,3 +1,5 @@
+'use strict';
+
 var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
 var MiddlewareHandler = require('middleware-handler');

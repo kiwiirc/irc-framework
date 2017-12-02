@@ -1,3 +1,5 @@
+'use strict';
+
 /*
 
 Generic IRC events. Simply passing selected IRC params into javascript objects

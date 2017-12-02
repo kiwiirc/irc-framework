@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The default irc-framework interface for nodejs
  * Usage: var IrcFramework = require('irc-framework');
