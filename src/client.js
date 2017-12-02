@@ -625,8 +625,8 @@ IrcClient.prototype.matchAction = function(match_regex, cb) {
  * Truncate a string into blocks of a set size
  */
 function isHighSurrogate(char_code) {
-    return char_code >= 55296 // d800
-        && char_code <= 56319; // dbff
+    return char_code >= 55296 && // d800
+           char_code <= 56319; // dbff
 }
 
 function truncateString(str, block_size) {
@@ -639,9 +639,9 @@ function truncateString(str, block_size) {
     while (remaining_string.length) {
         // Do not split unicode surrogate pairs
         this_block_size =
-            isHighSurrogate(remaining_string.charCodeAt(block_size - 1))
-            ? block_size - 1
-            : block_size;
+            isHighSurrogate(remaining_string.charCodeAt(block_size - 1)) ?
+            block_size - 1 :
+            block_size;
 
         blocks.push(remaining_string.substr(0, this_block_size));
         remaining_string = remaining_string.substr(this_block_size);
