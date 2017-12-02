@@ -1,3 +1,5 @@
+'use strict';
+
 var EventEmitter    = require('eventemitter3');
 var _               = require('lodash');
 var ircLineParser   = require('./irclineparser');
@@ -174,12 +176,12 @@ Connection.prototype.setTimeout = function(/*fn, length, argN */) {
     var tmr = null;
     var args = Array.prototype.slice.call(arguments, 0);
     var callback = args[0];
-    
+
     args[0] = function() {
        _.pull(that._timers, tmr);
        callback.apply(null, args);
     };
-    
+
     tmr = setTimeout.apply(null, args);
     this._timers.push(tmr);
     return tmr;
@@ -187,14 +189,14 @@ Connection.prototype.setTimeout = function(/*fn, length, argN */) {
 
 Connection.prototype.clearTimeout = function(tmr) {
 	clearTimeout(tmr);
-	_.pull(this._timers, tmr); 
+	_.pull(this._timers, tmr);
 };
 
 Connection.prototype.clearTimers = function() {
     this._timers.forEach(function(tmr) {
         clearTimeout(tmr);
     });
-    
+
     this._timers = [];
 };
 

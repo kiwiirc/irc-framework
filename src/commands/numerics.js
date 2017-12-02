@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
     '001': 'RPL_WELCOME',
     '002': 'RPL_YOURHOST',

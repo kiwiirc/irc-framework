@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 var EventEmitter = require('eventemitter3');
 var irc_numerics = require('./numerics');
