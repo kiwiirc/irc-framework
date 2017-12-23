@@ -249,7 +249,7 @@ IrcClient.prototype.registerToNetwork = function() {
     }
 
     this.raw('NICK', this.user.nick);
-    this.raw('USER', this.user.username, 0, '*', this.user.gecos);
+    this.raw('USER', this.options.username, 0, '*', this.user.gecos);
 };
 
 
