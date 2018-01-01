@@ -222,6 +222,7 @@ Connection.prototype.end = function(data, had_error) {
     // reconnects happen.
     if (!had_error) {
         this.requested_disconnect = true;
+        this.clearTimers();
     }
 
     if (this.transport) {
