@@ -1,3 +1,5 @@
+'use strict';
+
 /*globals describe, it */
 /* jshint -W024 */
 /* jshint expr:true */

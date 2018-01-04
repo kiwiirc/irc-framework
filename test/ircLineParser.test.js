@@ -1,3 +1,5 @@
+'use strict';
+
 /*globals describe, it */
 var chai = require('chai'),
     parseIrcLine = require('../src/irclineparser'),
@@ -111,7 +113,7 @@ describe('src/irclineparser.js', function () {
                 command: 'TEST'
             });
         });
-        
+
 
         it('should parse a command with a single parameter and a nick@hostname prefix', function () {
             var msgObj = parseIrcLine(':nick@example.org TEST foo');
@@ -279,7 +281,7 @@ describe('src/irclineparser.js', function () {
                 command: 'TEST'
             });
         });
-        
+
         it('should parse a message that has a tag with a value', function () {
             var msgObj = parseIrcLine('@foo=bar TEST');
 
@@ -339,7 +341,7 @@ describe('src/irclineparser.js', function () {
                 hostname: 'example.org'
             });
         });
-        
+
         it('should parse a message that has a tag with no value and a nick!ident@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo :nick!ident@example.org TEST');
 
@@ -650,7 +652,7 @@ describe('src/irclineparser.js', function () {
                 params: ['bar', 'baz']
             });
         });
-        
+
         it('should parse a message that has a tag with no value, a "trailing" parameter that has spaces and a nick@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo :nick@example.org TEST :hello world');
 
@@ -754,7 +756,7 @@ describe('src/irclineparser.js', function () {
                 params: ['bar', 'baz']
             });
         });
-        
+
         it('should parse a message that has a tag with no value, a "trailing" parameter that has spaces and a nick!ident@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo :nick!ident@example.org TEST :hello world');
 
@@ -1047,7 +1049,7 @@ describe('src/irclineparser.js', function () {
                 params: ['bar', 'baz']
             });
         });
-        
+
         it('should parse a message that has a tag with a value, a "trailing" parameter that has spaces and a nick!ident@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo=testvalue :nick!ident@example.org TEST :hello world');
 
@@ -1360,7 +1362,7 @@ describe('src/irclineparser.js', function () {
                 params: ['bar', 'baz']
             });
         });
-        
+
         it('should parse a message that has multiple tags with no values, a "trailing" parameter that has spaces and a nick!ident@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo;bar :nick!ident@example.org TEST :hello world');
 
@@ -1564,7 +1566,7 @@ describe('src/irclineparser.js', function () {
                 params: ['bar', 'baz']
             });
         });
-        
+
         it('should parse a message that has multiple tags one with a value, a "trailing" parameter that has spaces and a nick@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo=bar;baz :nick@example.org TEST :hello world');
 
@@ -1675,7 +1677,7 @@ describe('src/irclineparser.js', function () {
                 params: ['bar', 'baz']
             });
         });
-        
+
         it('should parse a message that has multiple tags one with a value, a "trailing" parameter that has spaces and a nick!ident@hostname prefix', function () {
             var msgObj = parseIrcLine('@foo=bar;baz :nick!ident@example.org TEST :hello world');
 

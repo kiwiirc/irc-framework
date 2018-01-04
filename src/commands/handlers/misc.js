@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 
 var handlers = {
@@ -204,7 +206,7 @@ module.exports = function AddCommandHandlers(command_controller) {
 function getChanListCache(that) {
     var cache = that.cache('chanlist');
 
-    // fix some IRC networks 
+    // fix some IRC networks
     if (!cache.channels) {
         cache.channels = [];
     }

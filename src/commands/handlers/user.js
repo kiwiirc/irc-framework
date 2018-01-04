@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 
 var handlers = {
@@ -177,7 +179,11 @@ var handlers = {
     RPL_WHOISCHANNELS:       function(command) {
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
-        cache.channels = command.params[command.params.length - 1];
+        if (cache.channels) {
+            cache.channels += ' ' + command.params[command.params.length - 1];
+        } else {
+            cache.channels = command.params[command.params.length - 1];
+        }
     },
 
     RPL_WHOISMODES: function(command) {

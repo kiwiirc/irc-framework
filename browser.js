@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The default irc-framework interface for browsers
  * Usage: var IrcFramework = require('irc-framework/browser');

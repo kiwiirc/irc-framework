@@ -1,3 +1,5 @@
+'use strict';
+
 var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
 var MiddlewareHandler = require('middleware-handler');
@@ -247,7 +249,7 @@ IrcClient.prototype.registerToNetwork = function() {
     }
 
     this.raw('NICK', this.user.nick);
-    this.raw('USER', this.user.username, 0, '*', this.user.gecos);
+    this.raw('USER', this.options.username, 0, '*', this.user.gecos);
 };
 
 
@@ -625,8 +627,8 @@ IrcClient.prototype.matchAction = function(match_regex, cb) {
  * Truncate a string into blocks of a set size
  */
 function isHighSurrogate(char_code) {
-    return char_code >= 55296 // d800
-        && char_code <= 56319; // dbff
+    return char_code >= 55296 && // d800
+           char_code <= 56319; // dbff
 }
 
 function truncateString(str, block_size) {
@@ -639,9 +641,9 @@ function truncateString(str, block_size) {
     while (remaining_string.length) {
         // Do not split unicode surrogate pairs
         this_block_size =
-            isHighSurrogate(remaining_string.charCodeAt(block_size - 1))
-            ? block_size - 1
-            : block_size;
+            isHighSurrogate(remaining_string.charCodeAt(block_size - 1)) ?
+            block_size - 1 :
+            block_size;
 
         blocks.push(remaining_string.substr(0, this_block_size));
         remaining_string = remaining_string.substr(this_block_size);

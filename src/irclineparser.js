@@ -1,5 +1,7 @@
-const _ = require('lodash');
-const MessageTags = require('./messagetags');
+'use strict';
+
+var _ = require('lodash');
+var MessageTags = require('./messagetags');
 
 module.exports = parseIrcLine;
 
