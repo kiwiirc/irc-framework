@@ -1,4 +1,5 @@
-var _ = require('lodash');
+const _ = require('lodash');
+const MessageTags = require('./messagetags');
 
 module.exports = parseIrcLine;
 
@@ -8,14 +9,6 @@ module.exports = parseIrcLine;
  * IRCds
  */
 var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
-
-var escape_tags_map = {
-    '\\\\': '\\',
-    '\\:':  ';',
-    '\\s':  ' ',
-    '\\n':  '\n',
-    '\\r':  '\r'
-};
 
 function parseIrcLine(line) {
     var msg;
@@ -32,21 +25,7 @@ function parseIrcLine(line) {
 
     // Extract any tags (msg[1])
     if (msg[1]) {
-        msg[1].split(';').forEach(function(tag) {
-            var parts = tag.split('=');
-            var key = parts[0].toLowerCase();
-            var value = parts[1];
-            if (key) {
-                if (typeof value === 'string') {
-                    value = value.replace(/\\\\|\\:|\\s|\\n|\\r/gi, function(matched) {
-                        return escape_tags_map[matched] || '';
-                    });
-                } else {
-                    value = true;
-                }
-                tags[key] = value;
-            }
-        });
+        tags = MessageTags.decode(msg[1]);
     }
 
     // Nick value will be in the prefix slot if a full user mask is not used
