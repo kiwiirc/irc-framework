@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports.decodeValue = decodeValue;
 module.exports.encodeValue = encodeValue;
 module.exports.decode = decode;
@@ -63,7 +65,7 @@ function encode(tags) {
             return key;
         }
 
-        return `${key}=${encodeValue(val.toString())}`;
+        return key + '=' + encodeValue(val.toString());
     });
 
     return parts.join(';');
