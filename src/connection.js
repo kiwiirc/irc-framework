@@ -156,6 +156,11 @@ Connection.prototype.connect = function(options) {
     }
 };
 
+Connection.prototype.addReadBuffer = function(line) {
+    this.read_buffer.push(line);
+    this.processReadBuffer();
+};
+
 Connection.prototype.write = function(data, callback) {
     if (!this.connected || this.requested_disconnect) {
         return 0;
