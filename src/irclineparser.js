@@ -43,7 +43,7 @@ function parseIrcLine(line) {
 
     // Add the trailing param to the params list
     if (typeof msg[8] !== 'undefined') {
-        msg_obj.params.push(_.trimRight(msg[8]));
+        msg_obj.params.push(_.trimEnd(msg[8]));
     }
 
     return msg_obj;
