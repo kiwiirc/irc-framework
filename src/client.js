@@ -298,6 +298,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
 
+    // Gets overridden with a function in startPeriodicPing(). Only set here for completeness.
     resetPingTimer() {}
 
 
