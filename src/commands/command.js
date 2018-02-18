@@ -2,47 +2,44 @@
 
 var _ = require('lodash');
 
-module.exports = IrcCommand;
+module.exports = class IrcCommand {
+    constructor(command, data) {
+        this.command = command += '';
+        this.params = _.clone(data.params);
+        this.tags = _.clone(data.tags);
 
-
-function IrcCommand(command, data) {
-    this.command = command += '';
-    this.params = _.clone(data.params);
-    this.tags = _.clone(data.tags);
-
-    this.prefix = data.prefix;
-    this.nick = data.nick;
-    this.ident = data.ident;
-    this.hostname = data.hostname;
-}
-
-
-IrcCommand.prototype.getTag = function(tag_name) {
-    return this.tags[tag_name.toLowerCase()];
-};
-
-
-IrcCommand.prototype.getServerTime = function() {
-    var time = this.getTag('time');
-
-    // Convert the time value to a unixtimestamp
-    if (typeof time === 'string') {
-        if (time.indexOf('T') > -1) {
-            time = parseISO8601(time);
-
-        } else if (time.match(/^[0-9.]+$/)) {
-            // A string formatted unix timestamp
-            time = new Date(time * 1000);
-        }
-
-        time = time.getTime();
-
-    } else if (typeof time === 'number') {
-        time = new Date(time * 1000);
-        time = time.getTime();
+        this.prefix = data.prefix;
+        this.nick = data.nick;
+        this.ident = data.ident;
+        this.hostname = data.hostname;
     }
 
-    return time;
+    getTag(tag_name) {
+        return this.tags[tag_name.toLowerCase()];
+    }
+
+    getServerTime() {
+        var time = this.getTag('time');
+
+        // Convert the time value to a unixtimestamp
+        if (typeof time === 'string') {
+            if (time.indexOf('T') > -1) {
+                time = parseISO8601(time);
+
+            } else if (time.match(/^[0-9.]+$/)) {
+                // A string formatted unix timestamp
+                time = new Date(time * 1000);
+            }
+
+            time = time.getTime();
+
+        } else if (typeof time === 'number') {
+            time = new Date(time * 1000);
+            time = time.getTime();
+        }
+
+        return time;
+    }
 };
 
 
