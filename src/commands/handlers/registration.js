@@ -96,8 +96,7 @@ var handlers = {
             'userhost-in-names',
             'extended-join',
             'znc.in/server-time-iso',
-            'znc.in/server-time',
-            'twitch.tv/membership'
+            'znc.in/server-time'
         ];
 
         // Optional CAPs depending on settings
