@@ -31,6 +31,15 @@ new Irc.Client({
 ##### `.connected`
 If connected to the IRC network and successfully registered
 
+##### `.user`
+Once connected to an IRC network, this object will have these properties:
+* `.nick` The current nick you are currently using
+* `.username` Your username (ident) that the network sees you as using
+* `.gecos` Your current gecos (realname)
+* `.host` On supported servers, the hostname that the networksees you as using
+* `.away` Your current away status. Empty for not away
+* `.modes` A Set() instance with your current user modes
+
 
 #### Methods
 ##### `.requestCap('twitch.tv/membership')`
