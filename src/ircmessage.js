@@ -1,10 +1,6 @@
 let MessageTags = require('./messagetags');
 
 module.exports = class IrcMessage {
-    static fromRaw(rawMessage) {
-
-    }
-
     constructor(command, ...args) {
         this.tags = Object.create(null);
         this.prefix = '';
