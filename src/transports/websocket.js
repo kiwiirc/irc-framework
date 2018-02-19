@@ -7,7 +7,7 @@
 var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
 
-module.exports = class Connection {
+module.exports = class Connection extends EventEmitter {
     constructor(options) {
         super();
 
