@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var MessageTags = require('./messagetags');
+var IrcMessage = require('./ircmessage');
 
 module.exports = parseIrcLine;
 
@@ -13,38 +14,31 @@ module.exports = parseIrcLine;
 var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
 
 function parseIrcLine(line) {
-    var msg;
-    var tags = Object.create(null);
-    var msg_obj;
-
     // Parse the complete line, removing any carriage returns
-    msg = parse_regex.exec(line.replace(/^\r+|\r+$/, ''));
-
-    if (!msg) {
+    let matches = parse_regex.exec(line.replace(/^\r+|\r+$/, ''));
+    if (!matches) {
         // The line was not parsed correctly, must be malformed
         return;
     }
 
-    // Extract any tags (msg[1])
-    if (msg[1]) {
-        tags = MessageTags.decode(msg[1]);
+    let msg = new IrcMessage();
+
+    if (matches[1]) {
+        msg.tags = MessageTags.decode(matches[1]);
     }
 
-    // Nick value will be in the prefix slot if a full user mask is not used
-    msg_obj = {
-        tags:       tags,
-        prefix:     msg[2],
-        nick:       msg[3] || msg[2],
-        ident:      msg[4] || '',
-        hostname:   msg[5] || '',
-        command:    msg[6],
-        params:     msg[7] ? msg[7].split(/ +/) : []
-    };
+    msg.prefix = matches[2];
+    // Nick will be in the prefix slot if a full user mask is not used
+    msg.nick = matches[3] || matches[2];
+    msg.ident = matches[4] || '';
+    msg.hostname = matches[5] || '';
+    msg.command = matches[6];
+    msg.params = matches[7] ? matches[7].split(/ +/) : [];
 
     // Add the trailing param to the params list
-    if (typeof msg[8] !== 'undefined') {
-        msg_obj.params.push(_.trimEnd(msg[8]));
+    if (typeof matches[8] !== 'undefined') {
+        msg.params.push(_.trimEnd(matches[8]));
     }
 
-    return msg_obj;
+    return msg;
 }

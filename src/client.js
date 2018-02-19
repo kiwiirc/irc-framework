@@ -4,6 +4,7 @@ var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
 var MiddlewareHandler = require('middleware-handler');
 var IrcCommandHandler = require('./commands/').CommandHandler;
+var IrcMessage = require('./ircmessage');
 var Connection = require('./connection');
 var NetworkInfo = require('./networkinfo');
 var User = require('./user');
@@ -308,7 +309,11 @@ module.exports = class IrcClient extends EventEmitter {
      * Client API
      */
     raw(input) {
-        this.connection.write(this.rawString.apply(this, arguments));
+        if (input instanceof IrcMessage) {
+            this.connection.write(input.to1459());
+        } else {
+            this.connection.write(this.rawString.apply(this, arguments));
+        }
     }
 
 
