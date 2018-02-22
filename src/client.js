@@ -26,6 +26,10 @@ module.exports = class IrcClient extends EventEmitter {
         default_transport = transport;
     }
 
+    get Message() {
+        return IrcMessage;
+    }
+
     _applyDefaultOptions(user_options) {
         var defaults = {
             nick: 'ircbot',
