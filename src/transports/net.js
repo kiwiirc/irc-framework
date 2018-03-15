@@ -86,14 +86,14 @@ module.exports = class Connection extends EventEmitter {
                 host: ircd_host,
                 port: ircd_port,
                 ssl: options.tls || options.ssl,
-                rejectUnauthorized: options.rejectUnauthorized,
-                family: this.getAddressFamily(options.outgoing_addr)
+                rejectUnauthorized: options.rejectUnauthorized
             }, {
                 host: options.socks.host,
                 port: options.socks.port || 8080,
                 user: options.socks.user,
                 pass: options.socks.pass,
-                localAddress: options.outgoing_addr
+                localAddress: options.outgoing_addr,
+                family: this.getAddressFamily(options.outgoing_addr)
             });
         } else {
             if (options.tls || options.ssl) {
