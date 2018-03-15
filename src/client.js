@@ -45,8 +45,7 @@ module.exports = class IrcClient extends EventEmitter {
             ping_interval: 30,
             ping_timeout: 120,
             message_max_length: 350,
-            transport: default_transport,
-            family: 4
+            transport: default_transport
         };
 
         var props = Object.keys(defaults);

@@ -86,14 +86,14 @@ module.exports = class Connection extends EventEmitter {
                 host: ircd_host,
                 port: ircd_port,
                 ssl: options.tls || options.ssl,
-                rejectUnauthorized: options.rejectUnauthorized
+                rejectUnauthorized: options.rejectUnauthorized,
+                family: this.getAddressFamily(options.outgoing_addr)
             }, {
                 host: options.socks.host,
                 port: options.socks.port || 8080,
                 user: options.socks.user,
                 pass: options.socks.pass,
-                localAddress: options.outgoing_addr,
-                family: options.family
+                localAddress: options.outgoing_addr
             });
         } else {
             if (options.tls || options.ssl) {
@@ -102,7 +102,7 @@ module.exports = class Connection extends EventEmitter {
                     port: ircd_port,
                     rejectUnauthorized: options.rejectUnauthorized,
                     localAddress: options.outgoing_addr,
-                    family: options.family
+                    family: this.getAddressFamily(options.outgoing_addr)
                 });
 
                 socket_connect_event_name = 'secureConnect';
@@ -112,7 +112,7 @@ module.exports = class Connection extends EventEmitter {
                     host: ircd_host,
                     port: ircd_port,
                     localAddress: options.outgoing_addr,
-                    family: options.family
+                    family: this.getAddressFamily(options.outgoing_addr)
                 });
 
                 socket_connect_event_name = 'connect';
@@ -218,6 +218,15 @@ module.exports = class Connection extends EventEmitter {
             return false;
         } catch (err) {
             return false;
+        }
+    }
+
+    getAddressFamily(addr) {
+        if (net.isIPv4(addr)) {
+            return 4;
+        }
+        if (net.isIPv6(addr)) {
+            return 6;
         }
     }
 };
