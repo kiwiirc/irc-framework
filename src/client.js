@@ -2,6 +2,7 @@
 
 var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
+var runes = require('runes');
 var MiddlewareHandler = require('middleware-handler');
 var IrcCommandHandler = require('./commands/').CommandHandler;
 var IrcMessage = require('./ircmessage');
@@ -363,7 +364,7 @@ module.exports = class IrcClient extends EventEmitter {
         // Maximum length of target + message we can send to the IRC server is 500 characters
         // but we need to leave extra room for the sender prefix so the entire message can
         // be sent from the IRCd to the target without being truncated.
-        var blocks = truncateString(message, this.options.message_max_length);
+        var blocks = this.stringToBlocks(message, this.options.message_max_length);
 
         blocks.forEach(function(block) {
             that.raw(commandName, target, block);
@@ -481,7 +482,7 @@ module.exports = class IrcClient extends EventEmitter {
 
         var commandName = 'ACTION';
         var blockLength = this.options.message_max_length - (commandName.length + 3);
-        var blocks = truncateString(message, blockLength);
+        var blocks = this.stringToBlocks(message, blockLength);
 
         blocks.forEach(function(block) {
             that.ctcpRequest(target, commandName, block);
@@ -624,36 +625,54 @@ module.exports = class IrcClient extends EventEmitter {
     matchAction(match_regex, cb) {
         return this.match(match_regex, cb, 'action');
     }
-};
+    
+    /**
+     * Truncate a string into blocks of a set size
+     */
+    stringToBlocks(str, block_size) {
+        block_size = block_size || 350;
 
+        // Quickly return if input string fits in a single block
+        if (str.length <= block_size) {
+            return [str];
+        }
 
+        var chars = runes(str);
+        var blocks = [];
+        var start_index = 0;
+        var end_index = 0;
+        var current_block_length = 0;
+        var current_char_length = 0;
 
+        do {
+            do {
+                current_char_length = chars[end_index].length;
+                current_block_length += current_char_length;
+                
+                // If character does not fit in a single block, include it in current block anyway
+                // and split it later on by falling back to simple substring
+                if (current_char_length > block_size) {
+                    end_index++;
+                }
+            }
+            while (current_block_length <= block_size && ++end_index < chars.length);
 
-/**
- * Truncate a string into blocks of a set size
- */
-function isHighSurrogate(char_code) {
-    return char_code >= 55296 && // d800
-           char_code <= 56319; // dbff
-}
+            var block = chars.slice(start_index, end_index).join('');
 
-function truncateString(str, block_size) {
-    block_size = block_size || 350;
+            // Fallback to plain substring if we are unable to fit unicode characters in a single block
+            if (block.length > block_size) {
+                for (current_char_length = 0; current_char_length < block.length; current_char_length += block_size) {
+                    blocks.push(block.substr(current_char_length, block_size));
+                }
+            } else {
+                blocks.push(block);
+            }
 
-    var blocks = [];
-    var this_block_size;
-    var remaining_string = str;
+            start_index = end_index;
+            current_block_length = 0;
+        }
+        while (end_index < chars.length);
 
-    while (remaining_string.length) {
-        // Do not split unicode surrogate pairs
-        this_block_size =
-            isHighSurrogate(remaining_string.charCodeAt(block_size - 1)) ?
-            block_size - 1 :
-            block_size;
-
-        blocks.push(remaining_string.substr(0, this_block_size));
-        remaining_string = remaining_string.substr(this_block_size);
+        return blocks;
     }
-
-    return blocks;
-}
+};
