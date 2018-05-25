@@ -99,8 +99,7 @@ module.exports = class Connection extends EventEmitter {
     		this.incoming_buffer = '';
     	}
 
-    	lines.forEach(function(_line) {
-    		var line = _line.trim();
+    	lines.forEach(function(line) {
     		that.emit('line', line);
     	});
     }

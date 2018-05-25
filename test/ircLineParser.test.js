@@ -1704,5 +1704,24 @@ describe('src/irclineparser.js', function () {
             });
         });
 
+        it('should remove all new lines', function () {
+            var msgObj = parseIrcLine("\n\r:irc.example.org TEST foo :bar  \r\n");
+
+            expect(msgObj).to.containSubset({
+                prefix: 'irc.example.org',
+                command: 'TEST',
+                params: ['foo', 'bar  ']
+            });
+        });
+
+        it('should keep whitespace in trailing parameter', function () {
+            var msgObj = parseIrcLine(':irc.example.org TEST foo :bar  ');
+
+            expect(msgObj).to.containSubset({
+                prefix: 'irc.example.org',
+                command: 'TEST',
+                params: ['foo', 'bar  ']
+            });
+        });
     });
 });

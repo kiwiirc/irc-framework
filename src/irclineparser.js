@@ -12,10 +12,11 @@ module.exports = parseIrcLine;
  * IRCds
  */
 var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
+var newline_regex = /^[\r\n]+|[\r\n]+$/g;
 
 function parseIrcLine(line) {
     // Parse the complete line, removing any carriage returns
-    let matches = parse_regex.exec(line.replace(/^\r+|\r+$/, ''));
+    let matches = parse_regex.exec(line.replace(newline_regex, ''));
     if (!matches) {
         // The line was not parsed correctly, must be malformed
         return;
@@ -37,7 +38,7 @@ function parseIrcLine(line) {
 
     // Add the trailing param to the params list
     if (typeof matches[8] !== 'undefined') {
-        msg.params.push(_.trimEnd(matches[8]));
+        msg.params.push(matches[8]);
     }
 
     return msg;
