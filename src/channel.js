@@ -74,7 +74,7 @@ module.exports = class IrcChannel {
             }
 
             // There can be multiple modes set at once, loop through
-            _.each(event.modes, function(mode) {
+            _.each(event.modes, mode => {
                 // If this mode has a user prefix then we need to update the user object
                 // eg. +o +h +v
                 let user_prefix = _.find(irc_client.network.options.PREFIX, {
@@ -85,9 +85,9 @@ module.exports = class IrcChannel {
                     // TODO : manage channel mode changes
                 } else { // It's a user mode
                     // Find the user affected
-                    let user = _.find(this.users, function(user) {
-                        return user.nick.toLowerCase() === mode.param.toLowerCase();
-                    });
+                    let user = _.find(this.users, user =>
+                        user.nick.toLowerCase() === mode.param.toLowerCase()
+                    );
 
                     if (!user) {
                         return;
