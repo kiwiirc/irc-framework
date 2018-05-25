@@ -8,6 +8,7 @@
     "iconv-lite": "^0.4.11",
     "lodash": "^4.17.4",
     "middleware-handler": "^0.2.0",
+    "runes": "^0.4.3",
     "socksjs": "^0.5.0"
   },
   "devDependencies": {
