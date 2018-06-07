@@ -144,6 +144,8 @@ var handlers = {
         var cache_key = 'whois.' + command.params[1].toLowerCase();
         var message = command.params[command.params.length - 1] || 'is away';
 
+        // RPL_AWAY may come as a response to PRIVMSG, and not be a part of whois
+        // If so, emit away event separately for it
         if (!this.hasCache(cache_key)) {
             // Check if we have a server-time
             var time = command.getServerTime();
