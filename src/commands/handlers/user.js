@@ -62,12 +62,14 @@ var handlers = {
         const message = command.params[command.params.length - 1];
         if (message === '') { // back
             this.emit('back', {
+                self: false,
                 nick: command.nick,
                 message: '',
                 time: time
             });
         } else {
             this.emit('away', {
+                self: false,
                 nick: command.nick,
                 message: message,
                 time: time
@@ -82,6 +84,7 @@ var handlers = {
         time = command.getServerTime();
 
         this.emit('away', {
+            self: true,
             nick: command.nick,
             message: command.params[command.params.length - 1],
             time: time
@@ -95,6 +98,7 @@ var handlers = {
         time = command.getServerTime();
 
         this.emit('back', {
+            self: true,
             nick: command.nick,
             message: command.params[command.params.length - 1] || '', // example: "<nick> is now back."
             time: time
@@ -137,9 +141,27 @@ var handlers = {
     },
 
     RPL_AWAY: function(command) {
-        var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
-        cache.away = command.params[command.params.length - 1] || 'is away';
+        var cache_key = 'whois.' + command.params[1].toLowerCase();
+        var message = command.params[command.params.length - 1] || 'is away';
+
+        // RPL_AWAY may come as a response to PRIVMSG, and not be a part of whois
+        // If so, emit away event separately for it
+        if (!this.hasCache(cache_key)) {
+            // Check if we have a server-time
+            var time = command.getServerTime();
+
+            this.emit('away', {
+                self: false,
+                nick: command.nick,
+                message: message,
+                time: time
+            });
+
+            return;
+        }
+
+        var cache = this.cache(cache_key);
+        cache.away = message;
     },
 
     RPL_WHOISUSER: function(command) {

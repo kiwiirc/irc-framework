@@ -382,8 +382,11 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
 
 
 **away**
+
+`self` will be `true` if this is a response to your `away` command.
 ~~~javascript
 {
+    self: false,
     nick: 'prawnsalad',
     message: 'Time to go eat some food.',
     time: 000000000
@@ -392,8 +395,11 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
 
 
 **back**
+
+`self` will be `true` if this is a response to your `away` command.
 ~~~javascript
 {
+    self: false,
     nick: 'prawnsalad',
     message: 'You are now back',
     time: 000000000
