@@ -188,4 +188,8 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
         return cache;
     }
+
+    hasCache(id) {
+        return this._caches && Object.prototype.hasOwnProperty.call(this._caches, id);
+    }
 };
