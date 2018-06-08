@@ -212,7 +212,7 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         commands.on('mode', function(event) {
-            if (client.user.nick === event.nick) {
+            if (client.user.nick === event.target) {
                 event.modes.forEach(function(mode) {
                     client.user.toggleModes(mode.mode);
                 });
