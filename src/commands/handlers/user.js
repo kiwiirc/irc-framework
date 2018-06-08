@@ -59,7 +59,7 @@ var handlers = {
 
         // Check if we have a server-time
         time = command.getServerTime();
-        const message = command.params[command.params.length - 1];
+        const message = command.params[command.params.length - 1] || '';
         if (message === '') { // back
             this.emit('back', {
                 self: false,
