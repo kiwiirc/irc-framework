@@ -6,7 +6,7 @@
 var chai = require('chai'),
     expect = chai.expect,
     mocks = require('../../mocks'),
-    parse = require('../../../src/ircLineParser'),
+    parse = require('../../../src/irclineparser'),
     sinonChai = require('sinon-chai'),
     misc = require('../../../src/commands/handlers/misc');
 
