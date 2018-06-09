@@ -39,10 +39,20 @@ describe('src/messagetags.js', function () {
         it('should decode a tag string into an object with correct characters', function () {
             let plain = 'foo=bar;baz;name=prawn\\ssalad';
             let tags = MessageTags.decode(plain);
-            expect(tags).to.containSubset({
+            expect(tags).to.deep.equal({
                 foo: 'bar',
                 baz: true,
                 name: 'prawn salad',
+            });
+        });
+
+        it('should handle equals signs in the tag value', function () {
+            let plain = 'foo=bar=baz;hello;world=monde';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: 'bar=baz',
+                hello: true,
+                world: 'monde',
             });
         });
     });
