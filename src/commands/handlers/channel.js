@@ -45,6 +45,9 @@ var handlers = {
         }
 
         _.each(members, function(member) {
+            if (!member) {
+                return;
+            }
             var j = 0;
             var modes = [];
             var user = null;
