@@ -1,5 +1,7 @@
 'use strict';
 
+const Helpers = require('./helpers');
+
 module.exports.decodeValue = decodeValue;
 module.exports.encodeValue = encodeValue;
 module.exports.decode = decode;
@@ -37,7 +39,7 @@ function decode(tag_str) {
     let tags = Object.create(null);
 
     tag_str.split(';').forEach(tag => {
-        let parts = tag.split('=');
+        let parts = Helpers.splitOnce(tag, '=');
         let key = parts[0].toLowerCase();
         let value = parts[1];
 
