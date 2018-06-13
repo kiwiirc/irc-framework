@@ -119,7 +119,7 @@ var handlers = {
         });
     },
 
-    ERR_ERRONEUSNICKNAME: function(command) {
+    ERR_ERRONEOUSNICKNAME: function(command) {
         this.emit('nick invalid', {
             nick: command.params[1],
             reason: command.params[command.params.length - 1]
@@ -305,7 +305,7 @@ var handlers = {
         // TODO: this
     },
 
-    RPL_HOSTCLOACKING: function(command) {
+    RPL_HOSTCLOAKING: function(command) {
         this.emit('displayed host', {
             nick: command.params[0],
             host: command.params[1]
