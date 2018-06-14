@@ -313,10 +313,11 @@ var handlers = {
     },
 
     ERR_WASNOSUCHNICK: function(command) {
-        this.emit('whowas', {
-            nick: command.params[1],
-            error: 'no_such_nick'
-        });
+        var cache_key = command.params[1].toLowerCase();
+        var cache = this.cache('whois.' + cache_key);
+
+        cache.nick = command.params[1];
+        cache.error = 'no_such_nick';
     },
 
     RPL_UMODEIS: function(command) {
