@@ -282,7 +282,7 @@ var handlers = {
 
     RPL_WHOWASUSER: function(command) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key), command.params[1]);
+        var cache = this.cache('whois.' + cache_key);
 
         cache.nick = command.params[1];
         cache.ident = command.params[2];
