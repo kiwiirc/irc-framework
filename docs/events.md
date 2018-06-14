@@ -187,8 +187,8 @@ Debugging messages.
 ~~~javascript
 {
     nick: 'prawnsalad',
-    user: 'prawnsalad',
-    host: 'unaffiliated/prawnsalad',
+    ident: 'prawnsalad',
+    hostname: 'unaffiliated/prawnsalad',
     channel: '#channel',
     when: 000000000
 }
@@ -439,26 +439,26 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
 Not all of these options will be available. Some will be missing depending on the network.
 ~~~javascript
 {
-	away: 'away message',
-	nick: 'prawnsalad',
-	user: 'prawn',
-	host: 'manchester.isp.net',
-	actualip: 'sometimes set when using webirc, could be the same as actualhost',
-	actualhost: 'sometimes set when using webirc',
-	real_name: 'A real prawn',
-	helpop: 'is available for help',
-	bot: 'is a bot',
-	server: 'irc.server.net',
-	server_info: '',
-	operator: 'is an operator',
-	channels: 'is on these channels',
-	modes: '',
-	idle: 'idle for 34 secs',
-	logon: 'logged on at X',
-	registered_nick: 'prawnsalad',
-	account: 'logged on account',
-	secure: 'is using SSL/TLS',
-	special: ''
+    away: 'away message',
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    actual_ip: 'sometimes set when using webirc, could be the same as actual_hostname',
+    actual_hostname: 'sometimes set when using webirc',
+    real_name: 'A real prawn',
+    helpop: 'is available for help',
+    bot: 'is a bot',
+    server: 'irc.server.net',
+    server_info: '',
+    operator: 'is an operator',
+    channels: 'is on these channels',
+    modes: '',
+    idle: 'idle for 34 secs',
+    logon: 'logged on at X',
+    registered_nick: 'prawnsalad',
+    account: 'logged on account',
+    secure: 'is using SSL/TLS',
+    special: ''
 }
 ~~~
 
@@ -470,8 +470,13 @@ If the requested user was not found, error will contain 'no_such_nick'.
 {
     nick: 'prawnsalad',
     ident: 'prawn',
-    host: 'manchester.isp.net',
-    real_name: 'prawns real name',
+    hostname: 'manchester.isp.net',
+    actual_ip: 'sometimes set when using webirc, could be the same as actual_hostname',
+    actual_hostname: 'sometimes set when using webirc',
+    real_name: 'A real prawn',
+    server: 'irc.server.net',
+    server_info: 'Thu Jun 14 09:15:51 2018',
+    account: 'logged on account',
     error: ''
 }
 ~~~
@@ -485,8 +490,8 @@ Only on supporting IRC servers with CHGHOST capabilities and 'enable_chghost' se
     nick: 'prawnsalad',
     ident: 'prawns_old_ident',
     hostname: 'prawns.old.hostname',
-    new_user: 'prawns_new_ident',
-    new_host: 'prawns_new_host',
+    new_ident: 'prawns_new_ident',
+    new_hostname: 'prawns_new_host',
     time: time
 }
 ~~~

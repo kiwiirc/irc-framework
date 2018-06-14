@@ -131,8 +131,8 @@ var handlers = {
         var parsed = Helpers.parseMask(command.params[2]);
         this.emit('topicsetby', {
             nick: parsed.nick,
-            user: parsed.user,
-            host: parsed.host,
+            ident: parsed.user,
+            hostname: parsed.host,
             channel: command.params[1],
             when: command.params[3]
         });
