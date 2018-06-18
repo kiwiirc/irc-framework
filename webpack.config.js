@@ -6,7 +6,10 @@ module.exports = {
   entry: { main: './index_browser.js' },
   output: {
     path: path.resolve(__dirname),
-    filename: 'browser.js'
+    filename: 'browser.js',
+    library: 'irc-framework',
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   module: {
     rules: [
