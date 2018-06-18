@@ -470,8 +470,13 @@ If the requested user was not found, error will contain 'no_such_nick'.
 {
     nick: 'prawnsalad',
     ident: 'prawn',
-    host: 'manchester.isp.net',
-    real_name: 'prawns real name',
+    hostname: 'manchester.isp.net',
+    actual_ip: 'sometimes set when using webirc, could be the same as actual_hostname',
+    actual_hostname: 'sometimes set when using webirc',
+    real_name: 'A real prawn',
+    server: 'irc.server.net',
+    server_info: 'Thu Jun 14 09:15:51 2018',
+    account: 'logged on account',
     error: ''
 }
 ~~~
