@@ -1,7 +1,9 @@
 'use strict';
 
+var _ = {
+    pull: require('lodash/pull'),
+};
 var EventEmitter    = require('eventemitter3');
-var _               = require('lodash');
 var ircLineParser   = require('./irclineparser');
 
 module.exports = class Connection extends EventEmitter {

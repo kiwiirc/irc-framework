@@ -4,8 +4,10 @@
  * Websocket transport
  */
 
+var _ = {
+    bind: require('lodash/bind'),
+};
 var EventEmitter = require('eventemitter3');
-var _ = require('lodash');
 
 module.exports = class Connection extends EventEmitter {
     constructor(options) {

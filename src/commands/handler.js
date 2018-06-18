@@ -1,6 +1,10 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    reduce: require('lodash/reduce'),
+    find: require('lodash/find'),
+    uniq: require('lodash/uniq'),
+};
 var EventEmitter = require('eventemitter3');
 var irc_numerics = require('./numerics');
 var IrcCommand = require('./command');
@@ -64,10 +68,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
 
     requestExtraCaps(cap) {
-        this.request_extra_caps = _(this.request_extra_caps)
-            .concat(cap)
-            .uniq()
-            .value();
+        this.request_extra_caps = _.uniq(this.request_extra_caps.concat(cap));
     }
 
 

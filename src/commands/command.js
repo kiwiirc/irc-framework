@@ -1,6 +1,8 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    clone: require('lodash/clone'),
+};
 
 module.exports = class IrcCommand {
     constructor(command, data) {

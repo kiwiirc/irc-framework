@@ -1,6 +1,9 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    each: require('lodash/each'),
+    clone: require('lodash/clone'),
+};
 
 var handlers = {
     RPL_LISTSTART: function() {

@@ -1,6 +1,8 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    each: require('lodash/each'),
+};
 var Helpers = require('../../helpers');
 
 var handlers = {

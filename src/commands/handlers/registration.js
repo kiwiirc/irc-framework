@@ -1,6 +1,11 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    intersection: require('lodash/intersection'),
+    difference: require('lodash/difference'),
+    each: require('lodash/each'),
+    uniq: require('lodash/uniq'),
+};
 
 var handlers = {
 	RPL_WELCOME: function(command) {
@@ -110,10 +115,7 @@ var handlers = {
             want.push('echo-message');
         }
 
-        want = _(want)
-            .concat(this.request_extra_caps)
-            .uniq()
-            .value();
+        want = _.uniq(want.concat(this.request_extra_caps));
 
         switch (command.params[1]) {
             case 'LS':

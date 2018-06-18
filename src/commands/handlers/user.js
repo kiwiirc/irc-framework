@@ -1,6 +1,8 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    each: require('lodash/each'),
+};
 
 var handlers = {
     NICK: function(command) {

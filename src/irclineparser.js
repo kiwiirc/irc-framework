@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('lodash');
 var MessageTags = require('./messagetags');
 var IrcMessage = require('./ircmessage');
 

@@ -1,7 +1,13 @@
 'use strict';
 
+var _ = {
+    extend: require('lodash/extend'),
+    find: require('lodash/find'),
+    each: require('lodash/each'),
+    defer: require('lodash/defer'),
+    bind: require('lodash/bind'),
+};
 var EventEmitter = require('eventemitter3');
-var _ = require('lodash');
 var runes = require('runes');
 var MiddlewareHandler = require('middleware-handler');
 var IrcCommandHandler = require('./commands/').CommandHandler;

@@ -1,6 +1,14 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = {
+    partial: require('lodash/partial'),
+    filter: require('lodash/filter'),
+    find: require('lodash/find'),
+    each: require('lodash/each'),
+    pull: require('lodash/pull'),
+    extend: require('lodash/extend'),
+};
+
 var DuplexStream = require('stream').Duplex;
 
 module.exports = class IrcChannel {
