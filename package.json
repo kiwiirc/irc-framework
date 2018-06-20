@@ -9,8 +9,7 @@
     "lodash": "^4.17.4",
     "middleware-handler": "^0.2.0",
     "runes": "^0.4.3",
-    "socksjs": "^0.5.0",
-    "webpack-cli": "^3.0.8"
+    "socksjs": "^0.5.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -23,7 +22,8 @@
     "mocha": "^2.3.4",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
-    "webpack": "^4.12.0"
+    "webpack": "^4.12.0",
+    "webpack-cli": "^3.0.8"
   },
   "scripts": {
     "test": "npm run lint && npm run coverage -- -R dot test/ --recursive",
@@ -31,7 +31,7 @@
     "unit-test": "mocha --recursive",
     "coverage": "istanbul cover --include-all-sources _mocha --",
     "build": "webpack --config webpack.config.js",
-    "prepublish": "webpack --config webpack.config.js"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
