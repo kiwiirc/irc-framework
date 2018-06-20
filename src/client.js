@@ -197,7 +197,7 @@ module.exports = class IrcClient extends EventEmitter {
 
             client.parsed_middleware.handle([event_name, event_arg, client], function(err) {
                 if (err) {
-                    //console.error('Middleware error', err.stack);
+                    console.error(err.stack);
                     return;
                 }
 
