@@ -51,7 +51,7 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             new_ident: command.params[0],
-            new_host: command.params[1],
+            new_hostname: command.params[1],
             time: time
         });
     },
@@ -170,8 +170,8 @@ var handlers = {
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
         cache.nick = command.params[1];
-        cache.user = command.params[2];
-        cache.host = command.params[3];
+        cache.ident = command.params[2];
+        cache.hostname = command.params[3];
         cache.real_name = command.params[5];
     },
 
@@ -243,8 +243,8 @@ var handlers = {
             return;
         }
 
-        cache.actualip = match[2];
-        cache.actualhost = match[1];
+        cache.actual_ip = match[2];
+        cache.actual_hostname = match[1];
     },
 
     RPL_WHOISSECURE: function(command) {
@@ -277,29 +277,50 @@ var handlers = {
         // UnrealIRCd uses this numeric for something else resulting in ip+host
         // to be empty, so ignore this is that's the case
         if (ip && host) {
-            cache.actualip = ip;
-            cache.actualhost = host;
+            cache.actual_ip = ip;
+            cache.actual_hostname = host;
         }
     },
 
     RPL_WHOWASUSER: function(command) {
-        this.emit('whowas', {
-            nick: command.params[1],
-            ident: command.params[2],
-            host: command.params[3],
-            real_name: command.params[command.params.length - 1]
-        });
+        var cache_key = command.params[1].toLowerCase();
+        var cache = this.cache('whois.' + cache_key);
+
+        cache.nick = command.params[1];
+        cache.ident = command.params[2];
+        cache.hostname = command.params[3];
+        cache.real_name = command.params[command.params.length - 1];
     },
 
-    RPL_ENDOFWHOWAS: function() {
-        // noop
+    RPL_ENDOFWHOWAS: function(command) {
+        // Because the WHOIS and WHOWAS numerics clash with eachother,
+        // a cache key will have more than what is just in RPL_WHOWASUSER.
+        // This is why we borrow from the whois.* cache key ID.
+        //
+        // This exposes some fields (that may or may not be set).
+        // Valid keys that should always be set: nick, ident, hostname, real_name
+        // Valid optional keys: actual_ip, actual_hostname, account, server,
+        //   server_info
+        // More optional fields MAY exist, depending on the type of ircd.
+        var cache_key = command.params[1].toLowerCase();
+        var cache = this.cache('whois.' + cache_key);
+
+        // Should, in theory, never happen.
+        if (!cache.nick) {
+            cache.nick = command.params[1];
+            cache.error = 'no_such_nick';
+        }
+
+        this.emit('whowas', cache);
+        cache.destroy();
     },
 
     ERR_WASNOSUCHNICK: function(command) {
-        this.emit('whowas', {
-            nick: command.params[1],
-            error: 'no_such_nick'
-        });
+        var cache_key = command.params[1].toLowerCase();
+        var cache = this.cache('whois.' + cache_key);
+
+        cache.nick = command.params[1];
+        cache.error = 'no_such_nick';
     },
 
     RPL_UMODEIS: function(command) {
@@ -310,7 +331,7 @@ var handlers = {
     RPL_HOSTCLOAKING: function(command) {
         this.emit('displayed host', {
             nick: command.params[0],
-            host: command.params[1]
+            hostname: command.params[1]
         });
     }
 };
