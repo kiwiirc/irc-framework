@@ -24,6 +24,14 @@ function NetworkInfo() {
         return this.options[support_name.toUpperCase()];
     };
 
+    this.isChannelName = function isChannelName(channel_name) {
+        if (typeof channel_name !== 'string' || channel_name === '') {
+            return false;
+        }
+        const chanPrefixes = this.supports('CHANTYPES') || '&#';
+        return chanPrefixes.indexOf(channel_name[0]) > -1;
+    };
+
     // Network capabilities
     this.cap = {
         negotiating: false,
