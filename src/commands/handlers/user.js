@@ -200,7 +200,7 @@ var handlers = {
         cache.operator = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISCHANNELS:       function(command) {
+    RPL_WHOISCHANNELS: function(command) {
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
         if (cache.channels) {

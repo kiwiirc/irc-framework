@@ -524,6 +524,31 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw(irc_args);
     }
 
+    whowas(target, _cb) {
+        var client = this;
+        var cb;
+        var irc_args = ['WHOWAS'];
+
+        // Support whowas(target, arg1, arg2, argN, cb)
+        _.each(arguments, function(arg) {
+            if (typeof arg === 'function') {
+                cb = arg;
+            } else {
+                irc_args.push(arg);
+            }
+        });
+
+        this.on('whowas', function onWhowas(event) {
+            if (event.nick.toLowerCase() === target.toLowerCase()) {
+                client.removeListener('whowas', onWhowas);
+                if (typeof cb === 'function') {
+                    cb(event);
+                }
+            }
+        });
+
+        this.raw(irc_args);
+    }
 
     /**
      * WHO requests are queued up to run serially.
