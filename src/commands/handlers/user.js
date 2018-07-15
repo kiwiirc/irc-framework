@@ -154,7 +154,7 @@ var handlers = {
 
             this.emit('away', {
                 self: false,
-                nick: command.nick,
+                nick: command.params[1],
                 message: message,
                 time: time
             });
