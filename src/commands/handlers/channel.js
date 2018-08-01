@@ -8,11 +8,15 @@ var Helpers = require('../../helpers');
 var handlers = {
     RPL_CHANNELMODEIS: function(command) {
         var channel = command.params[1];
-        var modes = this.parseModeList.call(this, command.params[2], command.params.slice(3));
+        var raw_modes = command.params[2];
+        var raw_params = command.params.slice(3);
+        var modes = this.parseModeList.call(this, raw_modes, raw_params);
 
         this.emit('channel info', {
             channel: channel,
-            modes: modes
+            modes: modes,
+            raw_modes: raw_modes,
+            raw_params: raw_params
         });
     },
 
