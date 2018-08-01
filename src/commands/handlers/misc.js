@@ -127,13 +127,17 @@ var handlers = {
         var time = command.getServerTime();
 
         // Get a JSON representation of the modes
-        var modes = this.parseModeList(command.params[1], command.params.slice(2));
+        var raw_modes = command.params[1];
+        var raw_params = command.params.slice(2);
+        var modes = this.parseModeList(raw_modes, raw_params);
 
         this.emit('mode', {
             target: command.params[0],
             nick: command.nick || command.prefix || '',
             modes: modes,
-            time: time
+            time: time,
+            raw_modes: raw_modes,
+            raw_params: raw_params
         });
     },
 
