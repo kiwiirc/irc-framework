@@ -68,9 +68,9 @@ var handlers = {
             if (prefix.symbol === target[0]) {
                 target_group = target[0];
                 target = target.substring(1);
-            }
 
-            return true;
+                return true;
+            }
         });
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
