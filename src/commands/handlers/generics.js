@@ -26,7 +26,7 @@ var generics = {
     ERR_LINKCHANNEL: {
         event: 'channel_redirect',
         from: 1,
-        to: 1
+        to: 2
     },
 
     ERR_NOSUCHNICK: {
