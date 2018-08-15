@@ -92,7 +92,7 @@ var handlers = {
 
 
     RPL_INVITELIST: function(command) {
-        var cache = this.cache('invitelist.' + command.params[1]);
+        var cache = this.cache('inviteList.' + command.params[1]);
         if (!cache.invites) {
             cache.invites = [];
         }
@@ -107,8 +107,8 @@ var handlers = {
 
 
     RPL_ENDOFINVITELIST: function(command) {
-        var cache = this.cache('invitelist.' + command.params[1]);
-        this.emit('invitelist', {
+        var cache = this.cache('inviteList.' + command.params[1]);
+        this.emit('inviteList', {
             channel: command.params[1],
             invites: cache.invites || []
         });
