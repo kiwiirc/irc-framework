@@ -13,7 +13,8 @@ describe('src/client.js', function () {
         });
 
         it('should correctly split complicated emojis', function () {
-            const family = "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}"; // full family emoji - 11 characters
+            // full family emoji - 11 characters
+            const family = "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}"; // jshint ignore:line
             let plain = `testing emoji splitting ${family}${family}${family} test string ${family}`;
             let blocks = [
                 'testing emoji s',
