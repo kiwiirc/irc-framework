@@ -417,6 +417,37 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw(raw);
     }
 
+    inviteList(channel, cb) {
+        var client = this;
+        var raw = ['MODE', channel, 'I'];
+
+        this.on('inviteList', function onInviteList(event) {
+            if (event.channel.toLowerCase() === channel.toLowerCase()) {
+                client.removeListener('inviteList', onInviteList);
+                if (typeof cb === 'function') {
+                    cb(event);
+                }
+            }
+        });
+
+        this.raw(raw);
+    }
+
+    invite(channel, nick) {
+        var raw = ['INVITE', channel, nick]
+        this.raw(raw);
+    }
+
+    addInvite(channel, mask) {
+        var raw = ['MODE', channel, '+I', mask];
+        this.raw(raw);
+    }
+
+    removeInvite(channel, mask) {
+        var raw = ['MODE', channel, '-I', mask];
+        this.raw(raw);
+    }
+
     banlist(channel, cb) {
         var client = this;
         var raw = ['MODE', channel, 'b'];

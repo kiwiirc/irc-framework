@@ -96,6 +96,8 @@ module.exports = {
     '338': 'RPL_WHOISACTUALLY',
     '341': 'RPL_INVITING',
     '344': 'RPL_WHOISCOUNTRY',
+    '346': 'RPL_INVITELIST',
+    '347': 'RPL_ENDOFINVITELIST',
     '352': 'RPL_WHOREPLY',
     '353': 'RPL_NAMEREPLY',
     '364': 'RPL_LINKS',
