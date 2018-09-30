@@ -87,8 +87,8 @@ var handlers = {
 
         this.emit('away', {
             self: true,
-            nick: command.nick,
-            message: command.params[command.params.length - 1],
+            nick: command.params[0],
+            message: command.params[1] || '',
             time: time
         });
     },
@@ -101,8 +101,8 @@ var handlers = {
 
         this.emit('back', {
             self: true,
-            nick: command.nick,
-            message: command.params[command.params.length - 1] || '', // example: "<nick> is now back."
+            nick: command.params[0],
+            message: command.params[1] || '', // example: "<nick> is now back."
             time: time
         });
     },
