@@ -98,22 +98,22 @@ Receive information about a user on the network if they exist. Optionally calls
 `cb(event)` with the result if provided.
 
 ##### `.who(target [, cb])`
-Receive a list of users on the network that matchs the target. The target may be
+Receive a list of users on the network that matches the target. The target may be
 a channel or wildcard nick. Optionally calls `cb(event)` with the result if
 provided. Multiple calls to this function are queued up and run one at a time in
 order.
 
 ##### `.list([, paramN])`
-Request that the IRC server sends a lsit of available channels. Extra parameters
+Request that the IRC server sends a list of available channels. Extra parameters
 will be sent.
 
 ##### `.channel(channel_name)`
 Create a channel object with the following methods:
-* `say(message)
-* `notice(message)
-* `action(message)
-* `part([part_message])
-* `join([key])
+* `say(message)`
+* `notice(message)`
+* `action(message)`
+* `part([part_message])`
+* `join([key])`
 
 ##### `.match(match_regex, cb[, message_type])`
 Call `cb()` when any incoming message matches `match_regex`.

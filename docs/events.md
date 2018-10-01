@@ -263,7 +263,7 @@ The account name will only be available on supported networks.
 #### Messaging
 **notice**
 
-Also triggers a **message** event with .type = 'notice'. from_server indicates is this notice was
+Also triggers a **message** event with .type = 'notice'. from_server indicates if this notice was
 sent from the server or a user.
 ~~~javascript
 {
