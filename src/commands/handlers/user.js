@@ -262,7 +262,8 @@ var handlers = {
     RPL_WHOISSPECIAL: function(command) {
         var cache_key = command.params[1].toLowerCase();
         var cache = this.cache('whois.' + cache_key);
-        cache.special = command.params[command.params.length - 1];
+        cache.special = cache.special || [];
+        cache.special.push(command.params[command.params.length - 1]);
     },
 
     RPL_WHOISCOUNTRY: function(command) {
