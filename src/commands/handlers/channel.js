@@ -91,6 +91,32 @@ var handlers = {
     },
 
 
+    RPL_INVITELIST: function(command) {
+        var cache = this.cache('inviteList.' + command.params[1]);
+        if (!cache.invites) {
+            cache.invites = [];
+        }
+
+        cache.invites.push({
+            channel: command.params[1],
+            invited: command.params[2],
+            invited_by: command.params[3],
+            invited_at: command.params[4]
+        });
+    },
+
+
+    RPL_ENDOFINVITELIST: function(command) {
+        var cache = this.cache('inviteList.' + command.params[1]);
+        this.emit('inviteList', {
+            channel: command.params[1],
+            invites: cache.invites || []
+        });
+
+        cache.destroy();
+    },
+
+
     RPL_BANLIST: function(command) {
         var cache = this.cache('banlist.' + command.params[1]);
         if (!cache.bans) {
