@@ -1,6 +1,6 @@
 ### irc-framework Client instance API
 
-Inherits EventEmitter (https://nodejs.org/api/events.html)
+Inherits [EventEmitter](https://nodejs.org/api/events.html). Read more on the Events available [here](https://github.com/kiwiirc/irc-framework/blob/master/docs/events.md).
 
 #### Constructor
 ~~~javascript
