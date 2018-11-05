@@ -99,6 +99,31 @@ var handlers = {
         });
     },
 
+    RPL_WHOSPCRPL: function(command) {
+        var cache = this.cache('who');
+        if (!cache.members) {
+            cache.members = [];
+        }
+        var params = command.params;
+
+        // G = Gone, H = Here
+        var is_away = params[6][0].toUpperCase() === 'G' ?
+            true :
+            false;
+
+        cache.members.push({
+            nick: params[5],
+            ident: params[2],
+            hostname: params[3],
+            server: params[4],
+            op_level: params[9]
+            real_name: params[10],
+            account: params[8],
+            away: is_away,
+            num_hops_away: params[7],
+        });
+    },
+
 
     RPL_ENDOFWHO: function(command) {
         var cache = this.cache('who');
