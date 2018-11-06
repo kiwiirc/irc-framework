@@ -639,7 +639,7 @@ module.exports = class IrcClient extends EventEmitter {
             }
         });
 
-        if (client.network.options.WHOX) {
+        if (client.network.supports('whox')) {
             client.raw('WHO', target, '%cuhsnfdaor');
         } else {
             client.raw('WHO', target);
