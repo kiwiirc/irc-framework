@@ -118,7 +118,7 @@ var handlers = {
             server: params[4],
             op_level: parseInt(params[9], 10),
             real_name: params[10],
-            account: params[8] === 0 ? '' : params[8],
+            account: params[8] === '0' ? '' : params[8],
             away: is_away,
             num_hops_away: parseInt(params[7], 10),
         });
