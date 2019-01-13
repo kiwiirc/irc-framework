@@ -116,6 +116,18 @@ module.exports = class IrcClient extends EventEmitter {
             });
         });
 
+        client.on('away', function(event) {
+            if (event.nick.toLowerCase() === client.user.nick.toLowerCase()) {
+                client.user.away = true;
+            }
+        });
+
+        client.on('back', function(event) {
+            if (event.nick.toLowerCase() === client.user.nick.toLowerCase()) {
+                client.user.away = false;
+            }
+        });
+
         // Proxy the command handler events onto the client object, with some added sugar
         client.proxyIrcEvents();
 
