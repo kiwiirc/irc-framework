@@ -656,7 +656,11 @@ module.exports = class IrcClient extends EventEmitter {
             }
         });
 
-        client.raw('WHO', target);
+        if (client.network.supports('whox')) {
+            client.raw('WHO', target, '%cuhsnfdaor');
+        } else {
+            client.raw('WHO', target);
+        }
     }
 
 
@@ -704,7 +708,7 @@ module.exports = class IrcClient extends EventEmitter {
     matchAction(match_regex, cb) {
         return this.match(match_regex, cb, 'action');
     }
-    
+
     /**
      * Truncate a string into blocks of a set size
      */
@@ -727,7 +731,7 @@ module.exports = class IrcClient extends EventEmitter {
             do {
                 current_char_length = chars[end_index].length;
                 current_block_length += current_char_length;
-                
+
                 // If character does not fit in a single block, include it in current block anyway
                 // and split it later on by falling back to simple substring
                 if (current_char_length > block_size) {

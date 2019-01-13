@@ -100,6 +100,7 @@ module.exports = {
     '347': 'RPL_ENDOFINVITELIST',
     '352': 'RPL_WHOREPLY',
     '353': 'RPL_NAMEREPLY',
+    '354': 'RPL_WHOSPCRPL',
     '364': 'RPL_LINKS',
     '365': 'RPL_ENDOFLINKS',
     '366': 'RPL_ENDOFNAMES',
