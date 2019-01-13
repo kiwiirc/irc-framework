@@ -37,9 +37,9 @@ module.exports = class Connection extends EventEmitter {
     writeLine(line, cb) {
     	if (this.socket && this.isConnected()) {
     		if (this.encoding !== 'utf8') {
-    			this.socket.write(iconv.encode(line + '\n', this.encoding), cb);
+    			this.socket.write(iconv.encode(line + '\r\n', this.encoding), cb);
     		} else {
-    			this.socket.write(line + '\n', cb);
+    			this.socket.write(line + '\r\n', cb);
     		}
     	}
     }

@@ -225,6 +225,11 @@ module.exports = class IrcClient extends EventEmitter {
 
         commands.on('nick', function(event) {
             if (client.user.nick === event.nick) {
+                // nicks starting with numbers are reserved for uuids
+                // we dont want to store these as they cannot be used
+                if (event.new_nick.match(/^\d/)) {
+                    return;
+                }
                 client.user.nick = event.new_nick;
             }
         });
