@@ -38,8 +38,8 @@ function MyIrcMiddleware() {
 
 	function theMiddleware(command, event, client, next) {
 		//console.log('[MyMiddleware]', command, event);
-		if (command === 'message' && event.msg.indexOf('omg') === 0) {
-			event.msg += '!!!!!';
+		if (command === 'message' && event.message.indexOf('omg') === 0) {
+			event.message += '!!!!!';
 			event.reply('> appended extra points');
 		}
 
@@ -72,9 +72,9 @@ bot.on('close', function() {
 });
 
 bot.on('message', function(event) {
-	console.log('<' + event.target + '>', event.msg);
-	if (event.msg.indexOf('whois') === 0) {
-		bot.whois(event.msg.split(' ')[1]);
+	console.log('<' + event.target + '>', event.message);
+	if (event.message.indexOf('whois') === 0) {
+		bot.whois(event.message.split(' ')[1]);
 	}
 });
 
