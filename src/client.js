@@ -436,7 +436,8 @@ module.exports = class IrcClient extends EventEmitter {
 
     inviteList(channel, cb) {
         var client = this;
-        var raw = ['MODE', channel, 'I'];
+        var raw = ['MODE', channel, this.network.supports('INVEX') || 'I'];
+
 
         this.on('inviteList', function onInviteList(event) {
             if (event.channel.toLowerCase() === channel.toLowerCase()) {
@@ -456,12 +457,14 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     addInvite(channel, mask) {
-        var raw = ['MODE', channel, '+I', mask];
+        var mode = this.network.supports('INVEX') || 'I';
+        var raw = ['MODE', channel, '+' + mode, mask];
         this.raw(raw);
     }
 
     removeInvite(channel, mask) {
-        var raw = ['MODE', channel, '-I', mask];
+        var mode = this.network.supports('INVEX') || 'I';
+        var raw = ['MODE', channel, '-' + mode, mask];
         this.raw(raw);
     }
 
