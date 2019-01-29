@@ -26,15 +26,11 @@ var handlers = {
                 time: time
             });
         } else {
-            // Support '@#channel' formats
-            _.find(this.network.options.PREFIX, function(prefix) {
-                if (prefix.symbol === target[0]) {
-                    target_group = target[0];
-                    target = target.substring(1);
-                }
-
-                return true;
-            });
+            var parsed_target = parseTargetGroup(this.network, target);
+            if (parsed_target) {
+                target = parsed_target.target;
+                target_group = parsed_target.target_group;
+            }
 
             notice_from_server = (
                 command.prefix === this.network.server ||
@@ -63,15 +59,11 @@ var handlers = {
         var target = command.params[0];
         var target_group;
 
-        // Support '@#channel' formats
-        _.find(this.network.options.PREFIX, function(prefix) {
-            if (prefix.symbol === target[0]) {
-                target_group = target[0];
-                target = target.substring(1);
-
-                return true;
-            }
-        });
+        var parsed_target = parseTargetGroup(this.network, target);
+        if (parsed_target) {
+            target = parsed_target.target;
+            target_group = parsed_target.target_group;
+        }
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // CTCP request
@@ -148,3 +140,29 @@ module.exports = function AddCommandHandlers(command_controller) {
         command_controller.addHandler(handler_command, handler);
     });
 };
+
+// Support '@#channel' and '++channel' formats
+function parseTargetGroup(network, target) {
+    var statusMsg = network.supports('STATUSMSG');
+
+    if (!statusMsg) {
+        return null;
+    }
+
+    var target_group = _.find(statusMsg, function(prefix) {
+        if (prefix === target[0]) {
+            target = target.substring(1);
+
+            return target[0];
+        }
+    });
+
+    if (!target_group) {
+        return null;
+    }
+
+    return {
+        target: target,
+        target_group: target_group,
+    };
+}

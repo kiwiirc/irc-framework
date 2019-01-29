@@ -47,6 +47,8 @@ var handlers = {
                 }
             } else if (option[0] === 'CHANTYPES') {
                 this.network.options.CHANTYPES = this.network.options.CHANTYPES.split('');
+            } else if (option[0] === 'STATUSMSG') {
+                this.network.options.STATUSMSG = this.network.options.STATUSMSG.split('');
             } else if (option[0] === 'CHANMODES') {
                 this.network.options.CHANMODES = option[1].split(',');
             } else if (option[0] === 'NETWORK') {
