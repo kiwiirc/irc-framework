@@ -1,5 +1,7 @@
 'use strict';
 
+const Helpers = require('../../helpers');
+
 var _ = {
     intersection: require('lodash/intersection'),
     difference: require('lodash/difference'),
@@ -210,11 +212,56 @@ var handlers = {
     },
 
 
-    RPL_SASLAUTHENTICATED: function() {
-        this.connection.write('CAP END');
-        this.network.cap.negotiating = false;
+    RPL_LOGGEDIN: function(command) {
+        if (this.network.cap.negotiating === true) {
+            this.connection.write('CAP END');
+            this.network.cap.negotiating = false;
+        }
+
+        var mask = Helpers.parseMask(command.params[1]);
+
+        // Check if we have a server-time
+        var time = command.getServerTime();
+
+        this.emit('loggedin', {
+            nick: command.params[0],
+            ident: mask.user,
+            hostname: mask.host,
+            account: command.params[2],
+            time: time
+        });
+
+        this.emit('account', {
+            nick: command.params[0],
+            ident: mask.user,
+            hostname: mask.host,
+            account: command.params[2],
+            time: time
+        });
     },
 
+    RPL_LOGGEDOUT: function(command) {
+        var mask = Helpers.parseMask(command.params[1]);
+
+        // Check if we have a server-time
+        var time = command.getServerTime();
+
+        this.emit('loggedout', {
+            nick: command.params[0],
+            ident: mask.user,
+            hostname: mask.host,
+            account: false,
+            time: time
+        });
+
+        this.emit('account', {
+            nick: command.params[0],
+            ident: mask.user,
+            hostname: mask.host,
+            account: false,
+            time: time
+        });
+    },
 
     RPL_SASLLOGGEDIN: function() {
         if (this.network.cap.negotiating === true) {
