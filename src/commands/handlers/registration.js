@@ -248,7 +248,7 @@ var handlers = {
             nick: command.params[0],
             ident: mask.user,
             hostname: mask.host,
-            account: '',
+            account: false,
             time: time
         });
 
@@ -256,7 +256,7 @@ var handlers = {
             nick: command.params[0],
             ident: mask.user,
             hostname: mask.host,
-            account: '',
+            account: false,
             time: time
         });
     },
