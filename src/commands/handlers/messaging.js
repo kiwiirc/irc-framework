@@ -153,7 +153,7 @@ function parseTargetGroup(network, target) {
         if (prefix === target[0]) {
             target = target.substring(1);
 
-            return target[0];
+            return prefix;
         }
     });
 
