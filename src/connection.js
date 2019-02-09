@@ -67,6 +67,7 @@ module.exports = class Connection extends EventEmitter {
 
         bindTransportEvents(transport);
 
+        this.registered = false;
         this.requested_disconnect = false;
         this.emit('connecting');
         transport.connect();
