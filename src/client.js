@@ -104,6 +104,12 @@ module.exports = class IrcClient extends EventEmitter {
             client.startPeriodicPing();
         });
 
+        client.connection.on('connecting', function() {
+            // Reset cap negotiation to false on a new connection
+            // This prevents stale state if a connection gets closed during CAP negotiation
+            client.network.cap.negotiating = false;
+        });
+
         // IRC command routing
         client.connection.on('message', function(message, raw_line) {
             client.raw_middleware.handle([message.command, message, raw_line, client], function(err) {
