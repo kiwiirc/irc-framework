@@ -9,6 +9,9 @@ function NetworkInfo() {
     // Name of the connected server
     this.server = '';
 
+    // The reported IRCd type
+    this.ircd = '';
+
     // Network provided options
     this.options = {
         PREFIX: [

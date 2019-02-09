@@ -23,6 +23,18 @@ var handlers = {
     },
 
 
+    RPL_YOURHOST: function(command) {
+        // Your host is ircd.network.org, running version InspIRCd-2.0
+        let param = command.params[1] || '';
+        let m = param.match(/running version (.*)$/);
+        if (!m) {
+            this.network.ircd = '';
+        } else {
+            this.network.ircd = m[1];
+        }
+    },
+
+
     RPL_ISUPPORT: function(command) {
         var options = command.params;
         var i;
