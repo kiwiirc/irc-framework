@@ -133,6 +133,7 @@ var handlers = {
                 // line which will not have * set for params[2]
                 if (command.params[2] !== '*') {
                     if (request_caps.length > 0) {
+                        this.network.cap.negotiating = true;
                         this.connection.write('CAP REQ :' + request_caps.join(' '));
                     } else {
                         this.connection.write('CAP END');
