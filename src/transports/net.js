@@ -27,7 +27,7 @@ module.exports = class Connection extends EventEmitter {
         this.socket_events = [];
 
         this.encoding = 'utf8';
-        this.incoming_buffer = '';
+        this.incoming_buffer = Buffer.from('');
     }
 
     isConnected() {
@@ -157,20 +157,15 @@ module.exports = class Connection extends EventEmitter {
     }
 
     onSocketData(data) {
-    	this.incoming_buffer += iconv.decode(data, this.encoding);
+        this.incoming_buffer = Buffer.concat(
+            [this.incoming_buffer, data],
+            this.incoming_buffer.length + data.length
+            );
 
-    	var lines = this.incoming_buffer.split('\n');
-    	if (lines[lines.length - 1] !== '') {
-    		this.incoming_buffer = lines.pop();
-    	} else {
-    		lines.pop();
-    		this.incoming_buffer = '';
+        this.splitLines().forEach(
+            line => this.emit('line', iconv.decode(data, this.encoding))
+            );
     	}
-
-    	lines.forEach(line => this.emit('line', line));
-    }
-
-
 
     disposeSocket() {
         this.debugOut('disposeSocket() connected=' + this.isConnected());
@@ -197,6 +192,31 @@ module.exports = class Connection extends EventEmitter {
         }
     }
 
+    // Returns an array of buffer slices containing all currently received
+    // complete lines, leaving the remainder in the buffer.
+    splitLines() {
+        var data = this.incoming_buffer;
+        var out = [];
+        var startIndex = 0;
+        while (true) {
+            const splitIndex = data.indexOf(0x0a, startIndex) + 1;
+
+            if (splitIndex != -1) {
+                out += [data.slice(startIndex, splitIndex)];
+                startIndex = splitIndex;
+            } else {
+                break;
+            }
+        }
+
+        if (startIndex < data.length) {
+            this.incoming_buffer = data.slice(startIndex);
+        } else {
+            this.incoming_buffer = Buffer.from('');
+        }
+
+        return out;
+    }
 
     setEncoding(encoding) {
         var encoded_test;
