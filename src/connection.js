@@ -60,6 +60,10 @@ module.exports = class Connection extends EventEmitter {
             this.setEncoding('utf8');
         }
 
+        if (options.encoding_fallback) {
+            this.setEncodingFallback(options.encoding_fallback);
+        }
+
         // Some transports may emit extra events
         transport.on('extra', function(/*event_name, argN*/) {
             that.emit.apply(that, arguments);
@@ -240,6 +244,14 @@ module.exports = class Connection extends EventEmitter {
 
         if (this.transport) {
             return this.transport.setEncoding(encoding);
+        }
+    }
+
+    setEncodingFallback(encoding) {
+        this.debugOut('Connection.setEncodingFallback() encoding=' + encoding);
+
+        if (this.transport) {
+            return this.transport.setEncodingFallback(encoding);
         }
     }
 

@@ -127,4 +127,7 @@ module.exports = class Connection extends EventEmitter {
 
     setEncoding(encoding) {
     }
+
+    setEncodingFallback(encoding) {
+    }
 };
