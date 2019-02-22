@@ -56,7 +56,7 @@ bot.on('registered', function() {
 	channel.join();
 	channel.say('Hi!');
 	
-	channel.updateUserList(function() {
+	channel.updateUsers(function() {
 		console.log(channel.users);
 	});
 
