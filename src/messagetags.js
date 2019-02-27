@@ -12,10 +12,11 @@ const tokens_map = {
     '\\:':  ';',
     '\\s':  ' ',
     '\\n':  '\n',
-    '\\r':  '\r'
+    '\\r':  '\r',
+    '\\': '', // remove invalid backslashes
 };
 
-const token_lookup = /\\\\|\\:|\\s|\\n|\\r/gi;
+const token_lookup = /\\\\|\\:|\\s|\\n|\\r|\\/gi;
 
 function decodeValue(value) {
     return value.replace(token_lookup, m => tokens_map[m] || '');

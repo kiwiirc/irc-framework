@@ -73,5 +73,14 @@ describe('src/messagetags.js', function () {
                 baz: true,
             });
         });
+
+        it('should handle invalid escapes', function () {
+            let plain = 'foo=test\\;bar=\\b\\sinvalidescape';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: 'test',
+                bar: 'b invalidescape',
+            });
+        });
     });
 });
