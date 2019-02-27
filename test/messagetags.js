@@ -55,5 +55,23 @@ describe('src/messagetags.js', function () {
                 world: 'monde',
             });
         });
+
+        it('should work with duplicate tags', function () {
+            let plain = 'foo;foo=one;foo=two;foo=lastvalue';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: 'lastvalue',
+            });
+        });
+
+        it('should work with empty values', function () {
+            let plain = 'foo;bar=;baz;';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: true,
+                bar: true,
+                baz: true,
+            });
+        });
     });
 });

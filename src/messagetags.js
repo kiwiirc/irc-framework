@@ -48,7 +48,7 @@ function decode(tag_str) {
         }
 
         // if no value is given for this tag, just set it to true
-        if (typeof value === 'string') {
+        if (typeof value === 'string' && value.length > 0) {
             value = decodeValue(value);
         } else {
             value = true;
