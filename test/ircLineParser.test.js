@@ -276,7 +276,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST'
             });
@@ -293,13 +293,35 @@ describe('src/irclineparser.js', function () {
             });
         });
 
+        it('should parse a message that has equals but no value', function () {
+            var msgObj = parseIrcLine('@foo= TEST');
+
+            expect(msgObj).to.containSubset({
+                tags: {
+                    foo: ''
+                },
+                command: 'TEST'
+            });
+        });
+
+        it('should parse a message that has equals and semicolon right after', function () {
+            var msgObj = parseIrcLine('@foo=; TEST');
+
+            expect(msgObj).to.containSubset({
+                tags: {
+                    foo: ''
+                },
+                command: 'TEST'
+            });
+        });
+
         it('should parse a message that has multiple tags with no value', function () {
             var msgObj = parseIrcLine('@foo;bar TEST');
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST'
             });
@@ -311,7 +333,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST'
             });
@@ -322,7 +344,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org'
@@ -334,7 +356,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -347,7 +369,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -399,8 +421,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org'
@@ -412,8 +434,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -426,8 +448,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -442,7 +464,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org'
@@ -455,7 +477,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -469,7 +491,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -483,7 +505,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -496,7 +518,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -509,7 +531,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -522,7 +544,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -535,7 +557,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -548,7 +570,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -561,7 +583,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -574,7 +596,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -588,7 +610,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -602,7 +624,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -616,7 +638,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -630,7 +652,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -644,7 +666,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -658,7 +680,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -672,7 +694,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -687,7 +709,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -702,7 +724,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -717,7 +739,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -732,7 +754,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -747,7 +769,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -762,7 +784,7 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true
+                    foo: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1070,8 +1092,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1084,8 +1106,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1098,8 +1120,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1112,8 +1134,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1126,8 +1148,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1140,8 +1162,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1154,8 +1176,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1168,8 +1190,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1183,8 +1205,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1198,8 +1220,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1213,8 +1235,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1228,8 +1250,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1243,8 +1265,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1257,8 +1279,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1272,8 +1294,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1288,8 +1310,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1304,8 +1326,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1320,8 +1342,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1336,8 +1358,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1352,8 +1374,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1368,8 +1390,8 @@ describe('src/irclineparser.js', function () {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: true,
-                    bar: true
+                    foo: '',
+                    bar: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1385,7 +1407,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1399,7 +1421,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1413,7 +1435,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1427,7 +1449,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1441,7 +1463,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1455,7 +1477,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1469,7 +1491,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
@@ -1483,7 +1505,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1498,7 +1520,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1513,7 +1535,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1528,7 +1550,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1543,7 +1565,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1558,7 +1580,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1573,7 +1595,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1588,7 +1610,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1604,7 +1626,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1620,7 +1642,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1636,7 +1658,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1652,7 +1674,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1668,7 +1690,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',
@@ -1684,7 +1706,7 @@ describe('src/irclineparser.js', function () {
             expect(msgObj).to.containSubset({
                 tags: {
                     foo: 'bar',
-                    baz: true
+                    baz: '',
                 },
                 command: 'TEST',
                 nick: 'nick',

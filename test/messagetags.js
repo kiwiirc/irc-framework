@@ -32,7 +32,7 @@ describe('src/messagetags.js', function () {
             let tags = MessageTags.decode(plain);
             expect(tags).to.containSubset({
                 foo: 'bar',
-                baz: true
+                baz: '',
             });
         });
 
@@ -41,7 +41,7 @@ describe('src/messagetags.js', function () {
             let tags = MessageTags.decode(plain);
             expect(tags).to.deep.equal({
                 foo: 'bar',
-                baz: true,
+                baz: '',
                 name: 'prawn salad',
             });
         });
@@ -51,7 +51,7 @@ describe('src/messagetags.js', function () {
             let tags = MessageTags.decode(plain);
             expect(tags).to.deep.equal({
                 foo: 'bar=baz',
-                hello: true,
+                hello: '',
                 world: 'monde',
             });
         });
@@ -68,9 +68,9 @@ describe('src/messagetags.js', function () {
             let plain = 'foo;bar=;baz;';
             let tags = MessageTags.decode(plain);
             expect(tags).to.deep.equal({
-                foo: true,
-                bar: true,
-                baz: true,
+                foo: '',
+                bar: '',
+                baz: '',
             });
         });
 
