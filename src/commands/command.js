@@ -4,6 +4,8 @@ var _ = {
     clone: require('lodash/clone'),
 };
 
+const numberRegex = /^[0-9.]{1,}$/;
+
 module.exports = class IrcCommand {
     constructor(command, data) {
         this.command = command += '';
@@ -21,55 +23,24 @@ module.exports = class IrcCommand {
     }
 
     getServerTime() {
-        var time = this.getTag('time');
+        const timeTag = this.getTag('time');
+        let time;
 
-        // Convert the time value to a unixtimestamp
-        if (typeof time === 'string') {
-            if (time.indexOf('T') > -1) {
-                time = parseISO8601(time);
+        // Explicitly return undefined if theres no time
+        // or the value is an empty string
+        if (!timeTag) {
+            return time;
+        }
 
-            } else if (time.match(/^[0-9.]+$/)) {
-                // A string formatted unix timestamp
-                time = new Date(time * 1000);
-            }
+        // If parsing fails for some odd reason, also fallback to
+        // undefined, instead of returning NaN
+        time = Date.parse(timeTag) || undefined;
 
-            time = time.getTime();
-
-        } else if (typeof time === 'number') {
-            time = new Date(time * 1000);
-            time = time.getTime();
+        // Support for znc.in/server-time unix timestamps
+        if (!time && numberRegex.test(timeTag)) {
+            return new Date(timeTag * 1000).getTime();
         }
 
         return time;
     }
 };
-
-
-
-
-
-// Code based on http://anentropic.wordpress.com/2009/06/25/javascript-iso8601-parser-and-pretty-dates/#comment-154
-function parseISO8601(str) {
-    if (Date.prototype.toISOString) {
-        return new Date(str);
-    }
-
-    var parts = str.split('T');
-    var dateParts = parts[0].split('-');
-    var timeParts = parts[1].split('Z');
-    var timeSubParts = timeParts[0].split(':');
-    var timeSecParts = timeSubParts[2].split('.');
-    var timeHours = Number(timeSubParts[0]);
-    var _date = new Date();
-
-    _date.setUTCFullYear(Number(dateParts[0]));
-    _date.setUTCDate(1);
-    _date.setUTCMonth(Number(dateParts[1]) - 1);
-    _date.setUTCDate(Number(dateParts[2]));
-    _date.setUTCHours(Number(timeHours));
-    _date.setUTCMinutes(Number(timeSubParts[1]));
-    _date.setUTCSeconds(Number(timeSecParts[0]));
-    if (timeSecParts[1]) {
-        _date.setUTCMilliseconds(Number(timeSecParts[1]));
-    }
-}
