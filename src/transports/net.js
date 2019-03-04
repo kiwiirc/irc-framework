@@ -67,11 +67,17 @@ module.exports = class Connection extends EventEmitter {
         var ircd_host = options.host;
         var ircd_port = options.port || 6667;
         var socket = null;
+        let sni;
 
         this.debugOut('connect()');
 
         this.disposeSocket();
         this.requested_disconnect = false;
+
+        // Include server name (SNI) if provided host is not an IP address
+        if (!this.getAddressFamily(ircd_host)) {
+            sni = ircd_host;
+        }
 
         if (!options.encoding || !this.setEncoding(options.encoding)) {
             this.setEncoding('utf8');
@@ -98,6 +104,7 @@ module.exports = class Connection extends EventEmitter {
         } else {
             if (options.tls || options.ssl) {
                 socket = this.socket = tls.connect({
+                    servername: sni,
                     host: ircd_host,
                     port: ircd_port,
                     rejectUnauthorized: options.rejectUnauthorized,
