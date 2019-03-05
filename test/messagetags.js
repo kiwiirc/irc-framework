@@ -32,7 +32,7 @@ describe('src/messagetags.js', function () {
             let tags = MessageTags.decode(plain);
             expect(tags).to.containSubset({
                 foo: 'bar',
-                baz: true
+                baz: '',
             });
         });
 
@@ -41,7 +41,7 @@ describe('src/messagetags.js', function () {
             let tags = MessageTags.decode(plain);
             expect(tags).to.deep.equal({
                 foo: 'bar',
-                baz: true,
+                baz: '',
                 name: 'prawn salad',
             });
         });
@@ -51,8 +51,35 @@ describe('src/messagetags.js', function () {
             let tags = MessageTags.decode(plain);
             expect(tags).to.deep.equal({
                 foo: 'bar=baz',
-                hello: true,
+                hello: '',
                 world: 'monde',
+            });
+        });
+
+        it('should work with duplicate tags', function () {
+            let plain = 'foo;foo=one;foo=two;foo=lastvalue';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: 'lastvalue',
+            });
+        });
+
+        it('should work with empty values', function () {
+            let plain = 'foo;bar=;baz;';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: '',
+                bar: '',
+                baz: '',
+            });
+        });
+
+        it('should handle invalid escapes', function () {
+            let plain = 'foo=test\\;bar=\\b\\sinvalidescape';
+            let tags = MessageTags.decode(plain);
+            expect(tags).to.deep.equal({
+                foo: 'test',
+                bar: 'b invalidescape',
             });
         });
     });

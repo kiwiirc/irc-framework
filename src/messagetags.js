@@ -12,10 +12,11 @@ const tokens_map = {
     '\\:':  ';',
     '\\s':  ' ',
     '\\n':  '\n',
-    '\\r':  '\r'
+    '\\r':  '\r',
+    '\\': '', // remove invalid backslashes
 };
 
-const token_lookup = /\\\\|\\:|\\s|\\n|\\r/gi;
+const token_lookup = /\\\\|\\:|\\s|\\n|\\r|\\/gi;
 
 function decodeValue(value) {
     return value.replace(token_lookup, m => tokens_map[m] || '');
@@ -41,18 +42,13 @@ function decode(tag_str) {
     tag_str.split(';').forEach(tag => {
         let parts = Helpers.splitOnce(tag, '=');
         let key = parts[0].toLowerCase();
-        let value = parts[1];
+        let value = parts[1] || '';
 
         if (!key) {
             return;
         }
 
-        // if no value is given for this tag, just set it to true
-        if (typeof value === 'string') {
-            value = decodeValue(value);
-        } else {
-            value = true;
-        }
+        value = decodeValue(value);
         tags[key] = value;
     });
 
