@@ -20,11 +20,6 @@ module.exports = class Connection extends EventEmitter {
         // When an IRC connection was successfully registered.
         this.registered = false;
 
-        this.read_buffer = [];
-        this.reading_buffer = false;
-
-        this.read_command_buffer = [];
-
         this.transport = null;
 
         this._timers = [];
@@ -94,8 +89,7 @@ module.exports = class Connection extends EventEmitter {
         }
 
         function socketLine(line) {
-            that.read_buffer.push(line);
-            that.processReadBuffer();
+            that.addReadBuffer(line);
         }
 
         function socketClose(err) {
@@ -158,8 +152,10 @@ module.exports = class Connection extends EventEmitter {
     }
 
     addReadBuffer(line) {
-        this.read_buffer.push(line);
-        this.processReadBuffer();
+        const message = ircLineParser(line);
+
+        this.emit('raw', { line: line, from_server: true });
+        this.emit('message', message, line);
     }
 
     write(data, callback) {
@@ -244,54 +240,6 @@ module.exports = class Connection extends EventEmitter {
 
         if (this.transport) {
             return this.transport.setEncoding(encoding);
-        }
-    }
-
-    /**
-     * Process the buffered messages recieved from the IRCd
-     * Will only process 4 lines per JS tick so that node can handle any other events while
-     * handling a large buffer
-     */
-    processReadBuffer(continue_processing) {
-        // If we already have the read buffer being iterated through, don't start
-        // another one.
-        if (this.reading_buffer && !continue_processing) {
-            return;
-        }
-
-        const that = this;
-        const lines_per_js_tick = 40;
-        let processed_lines = 0;
-        let line;
-        let message;
-
-        this.reading_buffer = true;
-
-        while (processed_lines < lines_per_js_tick && this.read_buffer.length > 0) {
-            line = this.read_buffer.shift();
-            if (!line) {
-                continue;
-            }
-
-            message = ircLineParser(line);
-
-            if (!message) {
-                // A malformed IRC line
-                continue;
-            }
-            this.emit('raw', { line: line, from_server: true });
-            this.emit('message', message, line);
-
-            processed_lines++;
-        }
-
-        // If we still have items left in our buffer then continue reading them in a few ticks
-        if (this.read_buffer.length > 0) {
-            this.setTimeout(function() {
-                that.processReadBuffer(true);
-            }, 1);
-        } else {
-            this.reading_buffer = false;
         }
     }
 };
