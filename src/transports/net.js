@@ -174,7 +174,7 @@ module.exports = class Connection extends EventEmitter {
 
         while (true) {
             // Search for the next new line in the buffered data
-            const endIndex = this.incoming_buffer.indexOf('\n', startIndex) + 1;
+            const endIndex = this.incoming_buffer.indexOf(0x0A, startIndex) + 1;
 
             // If this message is partial, keep it in the buffer until more data arrives.
             // If startIndex is equal to incoming_buffer.length, that means we reached the end
