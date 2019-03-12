@@ -5,25 +5,26 @@
   "main": "index.js",
   "dependencies": {
     "eventemitter3": "^2.0.2",
-    "iconv-lite": "^0.4.11",
-    "lodash": "^4.17.4",
+    "iconv-lite": "^0.4.24",
+    "lodash": "^4.17.11",
     "middleware-handler": "^0.2.0",
     "runes": "^0.4.3",
     "socksjs": "^0.5.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-loader": "^7.1.4",
-    "babel-preset-env": "^1.7.0",
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "babel-loader": "^8.0.5",
     "chai": "^3.4.1",
     "chai-subset": "^1.2.0",
-    "istanbul": "^0.4.1",
-    "jshint": "^2.8.0",
+    "istanbul": "^0.4.5",
+    "jshint": "^2.10.2",
     "mocha": "^5.2.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
-    "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.8"
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   },
   "scripts": {
     "test": "npm run lint && npm run coverage -- -R dot test/ --recursive",
