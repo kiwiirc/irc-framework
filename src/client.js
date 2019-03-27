@@ -412,6 +412,11 @@ module.exports = class IrcClient extends EventEmitter {
         return this.sendMessage('NOTICE', target, message);
     }
 
+    tagmsg(target, tags={}) {
+        let msg = new IrcMessage('TAGMSG', target);
+        msg.tags = tags;
+        return this.raw(msg);
+    }
 
     join(channel, key) {
         var raw = ['JOIN', channel];
@@ -716,6 +721,9 @@ module.exports = class IrcClient extends EventEmitter {
     }
     matchAction(match_regex, cb) {
         return this.match(match_regex, cb, 'action');
+    }
+    matchTagMsg(match_regex, cb) {
+        return this.match(match_regex, cb, 'tagmsg');
     }
 
     /**
