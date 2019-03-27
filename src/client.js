@@ -415,7 +415,7 @@ module.exports = class IrcClient extends EventEmitter {
     tagmsg(target, tags={}) {
         let msg = new IrcMessage('TAGMSG', target);
         msg.tags = tags;
-        return this.raw(msg);
+        this.raw(msg);
     }
 
     join(channel, key) {
