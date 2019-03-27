@@ -75,6 +75,9 @@ Send a message to the target.
 ##### `.notice(target, message)`
 Send a notice to the target.
 
+##### `.tagmsg(target, tags)`
+Send a tagged message without content to the target
+
 ##### `.join(channel [, key])`
 Join a channel, optionally with a key/password.
 

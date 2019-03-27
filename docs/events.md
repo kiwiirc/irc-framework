@@ -311,6 +311,20 @@ Also triggers a **message** event with .type = 'privmsg'
 }
 ~~~
 
+**tagmsg**
+
+~~~javascript
+{
+    nick: 'prawnsalad',
+    ident: 'prawn',
+    hostname: 'manchester.isp.net',
+    target: '#channel',
+    tags: {
+        example: 'hello'
+    },
+    time: 000000000
+}
+~~~
 
 **ctcp response**
 ~~~javascript
