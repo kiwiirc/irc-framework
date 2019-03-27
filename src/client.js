@@ -722,10 +722,7 @@ module.exports = class IrcClient extends EventEmitter {
     matchAction(match_regex, cb) {
         return this.match(match_regex, cb, 'action');
     }
-    matchTagMsg(match_regex, cb) {
-        return this.match(match_regex, cb, 'tagmsg');
-    }
-
+    
     /**
      * Truncate a string into blocks of a set size
      */
