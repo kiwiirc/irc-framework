@@ -18,6 +18,7 @@
 * sasl
 * server-time
 * userhost-in-names
+* message-tags
 
 #### Extra notes
 * chghost

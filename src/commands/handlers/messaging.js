@@ -121,7 +121,18 @@ var handlers = {
             });
         }
     },
-
+    TAGMSG: function(command) {
+        let time = command.getServerTime();
+        let target = command.params[0];
+        this.emit('tagmsg', {
+            nick: command.nick,
+            ident: command.ident,
+            hostname: command.hostname,
+            target: target,
+            tags: command.tags,
+            time: time
+        })
+    },
 
     RPL_WALLOPS: function(command) {
         this.emit('wallops', {
