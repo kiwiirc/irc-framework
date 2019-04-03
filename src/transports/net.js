@@ -6,7 +6,6 @@
 
 var net             = require('net');
 var tls             = require('tls');
-var util            = require('util');
 var EventEmitter    = require('events').EventEmitter;
 var Socks           = require('socksjs');
 var iconv           = require('iconv-lite');
@@ -27,7 +26,6 @@ module.exports = class Connection extends EventEmitter {
         this.socket_events = [];
 
         this.encoding = 'utf8';
-        this.incoming_buffer = '';
     }
 
     isConnected() {
@@ -73,6 +71,7 @@ module.exports = class Connection extends EventEmitter {
 
         this.disposeSocket();
         this.requested_disconnect = false;
+        this.incoming_buffer = Buffer.from('');
 
         // Include server name (SNI) if provided host is not an IP address
         if (!this.getAddressFamily(ircd_host)) {
@@ -164,17 +163,34 @@ module.exports = class Connection extends EventEmitter {
     }
 
     onSocketData(data) {
-    	this.incoming_buffer += iconv.decode(data, this.encoding);
+        // Buffer incoming data because multiple messages can arrive at once
+        // without necessarily ending in a new line
+        this.incoming_buffer = Buffer.concat(
+            [this.incoming_buffer, data],
+            this.incoming_buffer.length + data.length
+        );
 
-    	var lines = this.incoming_buffer.split('\n');
-    	if (lines[lines.length - 1] !== '') {
-    		this.incoming_buffer = lines.pop();
-    	} else {
-    		lines.pop();
-    		this.incoming_buffer = '';
-    	}
+        let startIndex = 0;
 
-    	lines.forEach(line => this.emit('line', line));
+        while (true) {
+            // Search for the next new line in the buffered data
+            const endIndex = this.incoming_buffer.indexOf(0x0A, startIndex) + 1;
+
+            // If this message is partial, keep it in the buffer until more data arrives.
+            // If startIndex is equal to incoming_buffer.length, that means we reached the end
+            // of the buffer and it ended on a new line, slice will return an empty buffer.
+            if (endIndex === 0) {
+                this.incoming_buffer = this.incoming_buffer.slice(startIndex);
+                break;
+            }
+
+            // Slice a single message delimited by a new line, decode it and emit it out
+            let line = this.incoming_buffer.slice(startIndex, endIndex);
+            line = iconv.decode(line, this.encoding);
+            this.emit('line', line);
+
+            startIndex = endIndex;
+        }
     }
 
 
