@@ -42,7 +42,7 @@ describe('src/commands/command.js', function () {
                 tags: {}
             });
 
-            expect(cmd.getServerTime()).to.be.undefined;
+            expect(cmd.getServerTime()).to.equal(undefined);
         });
 
         it('should return undefined for empty time', function () {
@@ -52,7 +52,7 @@ describe('src/commands/command.js', function () {
                 }
             });
 
-            expect(cmd.getServerTime()).to.be.undefined;
+            expect(cmd.getServerTime()).to.equal(undefined);
         });
 
         it('should return undefined for malformed time', function () {
@@ -62,7 +62,7 @@ describe('src/commands/command.js', function () {
                 }
             });
 
-            expect(cmd.getServerTime()).to.be.undefined;
+            expect(cmd.getServerTime()).to.equal(undefined);
         });
     });
 });

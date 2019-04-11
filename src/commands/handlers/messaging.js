@@ -131,7 +131,7 @@ var handlers = {
             target: target,
             tags: command.tags,
             time: time
-        })
+        });
     },
 
     RPL_WALLOPS: function(command) {
