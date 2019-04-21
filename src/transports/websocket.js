@@ -58,23 +58,25 @@ module.exports = class Connection extends EventEmitter {
 
         socket = this.socket = new WebSocket(ws_addr); // jshint ignore:line
 
-        socket.onopen = _.bind(function() {
+        socket.onopen = function() {
             that.onSocketFullyConnected();
-        });
+        };
         socket.onclose = function() {
             that.onSocketClose();
         };
         socket.onmessage = function(event) {
             that.onSocketMessage(event.data);
         };
-        socket.onopen = function() {
-            that.onSocketFullyConnected();
+        socket.onerror = function(err) {
+            that.debugOut('socketError() ' + err.message);
+            that.last_socket_error = err;
         };
     }
 
     // Called when the socket is connected and ready to start sending/receiving data.
     onSocketFullyConnected() {
         this.debugOut('socketFullyConnected()');
+        this.last_socket_error = null;
         this.connected = true;
         this.emit('open');
     }
@@ -82,7 +84,7 @@ module.exports = class Connection extends EventEmitter {
     onSocketClose() {
     	this.debugOut('socketClose()');
         this.connected = false;
-        this.emit('close');
+        this.emit('close', this.last_socket_error ? this.last_socket_error : false);
     }
 
     onSocketMessage(data) {
