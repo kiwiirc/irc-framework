@@ -43,7 +43,7 @@ var handlers = {
         var j;
 
         for (i = 1; i < options.length; i++) {
-            option = options[i].split('=', 2);
+            option = Helpers.splitOnce(options[i], '=');
             option[0] = option[0].toUpperCase();
 
             this.network.options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
