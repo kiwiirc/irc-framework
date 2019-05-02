@@ -3,7 +3,6 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: { main: './index_browser.js' },
   output: {
     path: path.resolve(__dirname),
     filename: 'browser.js',
