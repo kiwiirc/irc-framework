@@ -1,5 +1,8 @@
 // webpack v4
 const path = require('path');
+const CompressionPlugin = require('compression-webpack-plugin');
+
+const shouldCompress = /\.(js|css|html|svg)(\.map)?$/
 
 module.exports = {
   mode: 'production',
@@ -13,10 +16,27 @@ module.exports = {
   },
   module: {
     rules: [ ]
-      },
-  plugins: [ ],
+  },
+  plugins: [
+    new CompressionPlugin({
+      test: shouldCompress,
+    }),
+    new CompressionPlugin({
+      filename: '[path].br[query]',
+      algorithm: 'brotliCompress',
+      test: shouldCompress,
+      compressionOptions: { level: 11 },
+      threshold: 10240,
+      minRatio: 0.8,
+      deleteOriginalAssets: false
+    }),
+  ],
   optimization: {
     minimize: true
   },
   devtool: 'source-map',
+  performance: {
+    assetFilter: assetFilename =>
+      !assetFilename.match(/\.map(\.(gz|br))?$/),
+  },
 };
