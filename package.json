@@ -17,7 +17,6 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
-    "babel-loader": "^8.0.5",
     "chai": "^3.4.1",
     "chai-subset": "^1.2.0",
     "compression-webpack-plugin": "^2.0.0",
