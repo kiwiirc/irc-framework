@@ -11,7 +11,7 @@
     "iconv-lite": "^0.4.24",
     "lodash": "^4.17.11",
     "middleware-handler": "^0.2.0",
-    "runes": "github:dotcypress/runes#pull/4/head",
+    "runes": "github:kiwiirc/runes",
     "socksjs": "^0.5.0"
   },
   "devDependencies": {
