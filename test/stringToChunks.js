@@ -29,6 +29,13 @@ describe('src/client.js', function () {
             expect((new IrcClient()).stringToBlocks(plain, 15)).to.deep.equal(blocks);
         });
         
+        it('should split zalgo text by grapheme cluster', function () {
+            
+            const zalgo = ['z̸̩̉̿̐͗̾͘', 'a̷̮̭̠͍͐̋̏̈́̓̂̚', 'l̵̼̟̲̘̣͐̀̎̂', 'g̷̡̗̪̘̥͋͂͛́͘͝', 'ö̶̱̤̫̝̬̰́'];
+
+            expect((new IrcClient()).stringToBlocks(zalgo.join(''), 15)).to.deep.equal(zalgo);
+        });
+
         it('should split ascii string', function () {
             let plain = 'just a normal string, testing word splitting :)';
             let blocks = [
