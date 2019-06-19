@@ -393,7 +393,7 @@ module.exports = class IrcClient extends EventEmitter {
         // Maximum length of target + message we can send to the IRC server is 500 characters
         // but we need to leave extra room for the sender prefix so the entire message can
         // be sent from the IRCd to the target without being truncated.
-        var blocks = [...lineBreak(message, { bytes: this.options.message_max_length, allowBreakingWords: true })];
+        var blocks = [...lineBreak(message, { bytes: this.options.message_max_length, allowBreakingWords: true, allowBreakingGraphemes: true })];
 
         blocks.forEach(function(block) {
             that.raw(commandName, target, block);
@@ -550,7 +550,7 @@ module.exports = class IrcClient extends EventEmitter {
 
         var commandName = 'ACTION';
         var blockLength = this.options.message_max_length - (commandName.length + 3);
-        var blocks = [...lineBreak(message, { bytes: blockLength, allowBreakingWords: true })];
+        var blocks = [...lineBreak(message, { bytes: blockLength, allowBreakingWords: true, allowBreakingGraphemes: true })];
 
         blocks.forEach(function(block) {
             that.ctcpRequest(target, commandName, block);
