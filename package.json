@@ -7,10 +7,10 @@
   "dependencies": {
     "core-js": "^3.0.1",
     "eventemitter3": "^2.0.2",
+    "grapheme-splitter": "^1.0.4",
     "iconv-lite": "^0.4.24",
     "lodash": "^4.17.11",
     "middleware-handler": "^0.2.0",
-    "runes": "github:kiwiirc/runes",
     "socksjs": "^0.5.0"
   },
   "devDependencies": {
