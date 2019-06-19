@@ -1,5 +1,5 @@
 const GraphemeSplitter = require('grapheme-splitter');
-const { TextEncoder } = require('util');
+const { encode: encodeUTF8 } = require('isomorphic-textencoder');
 
 const graphemeSplitter = new GraphemeSplitter();
 
@@ -45,10 +45,8 @@ class CodepointTooLargeForLineError extends SubstringTooLargeForLineError {
 	}
 }
 
-const utf8encoder = new TextEncoder();
-
 function size(str/* : string */)/* : number */ {
-	const byteArray = utf8encoder.encode(str);
+	const byteArray = encodeUTF8(str);
 	const bytes = byteArray.byteLength;
 	return bytes;
 }
