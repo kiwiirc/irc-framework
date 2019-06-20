@@ -447,19 +447,43 @@ module.exports = class IrcClient extends EventEmitter {
 
     inviteList(channel, cb) {
         var client = this;
-        var raw = ['MODE', channel, this.network.supports('INVEX') || 'I'];
+        var invex = this.network.supports('INVEX');
+        var mode = 'I';
 
+        if (typeof invex === 'string' && invex) {
+            mode = invex;
+        }
 
-        this.on('inviteList', function onInviteList(event) {
+        function onInviteList(event) {
             if (event.channel.toLowerCase() === channel.toLowerCase()) {
-                client.removeListener('inviteList', onInviteList);
+                unbindEvents();
                 if (typeof cb === 'function') {
                     cb(event);
                 }
             }
-        });
+        }
 
-        this.raw(raw);
+        function onInviteListErr(event) {
+            if (event.error = 'chanop_privs_needed') {
+                unbindEvents();
+                if (typeof cb === 'function') {
+                    cb(null);
+                }
+            }
+        }
+
+        function bindEvents() {
+            client.on('inviteList', onInviteList);
+            client.on('irc error', onInviteListErr);
+        }
+
+        function unbindEvents() {
+            client.removeListener('inviteList', onInviteList);
+            client.removeListener('irc error', onInviteListErr);
+        }
+
+        bindEvents();
+        this.raw(['MODE', channel, mode]);
     }
 
     invite(channel, nick) {
