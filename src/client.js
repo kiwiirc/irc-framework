@@ -464,7 +464,7 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         function onInviteListErr(event) {
-            if (event.error = 'chanop_privs_needed') {
+            if (event.error === 'chanop_privs_needed') {
                 unbindEvents();
                 if (typeof cb === 'function') {
                     cb(null);
