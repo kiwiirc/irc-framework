@@ -117,7 +117,6 @@ var handlers = {
             'server-time',
             'userhost-in-names',
             'extended-join',
-            'draft/setname',
             'znc.in/server-time-iso',
             'znc.in/server-time'
         ];
@@ -128,6 +127,9 @@ var handlers = {
         }
         if (this.connection.options.enable_chghost) {
             want.push('chghost');
+        }
+        if (this.connection.options.enable_setname) {
+            want.push('draft/setname');
         }
         if (this.connection.options.enable_echomessage) {
             want.push('echo-message');

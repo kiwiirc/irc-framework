@@ -45,6 +45,7 @@ module.exports = class IrcClient extends EventEmitter {
             encoding: 'utf8',
             version: 'node.js irc-framework',
             enable_chghost: false,
+            enable_setname: false,
             enable_echomessage: false,
             auto_reconnect: true,
             auto_reconnect_wait: 4000,
