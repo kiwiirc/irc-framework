@@ -117,6 +117,7 @@ var handlers = {
             'server-time',
             'userhost-in-names',
             'extended-join',
+            'draft/setname',
             'znc.in/server-time-iso',
             'znc.in/server-time'
         ];

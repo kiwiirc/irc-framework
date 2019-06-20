@@ -56,6 +56,21 @@ var handlers = {
         });
     },
 
+    SETNAME: function(command) {
+        var time;
+
+        // Check if we have a server-time
+        time = command.getServerTime();
+
+        this.emit('user updated', {
+            nick: command.nick,
+            ident: command.ident,
+            hostname: command.hostname,
+            new_gecos: command.params[0],
+            time: time
+        });
+    },
+
     AWAY: function(command) {
         var time;
 
