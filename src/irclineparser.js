@@ -27,12 +27,12 @@ function parseIrcLine(line) {
         msg.tags = MessageTags.decode(matches[1]);
     }
 
-    msg.prefix = matches[2];
+    msg.prefix = matches[2] || '';
     // Nick will be in the prefix slot if a full user mask is not used
-    msg.nick = matches[3] || matches[2];
+    msg.nick = matches[3] || matches[2] || '';
     msg.ident = matches[4] || '';
     msg.hostname = matches[5] || '';
-    msg.command = matches[6];
+    msg.command = matches[6] || '';
     msg.params = matches[7] ? matches[7].split(/ +/) : [];
 
     // Add the trailing param to the params list
