@@ -26,7 +26,7 @@ var handlers = {
                 time: time
             });
         } else {
-            var parsed_target = parseTargetGroup(this.network, target);
+            var parsed_target = this.network.extractTargetGroup(target);
             if (parsed_target) {
                 target = parsed_target.target;
                 target_group = parsed_target.target_group;
@@ -59,7 +59,7 @@ var handlers = {
         var target = command.params[0];
         var target_group;
 
-        var parsed_target = parseTargetGroup(this.network, target);
+        var parsed_target = this.network.extractTargetGroup(target);
         if (parsed_target) {
             target = parsed_target.target;
             target_group = parsed_target.target_group;
@@ -151,29 +151,3 @@ module.exports = function AddCommandHandlers(command_controller) {
         command_controller.addHandler(handler_command, handler);
     });
 };
-
-// Support '@#channel' and '++channel' formats
-function parseTargetGroup(network, target) {
-    var statusMsg = network.supports('STATUSMSG');
-
-    if (!statusMsg) {
-        return null;
-    }
-
-    var target_group = _.find(statusMsg, function(prefix) {
-        if (prefix === target[0]) {
-            target = target.substring(1);
-
-            return prefix;
-        }
-    });
-
-    if (!target_group) {
-        return null;
-    }
-
-    return {
-        target: target,
-        target_group: target_group,
-    };
-}
