@@ -63,7 +63,7 @@ function NetworkInfo() {
             target: target,
             target_group: target_group,
         };
-    }
+    };
 
     // Network capabilities
     this.cap = {
