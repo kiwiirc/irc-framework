@@ -493,13 +493,23 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     addInvite(channel, mask) {
-        var mode = this.network.supports('INVEX') || 'I';
+        var mode = 'I';
+        var invex = this.network.supports('INVEX');
+        if (typeof invex === 'string') {
+            mode = invex;
+        }
+
         var raw = ['MODE', channel, '+' + mode, mask];
         this.raw(raw);
     }
 
     removeInvite(channel, mask) {
-        var mode = this.network.supports('INVEX') || 'I';
+        var mode = 'I';
+        var invex = this.network.supports('INVEX');
+        if (typeof invex === 'string') {
+            mode = invex;
+        }
+
         var raw = ['MODE', channel, '-' + mode, mask];
         this.raw(raw);
     }
