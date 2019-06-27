@@ -134,6 +134,16 @@ module.exports = function AddCommandHandlers(command_controller) {
                 }
             }
 
+            if (event_obj.channel) {
+                // Extract the group from any errors targetted towards channels with a statusmsg prefix
+                // Eg. @#channel
+                var parsed = this.network.extractTargetGroup(event_obj.channel);
+                if (parsed) {
+                    event_obj.channel = parsed.target;
+                    event_obj.target_group = parsed.target_group;
+                }
+            }
+
             this.emit(generic.event, event_obj);
         });
     });
