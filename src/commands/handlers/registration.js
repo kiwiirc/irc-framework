@@ -106,6 +106,7 @@ var handlers = {
 
         // Which capabilities we want to enable
         var want = [
+            'cap-notify',
             'batch',
             'multi-prefix',
             'message-tags',
@@ -196,10 +197,19 @@ var handlers = {
                 // should we do anything here?
                 break;
             case 'NEW':
-                // Not supported yet
+                // Update list of enabled capabilities
+                for (let i = 0; i < capabilities.length; i++) {
+                    if (this.network.cap.enabled.indexOf(capabilities[i]) === -1) {
+                        this.network.cap.enabled.push(capabilities[i]);
+                    }
+                }
                 break;
             case 'DEL':
-                // Not supported yet
+                // Update list of enabled capabilities
+                this.network.cap.enabled = _.difference(
+                    this.network.cap.enabled,
+                    capabilities
+                );
                 break;
         }
     },
