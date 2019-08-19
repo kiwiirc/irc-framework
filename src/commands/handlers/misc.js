@@ -3,6 +3,7 @@
 var _ = {
     each: require('lodash/each'),
     clone: require('lodash/clone'),
+    map: require('lodash/map'),
 };
 
 var handlers = {
@@ -78,6 +79,14 @@ var handlers = {
         var is_away = params[6][0].toUpperCase() === 'G' ?
             true :
             false;
+
+        // get user channel modes
+        var net_prefixes = this.network.options.PREFIX;
+        // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
+        var chan_prefixes = net_prefixes.filter(f => params[6].indexOf(f.symbol) > -1);
+        // use _.map to return an array of mode strings from matched PREFIX objects
+        var chan_modes = _.map(chan_prefixes, 'mode');
+
         var hops_away = 0;
         var realname = params[7];
 
@@ -95,7 +104,9 @@ var handlers = {
             server: params[4],
             real_name: realname,
             away: is_away,
-            num_hops_away: hops_away
+            num_hops_away: hops_away,
+            channel: params[1],
+            channel_modes: chan_modes,
         });
     },
 
@@ -111,6 +122,13 @@ var handlers = {
             true :
             false;
 
+        // get user channel modes
+        var net_prefixes = this.network.options.PREFIX;
+        // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
+        var chan_prefixes = net_prefixes.filter(f => params[6].indexOf(f.symbol) > -1);
+        // use _.map to return an array of mode strings from matched PREFIX objects
+        var chan_modes = _.map(chan_prefixes, 'mode');
+
         // Some ircd's use n/a for no level, unify them all to 0 for no level
         var op_level = !/^[0-9]+$/.test(params[9]) ? 0 : parseInt(params[9], 10);
 
@@ -124,6 +142,8 @@ var handlers = {
             account: params[8] === '0' ? '' : params[8],
             away: is_away,
             num_hops_away: parseInt(params[7], 10),
+            channel: params[1],
+            channel_modes: chan_modes,
         });
     },
 
