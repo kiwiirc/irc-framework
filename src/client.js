@@ -440,7 +440,12 @@ module.exports = class IrcClient extends EventEmitter {
         var raw = ['MODE', channel, mode];
 
         if (extra_args) {
-            raw.push(extra_args);
+            if (Array.isArray(extra_args)) {
+                raw = raw.concat(extra_args);
+            }
+            else {
+                raw.push(extra_args);
+            }
         }
 
         this.raw(raw);
