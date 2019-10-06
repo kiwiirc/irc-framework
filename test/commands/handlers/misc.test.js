@@ -8,7 +8,8 @@ var chai = require('chai'),
     mocks = require('../../mocks'),
     parse = require('../../../src/irclineparser'),
     sinonChai = require('sinon-chai'),
-    misc = require('../../../src/commands/handlers/misc');
+    misc = require('../../../src/commands/handlers/misc'),
+    IrcCommand = require('../../../src/commands/command');
 
 chai.use(sinonChai);
 
@@ -27,12 +28,19 @@ describe('src/commands/handlers/misc.js', function() {
 
     describe('PONG handler', function() {
 
-        it('should respond with the appropriate PONG message', function () {
+        it('should emit the appropriate PONG event', function () {
             var mock = mocks.IrcCommandHandler([misc]);
-            mock.handlers.PONG(parse("PONG one.example.com two.example.com"));
+            var cmd = new IrcCommand("PONG", {
+                params: ["one.example.com", "two.example.com"],
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                }
+            });
+            mock.handlers.PONG(cmd);
             expect(mock.spies.emit).to.have.been.calledOnce;
-            expect(mock.spies.emit).to.have.been.calledWith("pong", {
-                message: "two.example.com"
+            expect(mock.spies.emit).to.have.been.calledWith('pong', {
+                message: "two.example.com",
+                time: 1318258080000,
             });
         });
 

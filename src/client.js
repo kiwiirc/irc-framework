@@ -78,6 +78,8 @@ module.exports = class IrcClient extends EventEmitter {
         client.network = new NetworkInfo();
         client.user = new User();
 
+        client.time_offsets = [];
+
         client.command_handler = new IrcCommandHandler(client.connection, client.network);
 
         client.addCommandHandlerListeners();
@@ -197,6 +199,35 @@ module.exports = class IrcClient extends EventEmitter {
         var client = this;
 
         this.command_handler.on('all', function(event_name, event_arg) {
+
+            if (event_name === 'pong' && event_arg.time) {
+                var serverTime = parseInt(event_arg.time);
+
+                // START debugging code
+                var expectedTime = client.getExpectedServerTime()
+                console.log(
+                    'server:', parseInt(event_arg.time),
+                    'expect:', expectedTime,
+                    'differ', serverTime - expectedTime,
+                );
+                // END debugging code
+
+                // add our new offset
+                var newOffset = Date.now() - serverTime;
+                client.time_offsets.push(newOffset);
+
+                // limit out offsets array to 7 enteries
+                if (client.time_offsets.length > 7) {
+                    client.time_offsets = client.time_offsets.slice(client.time_offsets.length - 7);
+                }
+
+                var offset = client.getServerTimeOffset()
+                if (newOffset - offset > 2000 || newOffset - offset < -2000) {
+                    // skew was over 2 seconds, invalidate all but last offset
+                    client.time_offsets = client.time_offsets.slice(-1);
+                }
+            }
+
             client.resetPingTimer();
 
             // Add a reply() function to selected message events
@@ -747,6 +778,14 @@ module.exports = class IrcClient extends EventEmitter {
         };
     }
 
+    getServerTimeOffset() {
+        var sortedOffsets = this.time_offsets.slice(0).sort(function (a, b) {  return a - b;  });
+        return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
+    }
+
+    getExpectedServerTime() {
+        return Date.now() - this.getServerTimeOffset();
+    }
 
     matchNotice(match_regex, cb) {
         return this.match(match_regex, cb, 'notice');

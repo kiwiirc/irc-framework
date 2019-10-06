@@ -164,8 +164,11 @@ var handlers = {
 
 
     PONG: function(command) {
+        var time = command.getServerTime();
+
         this.emit('pong', {
-            message: command.params[1]
+            message: command.params[1],
+            time: time,
         });
     },
 

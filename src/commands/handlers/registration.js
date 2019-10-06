@@ -17,6 +17,11 @@ var handlers = {
         this.network.server = command.prefix;
 
         this.network.cap.negotiating = false;
+
+        // ping before emitting registered so we get a response
+        // before the client can make any other requests
+        this.connection.write('PING ' + Date.now());
+
         this.emit('registered', {
             nick: nick
         });
