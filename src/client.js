@@ -320,7 +320,7 @@ module.exports = class IrcClient extends EventEmitter {
 
         function pingServer() {
             timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout*1000);
-            that.ping();
+            that.ping(Date.now().toString());
         }
 
         function pingTimeout() {
