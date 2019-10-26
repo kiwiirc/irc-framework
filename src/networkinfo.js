@@ -27,6 +27,18 @@ function NetworkInfo() {
         ]
     };
 
+    this.time_offsets = [];
+    this.time_offset = 0;
+
+    this.timeToLocal = function timeToLocal(serverTimeMs) {
+        return serverTimeMs - this.getServerTimeOffset();
+    };
+
+    this.getServerTimeOffset = function getServerTimeOffset() {
+        var sortedOffsets = this.time_offsets.slice(0).sort(function (a, b) {  return a - b;  });
+        return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
+    }
+
     this.supports = function supports(support_name) {
         return this.options[support_name.toUpperCase()];
     };

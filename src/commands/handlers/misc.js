@@ -164,7 +164,30 @@ var handlers = {
 
 
     PONG: function(command) {
-        var time = command.getServerTime();
+        let time = command.getServerTime();
+
+        if (time) {
+            let network = this.network;
+            let msgTime = time;
+
+            // add our new offset
+            let newOffset = msgTime - Date.now();
+            network.time_offsets.push(newOffset);
+
+            // limit out offsets array to 7 enteries
+            if (network.time_offsets.length > 7) {
+                network.time_offsets = network.time_offsets.slice(network.time_offsets.length - 7);
+            }
+
+            let currentOffset = network.getServerTimeOffset();
+            if (newOffset - currentOffset > 2000 || newOffset - currentOffset < -2000) {
+                // skew was over 2 seconds, invalidate all but last offset
+                // > 2sec skew is a little large so just use that. Possible
+                // that the time on the IRCd actually changed
+                network.time_offsets = network.time_offsets.slice(-1);
+            }
+
+            network.time_offset = network.getServerTimeOffset();
 
         this.emit('pong', {
             message: command.params[1],
