@@ -41,7 +41,7 @@ function NetworkInfo() {
     this.getServerTimeOffset = function getServerTimeOffset() {
         var sortedOffsets = this.time_offsets.slice(0).sort(function (a, b) {  return a - b;  });
         return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
-    }
+    };
 
     this.addServerTimeOffset = function addServerTimeOffset(time) {
         // add our new offset
@@ -62,7 +62,7 @@ function NetworkInfo() {
         }
 
         this.time_offset = this.getServerTimeOffset();
-    }
+    };
 
     this.supports = function supports(support_name) {
         return this.options[support_name.toUpperCase()];

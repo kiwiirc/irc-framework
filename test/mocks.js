@@ -17,7 +17,10 @@ module.exports = {
             emit: sinon.stub(),
             connection: {
                 write: sinon.stub()
-            }
+            },
+            network: {
+                addServerTimeOffset: sinon.stub()
+            },
         };
         var handler = _.mapValues(stubs, function spyify(value) {
             if (_.isFunction(value)) {
@@ -27,9 +30,7 @@ module.exports = {
             }
         });
         return {
-            handlers: _.mapValues(handlers, function(value) {
-                return value.bind(handler);
-            }),
+            handlers: handlers,
             stubs: stubs,
             spies: handler
         };

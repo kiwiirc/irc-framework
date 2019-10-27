@@ -19,7 +19,7 @@ describe('src/commands/handlers/misc.js', function() {
 
         it('should respond with the appropriate PONG message', function () {
             var mock = mocks.IrcCommandHandler([misc]);
-            mock.handlers.PING(parse("PING example.com"));
+            mock.handlers.PING(parse("PING example.com"), mock.spies);
             expect(mock.spies.connection.write).to.have.been.calledOnce;
             expect(mock.spies.connection.write).to.have.been.calledWith("PONG example.com");
         });
@@ -36,7 +36,8 @@ describe('src/commands/handlers/misc.js', function() {
                     time: '2011-10-10T14:48:00Z',
                 }
             });
-            mock.handlers.PONG(cmd);
+            mock.handlers.PONG(cmd, mock.spies);
+            expect(mock.spies.network.addServerTimeOffset).to.have.been.calledOnce;
             expect(mock.spies.emit).to.have.been.calledOnce;
             expect(mock.spies.emit).to.have.been.calledWith('pong', {
                 message: "two.example.com",
