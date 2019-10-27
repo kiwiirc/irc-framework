@@ -18,9 +18,13 @@ var handlers = {
 
         this.network.cap.negotiating = false;
 
-        // ping before emitting registered so we get a response
-        // before the client can make any other requests
-        this.connection.write('PING ' + Date.now());
+        let time = command.getServerTime();
+        if (time) {
+            this.network.addServerTimeOffset(time);
+        } else if (this.network.cap.isEnabled('server-time')) {
+            // Ping to try get a server-time in its response as soon as possible
+            this.connection.write('PING ' + Date.now());
+        }
 
         this.emit('registered', {
             nick: nick

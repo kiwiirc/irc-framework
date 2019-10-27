@@ -39,6 +39,27 @@ function NetworkInfo() {
         return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
     }
 
+    this.addServerTimeOffset = function addServerTimeOffset(time) {
+        // add our new offset
+        let newOffset = time - Date.now();
+        this.time_offsets.push(newOffset);
+
+        // limit out offsets array to 7 enteries
+        if (this.time_offsets.length > 7) {
+            this.time_offsets = this.time_offsets.slice(this.time_offsets.length - 7);
+        }
+
+        let currentOffset = this.getServerTimeOffset();
+        if (newOffset - currentOffset > 2000 || newOffset - currentOffset < -2000) {
+            // skew was over 2 seconds, invalidate all but last offset
+            // > 2sec skew is a little large so just use that. Possible
+            // that the time on the IRCd actually changed
+            this.time_offsets = this.time_offsets.slice(-1);
+        }
+
+        this.time_offset = this.getServerTimeOffset();
+    }
+
     this.supports = function supports(support_name) {
         return this.options[support_name.toUpperCase()];
     };
