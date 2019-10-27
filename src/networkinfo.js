@@ -34,6 +34,10 @@ function NetworkInfo() {
         return serverTimeMs - this.getServerTimeOffset();
     };
 
+    this.timeToServer = function timeToServer(localTimeMs) {
+        return localTimeMs + this.getServerTimeOffset();
+    };
+
     this.getServerTimeOffset = function getServerTimeOffset() {
         var sortedOffsets = this.time_offsets.slice(0).sort(function (a, b) {  return a - b;  });
         return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
