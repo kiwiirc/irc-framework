@@ -50,7 +50,7 @@ module.exports = class IrcClient extends EventEmitter {
             auto_reconnect: true,
             auto_reconnect_wait: 4000,
             auto_reconnect_max_retries: 3,
-            ping_interval: 60,
+            ping_interval: 30,
             ping_timeout: 120,
             message_max_length: 350,
             transport: default_transport
@@ -197,6 +197,8 @@ module.exports = class IrcClient extends EventEmitter {
         var client = this;
 
         this.command_handler.on('all', function(event_name, event_arg) {
+            client.resetPingTimeoutTimer();
+
             // Add a reply() function to selected message events
             if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
                 event_arg.reply = function(message) {
@@ -292,33 +294,24 @@ module.exports = class IrcClient extends EventEmitter {
 
 
     startPeriodicPing() {
-        var that = this;
-        var ping_timer = null;
-        var timeout_timer = null;
+        let that = this;
+        let ping_timer = null;
+        let timeout_timer = null;
 
         if(that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
             return;
         }
 
-        function scheduleNextPing() {
+        // Constantly ping the server for lag and time syncing functions
+        function pingServer() {
+            that.ping();
             ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
         }
 
-        function resetPingTimer() {
-            if(ping_timer) {
-                that.connection.clearTimeout(ping_timer);
-            }
-
-            if(timeout_timer) {
-                that.connection.clearTimeout(timeout_timer);
-            }
-
-            scheduleNextPing();
-        }
-
-        function pingServer() {
+        // Data from the server was detected so restart the timeout
+        function resetPingTimeoutTimer() {
+            that.connection.clearTimeout(timeout_timer);
             timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout*1000);
-            that.ping();
         }
 
         function pingTimeout() {
@@ -327,13 +320,13 @@ module.exports = class IrcClient extends EventEmitter {
             that.connection.end(end_msg, true);
         }
 
-        this.resetPingTimer = resetPingTimer;
-        scheduleNextPing();
+        this.resetPingTimeoutTimer = resetPingTimeoutTimer;
+        ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
     }
 
 
     // Gets overridden with a function in startPeriodicPing(). Only set here for completeness.
-    resetPingTimer() {}
+    resetPingTimeoutTimer() {}
 
 
 

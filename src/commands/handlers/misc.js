@@ -188,6 +188,7 @@ var handlers = {
             }
 
             network.time_offset = network.getServerTimeOffset();
+        }
 
         this.emit('pong', {
             message: command.params[1],
