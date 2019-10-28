@@ -7,7 +7,7 @@ var _ = {
 var util = require('util');
 
 var handlers = {
-    NOTICE: function(command) {
+    NOTICE: function(command, handler) {
         var time = command.getServerTime();
         var message = command.params[command.params.length - 1];
         var target = command.params[0];
@@ -16,7 +16,7 @@ var handlers = {
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // It's a CTCP response
-            this.emit('ctcp response', {
+            handler.emit('ctcp response', {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -26,18 +26,18 @@ var handlers = {
                 time: time
             });
         } else {
-            var parsed_target = this.network.extractTargetGroup(target);
+            var parsed_target = handler.network.extractTargetGroup(target);
             if (parsed_target) {
                 target = parsed_target.target;
                 target_group = parsed_target.target_group;
             }
 
             notice_from_server = (
-                command.prefix === this.network.server ||
-                !this.connection.registered
+                command.prefix === handler.network.server ||
+                !handler.connection.registered
             );
 
-            this.emit('notice', {
+            handler.emit('notice', {
                 from_server: notice_from_server,
                 nick: command.nick || undefined,
                 ident: command.ident,
@@ -53,13 +53,13 @@ var handlers = {
     },
 
 
-    PRIVMSG: function(command) {
+    PRIVMSG: function(command, handler) {
         var time = command.getServerTime();
         var message = command.params[command.params.length - 1];
         var target = command.params[0];
         var target_group;
 
-        var parsed_target = this.network.extractTargetGroup(target);
+        var parsed_target = handler.network.extractTargetGroup(target);
         if (parsed_target) {
             target = parsed_target.target;
             target_group = parsed_target.target_group;
@@ -69,7 +69,7 @@ var handlers = {
             // CTCP request
             var ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
             if (ctcp_command === 'ACTION') {
-                this.emit('action', {
+                handler.emit('action', {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -81,21 +81,21 @@ var handlers = {
                     account: command.getTag('account')
                 });
 
-            } else if (ctcp_command === 'VERSION' && this.connection.options.version) {
-                this.connection.write(util.format(
+            } else if (ctcp_command === 'VERSION' && handler.connection.options.version) {
+                handler.connection.write(util.format(
                     'NOTICE %s :\x01VERSION %s\x01',
                     command.nick,
-                    this.connection.options.version
+                    handler.connection.options.version
                 ));
 
             } else if (ctcp_command === 'CLIENTINFO') {
-                this.connection.write(util.format(
+                handler.connection.write(util.format(
                     'NOTICE %s :\x01CLIENTINFO VERSION\x01',
                     command.nick
                 ));
 
             } else {
-                this.emit('ctcp request', {
+                handler.emit('ctcp request', {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -108,7 +108,7 @@ var handlers = {
                 });
             }
         } else {
-            this.emit('privmsg', {
+            handler.emit('privmsg', {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -121,10 +121,10 @@ var handlers = {
             });
         }
     },
-    TAGMSG: function(command) {
+    TAGMSG: function(command, handler) {
         let time = command.getServerTime();
         let target = command.params[0];
-        this.emit('tagmsg', {
+        handler.emit('tagmsg', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -134,8 +134,8 @@ var handlers = {
         });
     },
 
-    RPL_WALLOPS: function(command) {
-        this.emit('wallops', {
+    RPL_WALLOPS: function(command, handler) {
+        handler.emit('wallops', {
             from_server: false,
             nick: command.nick,
             ident: command.ident,

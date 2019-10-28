@@ -60,7 +60,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         }
 
         if (this.handlers[command_name]) {
-            this.handlers[command_name].call(this, irc_command);
+            this.handlers[command_name](irc_command, this);
         } else {
             this.emitUnknownCommand(irc_command);
         }

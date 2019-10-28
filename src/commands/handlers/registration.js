@@ -10,32 +10,41 @@ var _ = {
 };
 
 var handlers = {
-	RPL_WELCOME: function(command) {
+	RPL_WELCOME: function(command, handler) {
         var nick =  command.params[0];
 
         // Get the server name so we know which messages are by the server in future
-        this.network.server = command.prefix;
+        handler.network.server = command.prefix;
 
-        this.network.cap.negotiating = false;
-        this.emit('registered', {
+        handler.network.cap.negotiating = false;
+
+        let time = command.getServerTime();
+        if (time) {
+            handler.network.addServerTimeOffset(time);
+        } else if (handler.network.cap.isEnabled('server-time')) {
+            // Ping to try get a server-time in its response as soon as possible
+            handler.connection.write('PING ' + Date.now());
+        }
+
+        handler.emit('registered', {
             nick: nick
         });
     },
 
 
-    RPL_YOURHOST: function(command) {
+    RPL_YOURHOST: function(command, handler) {
         // Your host is ircd.network.org, running version InspIRCd-2.0
         let param = command.params[1] || '';
         let m = param.match(/running version (.*)$/);
         if (!m) {
-            this.network.ircd = '';
+            handler.network.ircd = '';
         } else {
-            this.network.ircd = m[1];
+            handler.network.ircd = m[1];
         }
     },
 
 
-    RPL_ISUPPORT: function(command) {
+    RPL_ISUPPORT: function(command, handler) {
         var options = command.params;
         var i;
         var option;
@@ -46,42 +55,42 @@ var handlers = {
             option = Helpers.splitOnce(options[i], '=');
             option[0] = option[0].toUpperCase();
 
-            this.network.options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
+            handler.network.options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
 
             if (option[0] === 'PREFIX') {
                 matches = /\(([^)]*)\)(.*)/.exec(option[1]);
                 if (matches && matches.length === 3) {
-                    this.network.options.PREFIX = [];
+                    handler.network.options.PREFIX = [];
                     for (j = 0; j < matches[2].length; j++) {
-                        this.network.options.PREFIX.push({
+                        handler.network.options.PREFIX.push({
                             symbol: matches[2].charAt(j),
                             mode: matches[1].charAt(j)
                         });
                     }
                 }
             } else if (option[0] === 'CHANTYPES') {
-                this.network.options.CHANTYPES = this.network.options.CHANTYPES.split('');
+                handler.network.options.CHANTYPES = handler.network.options.CHANTYPES.split('');
             } else if (option[0] === 'STATUSMSG') {
-                this.network.options.STATUSMSG = this.network.options.STATUSMSG.split('');
+                handler.network.options.STATUSMSG = handler.network.options.STATUSMSG.split('');
             } else if (option[0] === 'CHANMODES') {
-                this.network.options.CHANMODES = option[1].split(',');
+                handler.network.options.CHANMODES = option[1].split(',');
             } else if (option[0] === 'NETWORK') {
-                this.network.name = option[1];
-            } else if (option[0] === 'NAMESX' && !this.network.cap.isEnabled('multi-prefix')) {
+                handler.network.name = option[1];
+            } else if (option[0] === 'NAMESX' && !handler.network.cap.isEnabled('multi-prefix')) {
                 // Tell the server to send us all user modes in NAMES reply, not just
                 // the highest one
-                this.connection.write('PROTOCTL NAMESX');
+                handler.connection.write('PROTOCTL NAMESX');
             }
         }
 
-        this.emit('server options', {
-            options: this.network.options,
-            cap: this.network.cap.enabled
+        handler.emit('server options', {
+            options: handler.network.options,
+            cap: handler.network.cap.enabled
         });
     },
 
 
-    CAP: function(command) {
+    CAP: function(command, handler) {
         var request_caps = [];
         var capability_values = Object.create(null);
 
@@ -122,74 +131,74 @@ var handlers = {
         ];
 
         // Optional CAPs depending on settings
-        if (this.connection.options.password) {
+        if (handler.connection.options.password) {
             want.push('sasl');
         }
-        if (this.connection.options.enable_chghost) {
+        if (handler.connection.options.enable_chghost) {
             want.push('chghost');
         }
-        if (this.connection.options.enable_setname) {
+        if (handler.connection.options.enable_setname) {
             want.push('draft/setname');
         }
-        if (this.connection.options.enable_echomessage) {
+        if (handler.connection.options.enable_echomessage) {
             want.push('echo-message');
         }
 
-        want = _.uniq(want.concat(this.request_extra_caps));
+        want = _.uniq(want.concat(handler.request_extra_caps));
 
         switch (command.params[1]) {
             case 'LS':
                 // Compute which of the available capabilities we want and request them
                 request_caps = _.intersection(capabilities, want);
                 if (request_caps.length > 0) {
-                    this.network.cap.requested = this.network.cap.requested.concat(request_caps);
+                    handler.network.cap.requested = handler.network.cap.requested.concat(request_caps);
                 }
 
                 // CAP 3.2 multline support. Only send our CAP requests on the last CAP LS
                 // line which will not have * set for params[2]
                 if (command.params[2] !== '*') {
                     if (request_caps.length > 0) {
-                        this.network.cap.negotiating = true;
-                        this.connection.write('CAP REQ :' + request_caps.join(' '));
+                        handler.network.cap.negotiating = true;
+                        handler.connection.write('CAP REQ :' + request_caps.join(' '));
                     } else {
-                        this.connection.write('CAP END');
-                        this.network.cap.negotiating = false;
+                        handler.connection.write('CAP END');
+                        handler.network.cap.negotiating = false;
                     }
                 }
                 break;
             case 'ACK':
                 if (capabilities.length > 0) {
                     // Update list of enabled capabilities
-                    this.network.cap.enabled = capabilities;
+                    handler.network.cap.enabled = capabilities;
                     // Update list of capabilities we would like to have but that aren't enabled
-                    this.network.cap.requested = _.difference(
-                        this.network.cap.requested,
+                    handler.network.cap.requested = _.difference(
+                        handler.network.cap.requested,
                         capabilities
                     );
                 }
-                if (this.network.cap.enabled.length > 0) {
-                    if (this.network.cap.isEnabled('sasl')) {
-                        if (this.connection.options.sasl_mechanism === 'AUTHCOOKIE') {
-                            this.connection.write('AUTHENTICATE AUTHCOOKIE');
+                if (handler.network.cap.enabled.length > 0) {
+                    if (handler.network.cap.isEnabled('sasl')) {
+                        if (handler.connection.options.sasl_mechanism === 'AUTHCOOKIE') {
+                            handler.connection.write('AUTHENTICATE AUTHCOOKIE');
                         } else {
-                            this.connection.write('AUTHENTICATE PLAIN');
+                            handler.connection.write('AUTHENTICATE PLAIN');
                         }
                     } else {
-                        this.connection.write('CAP END');
-                        this.network.cap.negotiating = false;
+                        handler.connection.write('CAP END');
+                        handler.network.cap.negotiating = false;
                     }
                 }
                 break;
             case 'NAK':
                 if (capabilities.length > 0) {
-                    this.network.cap.requested = _.difference(
-                        this.network.cap.requested,
+                    handler.network.cap.requested = _.difference(
+                        handler.network.cap.requested,
                         capabilities
                     );
                 }
-                if (this.network.cap.requested.length > 0) {
-                    this.connection.write('CAP END');
-                    this.network.cap.negotiating = false;
+                if (handler.network.cap.requested.length > 0) {
+                    handler.connection.write('CAP END');
+                    handler.network.cap.negotiating = false;
                 }
                 break;
             case 'LIST':
@@ -205,34 +214,34 @@ var handlers = {
     },
 
 
-    AUTHENTICATE: function(command) {
-        var auth_str = this.connection.options.nick + '\0' +
-            this.connection.options.nick + '\0' +
-            this.connection.options.password;
+    AUTHENTICATE: function(command, handler) {
+        var auth_str = handler.connection.options.nick + '\0' +
+            handler.connection.options.nick + '\0' +
+            handler.connection.options.password;
         var b = new Buffer(auth_str, 'utf8');
         var b64 = b.toString('base64');
 
         if (command.params[0] === '+') {
             while (b64.length >= 400) {
-                this.connection.write('AUTHENTICATE ' + b64.slice(0, 399));
+                handler.connection.write('AUTHENTICATE ' + b64.slice(0, 399));
                 b64 = b64.slice(399);
             }
             if (b64.length > 0) {
-                this.connection.write('AUTHENTICATE ' + b64);
+                handler.connection.write('AUTHENTICATE ' + b64);
             } else {
-                this.connection.write('AUTHENTICATE +');
+                handler.connection.write('AUTHENTICATE +');
             }
         } else {
-            this.connection.write('CAP END');
-            this.network.cap.negotiating = false;
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
         }
     },
 
 
-    RPL_LOGGEDIN: function(command) {
-        if (this.network.cap.negotiating === true) {
-            this.connection.write('CAP END');
-            this.network.cap.negotiating = false;
+    RPL_LOGGEDIN: function(command, handler) {
+        if (handler.network.cap.negotiating === true) {
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
         }
 
         var mask = Helpers.parseMask(command.params[1]);
@@ -240,7 +249,7 @@ var handlers = {
         // Check if we have a server-time
         var time = command.getServerTime();
 
-        this.emit('loggedin', {
+        handler.emit('loggedin', {
             nick: command.params[0],
             ident: mask.user,
             hostname: mask.host,
@@ -248,7 +257,7 @@ var handlers = {
             time: time
         });
 
-        this.emit('account', {
+        handler.emit('account', {
             nick: command.params[0],
             ident: mask.user,
             hostname: mask.host,
@@ -257,13 +266,13 @@ var handlers = {
         });
     },
 
-    RPL_LOGGEDOUT: function(command) {
+    RPL_LOGGEDOUT: function(command, handler) {
         var mask = Helpers.parseMask(command.params[1]);
 
         // Check if we have a server-time
         var time = command.getServerTime();
 
-        this.emit('loggedout', {
+        handler.emit('loggedout', {
             nick: command.params[0],
             ident: mask.user,
             hostname: mask.host,
@@ -271,7 +280,7 @@ var handlers = {
             time: time
         });
 
-        this.emit('account', {
+        handler.emit('account', {
             nick: command.params[0],
             ident: mask.user,
             hostname: mask.host,
@@ -280,26 +289,26 @@ var handlers = {
         });
     },
 
-    RPL_SASLLOGGEDIN: function() {
-        if (this.network.cap.negotiating === true) {
-            this.connection.write('CAP END');
-            this.network.cap.negotiating = false;
+    RPL_SASLLOGGEDIN: function(command, handler) {
+        if (handler.network.cap.negotiating === true) {
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
         }
     },
 
-    ERR_SASLNOTAUTHORISED: function() {
-        this.connection.write('CAP END');
-        this.network.cap.negotiating = false;
+    ERR_SASLNOTAUTHORISED: function(command, handler) {
+        handler.connection.write('CAP END');
+        handler.network.cap.negotiating = false;
     },
 
 
-    ERR_SASLABORTED: function() {
-        this.connection.write('CAP END');
-        this.network.cap.negotiating = false;
+    ERR_SASLABORTED: function(command, handler) {
+        handler.connection.write('CAP END');
+        handler.network.cap.negotiating = false;
     },
 
 
-    ERR_SASLALREADYAUTHED: function() {
+    ERR_SASLALREADYAUTHED: function(command, handler) {
         // noop
     }
 };
