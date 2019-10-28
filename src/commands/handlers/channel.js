@@ -6,13 +6,13 @@ var _ = {
 var Helpers = require('../../helpers');
 
 var handlers = {
-    RPL_CHANNELMODEIS: function(command) {
+    RPL_CHANNELMODEIS: function(command, handler) {
         var channel = command.params[1];
         var raw_modes = command.params[2];
         var raw_params = command.params.slice(3);
-        var modes = this.parseModeList.call(this, raw_modes, raw_params);
+        var modes = handler.parseModeList(raw_modes, raw_params);
 
-        this.emit('channel info', {
+        handler.emit('channel info', {
             channel: channel,
             modes: modes,
             raw_modes: raw_modes,
@@ -21,30 +21,29 @@ var handlers = {
     },
 
 
-    RPL_CREATIONTIME: function(command) {
+    RPL_CREATIONTIME: function(command, handler) {
         var channel = command.params[1];
 
-        this.emit('channel info', {
+        handler.emit('channel info', {
             channel: channel,
             created_at: parseInt(command.params[2], 10)
         });
     },
 
 
-    RPL_CHANNEL_URL: function(command) {
+    RPL_CHANNEL_URL: function(command, handler) {
         var channel = command.params[1];
 
-        this.emit('channel info', {
+        handler.emit('channel info', {
             channel: channel,
             url: command.params[command.params.length - 1]
         });
     },
 
 
-    RPL_NAMEREPLY: function(command) {
-        var that = this;
+    RPL_NAMEREPLY: function(command, handler) {
         var members = command.params[command.params.length - 1].split(' ');
-        var cache = this.cache('names.' + command.params[2]);
+        var cache = handler.cache('names.' + command.params[2]);
 
         if (!cache.members) {
             cache.members = [];
@@ -59,10 +58,10 @@ var handlers = {
             var user = null;
 
             // If we have prefixes, strip them from the nick and keep them separate
-            if (that.network.options.PREFIX) {
-                for (j = 0; j < that.network.options.PREFIX.length; j++) {
-                    if (member[0] === that.network.options.PREFIX[j].symbol) {
-                        modes.push(that.network.options.PREFIX[j].mode);
+            if (handler.network.options.PREFIX) {
+                for (j = 0; j < handler.network.options.PREFIX.length; j++) {
+                    if (member[0] === handler.network.options.PREFIX[j].symbol) {
+                        modes.push(handler.network.options.PREFIX[j].mode);
                         member = member.substring(1);
                     }
                 }
@@ -81,9 +80,9 @@ var handlers = {
     },
 
 
-    RPL_ENDOFNAMES: function(command) {
-        var cache = this.cache('names.' + command.params[1]);
-        this.emit('userlist', {
+    RPL_ENDOFNAMES: function(command, handler) {
+        var cache = handler.cache('names.' + command.params[1]);
+        handler.emit('userlist', {
             channel: command.params[1],
             users: cache.members || []
         });
@@ -91,8 +90,8 @@ var handlers = {
     },
 
 
-    RPL_INVITELIST: function(command) {
-        var cache = this.cache('inviteList.' + command.params[1]);
+    RPL_INVITELIST: function(command, handler) {
+        var cache = handler.cache('inviteList.' + command.params[1]);
         if (!cache.invites) {
             cache.invites = [];
         }
@@ -106,9 +105,9 @@ var handlers = {
     },
 
 
-    RPL_ENDOFINVITELIST: function(command) {
-        var cache = this.cache('inviteList.' + command.params[1]);
-        this.emit('inviteList', {
+    RPL_ENDOFINVITELIST: function(command, handler) {
+        var cache = handler.cache('inviteList.' + command.params[1]);
+        handler.emit('inviteList', {
             channel: command.params[1],
             invites: cache.invites || []
         });
@@ -117,8 +116,8 @@ var handlers = {
     },
 
 
-    RPL_BANLIST: function(command) {
-        var cache = this.cache('banlist.' + command.params[1]);
+    RPL_BANLIST: function(command, handler) {
+        var cache = handler.cache('banlist.' + command.params[1]);
         if (!cache.bans) {
             cache.bans = [];
         }
@@ -132,9 +131,9 @@ var handlers = {
     },
 
 
-    RPL_ENDOFBANLIST: function(command) {
-        var cache = this.cache('banlist.' + command.params[1]);
-        this.emit('banlist', {
+    RPL_ENDOFBANLIST: function(command, handler) {
+        var cache = handler.cache('banlist.' + command.params[1]);
+        handler.emit('banlist', {
             channel: command.params[1],
             bans: cache.bans || []
         });
@@ -143,25 +142,25 @@ var handlers = {
     },
 
 
-    RPL_TOPIC: function(command) {
-        this.emit('topic', {
+    RPL_TOPIC: function(command, handler) {
+        handler.emit('topic', {
             channel: command.params[1],
             topic: command.params[command.params.length - 1]
         });
     },
 
 
-    RPL_NOTOPIC: function(command) {
-        this.emit('topic', {
+    RPL_NOTOPIC: function(command, handler) {
+        handler.emit('topic', {
             channel: command.params[1],
             topic: ''
         });
     },
 
 
-    RPL_TOPICWHOTIME: function(command) {
+    RPL_TOPICWHOTIME: function(command, handler) {
         var parsed = Helpers.parseMask(command.params[2]);
-        this.emit('topicsetby', {
+        handler.emit('topicsetby', {
             nick: parsed.nick,
             ident: parsed.user,
             hostname: parsed.host,
@@ -171,7 +170,7 @@ var handlers = {
     },
 
 
-    JOIN: function(command) {
+    JOIN: function(command, handler) {
         var channel;
         var gecos_idx = 1;
         var data = {};
@@ -180,7 +179,7 @@ var handlers = {
             channel = command.params[0];
         }
 
-        if (this.network.cap.isEnabled('extended-join')) {
+        if (handler.network.cap.isEnabled('extended-join')) {
             data.account = command.params[1] === '*' ? false : command.params[1];
             gecos_idx = 2;
         }
@@ -192,14 +191,14 @@ var handlers = {
         data.channel = channel;
         data.time = command.getServerTime();
 
-        this.emit('join', data);
+        handler.emit('join', data);
     },
 
 
-    PART: function(command) {
+    PART: function(command, handler) {
         var time = command.getServerTime();
 
-        this.emit('part', {
+        handler.emit('part', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -210,10 +209,10 @@ var handlers = {
     },
 
 
-    KICK: function(command) {
+    KICK: function(command, handler) {
         var time = command.getServerTime();
 
-        this.emit('kick', {
+        handler.emit('kick', {
             kicked: command.params[1],
             nick: command.nick,
             ident: command.ident,
@@ -225,10 +224,10 @@ var handlers = {
     },
 
 
-    QUIT: function(command) {
+    QUIT: function(command, handler) {
         var time = command.getServerTime();
 
-        this.emit('quit', {
+        handler.emit('quit', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -238,7 +237,7 @@ var handlers = {
     },
 
 
-    TOPIC: function(command) {
+    TOPIC: function(command, handler) {
         // If we don't have an associated channel, no need to continue
         if (!command.params[0]) {
             return;
@@ -250,7 +249,7 @@ var handlers = {
         var channel = command.params[0];
         var topic = command.params[command.params.length - 1] || '';
 
-        this.emit('topic', {
+        handler.emit('topic', {
             nick: command.nick,
             channel: channel,
             topic: topic,
@@ -259,10 +258,10 @@ var handlers = {
     },
 
 
-    INVITE: function(command) {
+    INVITE: function(command, handler) {
         var time = command.getServerTime();
 
-        this.emit('invite', {
+        handler.emit('invite', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -273,8 +272,8 @@ var handlers = {
     },
 
 
-    RPL_INVITING: function(command) {
-        this.emit('invited', {
+    RPL_INVITING: function(command, handler) {
+        handler.emit('invited', {
             nick: command.params[0],
             channel: command.params[1]
         });

@@ -5,13 +5,13 @@ var _ = {
 };
 
 var handlers = {
-    NICK: function(command) {
+    NICK: function(command, handler) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('nick', {
+        handler.emit('nick', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -20,7 +20,7 @@ var handlers = {
         });
     },
 
-    ACCOUNT: function(command) {
+    ACCOUNT: function(command, handler) {
         var time;
 
         // Check if we have a server-time
@@ -30,7 +30,7 @@ var handlers = {
             false :
             command.params[0];
 
-        this.emit('account', {
+        handler.emit('account', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -40,13 +40,13 @@ var handlers = {
     },
 
     // If the chghost CAP is enabled and 'enable_chghost' option is true
-    CHGHOST: function(command) {
+    CHGHOST: function(command, handler) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('user updated', {
+        handler.emit('user updated', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -56,13 +56,13 @@ var handlers = {
         });
     },
 
-    SETNAME: function(command) {
+    SETNAME: function(command, handler) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('user updated', {
+        handler.emit('user updated', {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
@@ -71,21 +71,21 @@ var handlers = {
         });
     },
 
-    AWAY: function(command) {
+    AWAY: function(command, handler) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
         const message = command.params[command.params.length - 1] || '';
         if (message === '') { // back
-            this.emit('back', {
+            handler.emit('back', {
                 self: false,
                 nick: command.nick,
                 message: '',
                 time: time
             });
         } else {
-            this.emit('away', {
+            handler.emit('away', {
                 self: false,
                 nick: command.nick,
                 message: message,
@@ -94,13 +94,13 @@ var handlers = {
         }
     },
 
-    RPL_NOWAWAY: function(command) {
+    RPL_NOWAWAY: function(command, handler) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('away', {
+        handler.emit('away', {
             self: true,
             nick: command.params[0],
             message: command.params[1] || '',
@@ -108,13 +108,13 @@ var handlers = {
         });
     },
 
-    RPL_UNAWAY: function(command) {
+    RPL_UNAWAY: function(command, handler) {
         var time;
 
         // Check if we have a server-time
         time = command.getServerTime();
 
-        this.emit('back', {
+        handler.emit('back', {
             self: true,
             nick: command.params[0],
             message: command.params[1] || '', // example: "<nick> is now back."
@@ -122,52 +122,52 @@ var handlers = {
         });
     },
 
-    RPL_ISON: function(command) {
-        this.emit('users online', {
+    RPL_ISON: function(command, handler) {
+        handler.emit('users online', {
             nicks: (command.params[command.params.length - 1] || '').split(' '),
         });
     },
 
 
-    ERR_NICKNAMEINUSE: function(command) {
-        this.emit('nick in use', {
+    ERR_NICKNAMEINUSE: function(command, handler) {
+        handler.emit('nick in use', {
             nick: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
-    ERR_ERRONEOUSNICKNAME: function(command) {
-        this.emit('nick invalid', {
+    ERR_ERRONEOUSNICKNAME: function(command, handler) {
+        handler.emit('nick invalid', {
             nick: command.params[1],
             reason: command.params[command.params.length - 1]
         });
     },
 
 
-    RPL_ENDOFWHOIS: function(command) {
+    RPL_ENDOFWHOIS: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
 
         if (!cache.nick) {
             cache.nick = command.params[1];
             cache.error = 'not_found';
         }
 
-        this.emit('whois', cache);
+        handler.emit('whois', cache);
         cache.destroy();
     },
 
-    RPL_AWAY: function(command) {
+    RPL_AWAY: function(command, handler) {
         var cache_key = 'whois.' + command.params[1].toLowerCase();
         var message = command.params[command.params.length - 1] || 'is away';
 
         // RPL_AWAY may come as a response to PRIVMSG, and not be a part of whois
         // If so, emit away event separately for it
-        if (!this.hasCache(cache_key)) {
+        if (!handler.hasCache(cache_key)) {
             // Check if we have a server-time
             var time = command.getServerTime();
 
-            this.emit('away', {
+            handler.emit('away', {
                 self: false,
                 nick: command.params[1],
                 message: message,
@@ -177,47 +177,47 @@ var handlers = {
             return;
         }
 
-        var cache = this.cache(cache_key);
+        var cache = handler.cache(cache_key);
         cache.away = message;
     },
 
-    RPL_WHOISUSER: function(command) {
+    RPL_WHOISUSER: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.nick = command.params[1];
         cache.ident = command.params[2];
         cache.hostname = command.params[3];
         cache.real_name = command.params[5];
     },
 
-    RPL_WHOISHELPOP: function(command) {
+    RPL_WHOISHELPOP: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.helpop = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISBOT: function(command) {
+    RPL_WHOISBOT: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.bot = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISSERVER: function(command) {
+    RPL_WHOISSERVER: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.server = command.params[2];
         cache.server_info = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISOPERATOR: function(command) {
+    RPL_WHOISOPERATOR: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.operator = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISCHANNELS: function(command) {
+    RPL_WHOISCHANNELS: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         if (cache.channels) {
             cache.channels += ' ' + command.params[command.params.length - 1];
         } else {
@@ -225,30 +225,30 @@ var handlers = {
         }
     },
 
-    RPL_WHOISMODES: function(command) {
+    RPL_WHOISMODES: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.modes = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISIDLE: function(command) {
+    RPL_WHOISIDLE: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.idle = command.params[2];
         if (command.params[3]) {
             cache.logon = command.params[3];
         }
     },
 
-    RPL_WHOISREGNICK: function(command) {
+    RPL_WHOISREGNICK: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.registered_nick = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISHOST: function(command) {
+    RPL_WHOISHOST: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
 
         var last_param = command.params[command.params.length - 1];
         // <source> 378 <target> <nick> :is connecting from <user>@<host> <ip>
@@ -262,34 +262,34 @@ var handlers = {
         cache.actual_hostname = match[1];
     },
 
-    RPL_WHOISSECURE: function(command) {
+    RPL_WHOISSECURE: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.secure = true;
     },
 
-    RPL_WHOISACCOUNT: function(command) {
+    RPL_WHOISACCOUNT: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.account = command.params[2];
     },
 
-    RPL_WHOISSPECIAL: function(command) {
+    RPL_WHOISSPECIAL: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.special = cache.special || [];
         cache.special.push(command.params[command.params.length - 1]);
     },
 
-    RPL_WHOISCOUNTRY: function(command) {
+    RPL_WHOISCOUNTRY: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
         cache.country = command.params[command.params.length - 1];
     },
 
-    RPL_WHOISACTUALLY: function(command) {
+    RPL_WHOISACTUALLY: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
 
         // <source> 338 <target> <nick> <user>@<host> <ip> :Actual user@host, Actual IP
         var user_host = command.params[command.params.length - 3] || '';
@@ -304,9 +304,9 @@ var handlers = {
         }
     },
 
-    RPL_WHOWASUSER: function(command) {
+    RPL_WHOWASUSER: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
 
         cache.nick = command.params[1];
         cache.ident = command.params[2];
@@ -314,7 +314,7 @@ var handlers = {
         cache.real_name = command.params[command.params.length - 1];
     },
 
-    RPL_ENDOFWHOWAS: function(command) {
+    RPL_ENDOFWHOWAS: function(command, handler) {
         // Because the WHOIS and WHOWAS numerics clash with eachother,
         // a cache key will have more than what is just in RPL_WHOWASUSER.
         // This is why we borrow from the whois.* cache key ID.
@@ -325,7 +325,7 @@ var handlers = {
         //   server_info
         // More optional fields MAY exist, depending on the type of ircd.
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
 
         // Should, in theory, never happen.
         if (!cache.nick) {
@@ -333,25 +333,25 @@ var handlers = {
             cache.error = 'no_such_nick';
         }
 
-        this.emit('whowas', cache);
+        handler.emit('whowas', cache);
         cache.destroy();
     },
 
-    ERR_WASNOSUCHNICK: function(command) {
+    ERR_WASNOSUCHNICK: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
-        var cache = this.cache('whois.' + cache_key);
+        var cache = handler.cache('whois.' + cache_key);
 
         cache.nick = command.params[1];
         cache.error = 'no_such_nick';
     },
 
-    RPL_UMODEIS: function(command) {
-        // this.connection.umodes = the modes
+    RPL_UMODEIS: function(command, handler) {
+        // handler.connection.umodes = the modes
         // TODO: this
     },
 
-    RPL_HOSTCLOAKING: function(command) {
-        this.emit('displayed host', {
+    RPL_HOSTCLOAKING: function(command, handler) {
+        handler.emit('displayed host', {
             nick: command.params[0],
             hostname: command.params[1]
         });
