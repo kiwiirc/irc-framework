@@ -115,6 +115,7 @@ var handlers = {
 
         // Which capabilities we want to enable
         var want = [
+            'cap-notify',
             'batch',
             'multi-prefix',
             'message-tags',
@@ -160,7 +161,7 @@ var handlers = {
                     if (request_caps.length > 0) {
                         handler.network.cap.negotiating = true;
                         handler.connection.write('CAP REQ :' + request_caps.join(' '));
-                    } else {
+                    } else if(handler.network.cap.negotiating) {
                         handler.connection.write('CAP END');
                         handler.network.cap.negotiating = false;
                     }
@@ -169,21 +170,23 @@ var handlers = {
             case 'ACK':
                 if (capabilities.length > 0) {
                     // Update list of enabled capabilities
-                    handler.network.cap.enabled = capabilities;
+                    handler.network.cap.enabled = _.uniq(handler.network.cap.enabled.concat(capabilities));
+
                     // Update list of capabilities we would like to have but that aren't enabled
                     handler.network.cap.requested = _.difference(
                         handler.network.cap.requested,
                         capabilities
                     );
                 }
-                if (handler.network.cap.enabled.length > 0) {
+                if (handler.network.cap.negotiating) {
                     if (handler.network.cap.isEnabled('sasl')) {
                         if (handler.connection.options.sasl_mechanism === 'AUTHCOOKIE') {
                             handler.connection.write('AUTHENTICATE AUTHCOOKIE');
                         } else {
                             handler.connection.write('AUTHENTICATE PLAIN');
                         }
-                    } else {
+                    } else if (handler.network.cap.requested.length === 0) {
+                        // If all of our requested CAPs have been handled, end CAP negotiation
                         handler.connection.write('CAP END');
                         handler.network.cap.negotiating = false;
                     }
@@ -196,7 +199,9 @@ var handlers = {
                         capabilities
                     );
                 }
-                if (handler.network.cap.requested.length > 0) {
+
+                // If all of our requested CAPs have been handled, end CAP negotiation
+                if (handler.network.cap.negotiating && handler.network.cap.requested.length === 0) {
                     handler.connection.write('CAP END');
                     handler.network.cap.negotiating = false;
                 }
@@ -205,10 +210,27 @@ var handlers = {
                 // should we do anything here?
                 break;
             case 'NEW':
-                // Not supported yet
+                // Request any new CAPs that we want but haven't already enabled
+                request_caps = [];
+                for (let i = 0; i < capabilities.length; i++) {
+                    let cap = capabilities[i];
+                    if (
+                        want.indexOf(cap) > -1 &&
+                        request_caps.indexOf(cap) === -1 &&
+                        !handler.network.cap.isEnabled(cap)
+                    ) {
+                        request_caps.push(cap);
+                    }
+                }
+
+                handler.connection.write('CAP REQ :' + request_caps.join(' '));
                 break;
             case 'DEL':
-                // Not supported yet
+                // Update list of enabled capabilities
+                handler.network.cap.enabled = _.difference(
+                    handler.network.cap.enabled,
+                    capabilities
+                );
                 break;
         }
     },
@@ -231,7 +253,7 @@ var handlers = {
             } else {
                 handler.connection.write('AUTHENTICATE +');
             }
-        } else {
+        } else if (handler.network.cap.negotiating) {
             handler.connection.write('CAP END');
             handler.network.cap.negotiating = false;
         }
@@ -297,14 +319,18 @@ var handlers = {
     },
 
     ERR_SASLNOTAUTHORISED: function(command, handler) {
-        handler.connection.write('CAP END');
-        handler.network.cap.negotiating = false;
+        if (handler.network.cap.negotiating) {
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
+        }
     },
 
 
     ERR_SASLABORTED: function(command, handler) {
-        handler.connection.write('CAP END');
-        handler.network.cap.negotiating = false;
+        if (handler.network.cap.negotiating) {
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
+        }
     },
 
 
