@@ -20,7 +20,7 @@ function parseMask(mask) {
 		nick = mask;
 	} else if (sep1 === -1 && sep2 !== -1) {
 		// something@something
-		user = mask.substring(0, sep2);
+		nick = mask.substring(0, sep2);
 		host = mask.substring(sep2 + 1);
 	} else if (sep1 !== -1 && sep2 === -1) {
 		// something!something
