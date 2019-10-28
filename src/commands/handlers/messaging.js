@@ -12,7 +12,6 @@ var handlers = {
         var message = command.params[command.params.length - 1];
         var target = command.params[0];
         var target_group;
-        var notice_from_server = false;
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // It's a CTCP response
@@ -32,13 +31,8 @@ var handlers = {
                 target_group = parsed_target.target_group;
             }
 
-            notice_from_server = (
-                command.prefix === handler.network.server ||
-                !handler.connection.registered
-            );
-
             handler.emit('notice', {
-                from_server: notice_from_server,
+                from_server: command.nick.indexOf('.') > -1,
                 nick: command.nick || undefined,
                 ident: command.ident,
                 hostname: command.hostname,

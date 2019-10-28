@@ -27,12 +27,12 @@ describe('src/irclineparser.js', function () {
             });
         });
 
-        it('should recognize when just passed a user and host', function () {
+        it('should recognize when just passed a nick and host', function () {
             var msgObj = Helper.parseMask("something@something");
 
             expect(msgObj).to.containSubset({
                 host: "something",
-                user: "something",
+                nick: "something",
             });
         });
 
