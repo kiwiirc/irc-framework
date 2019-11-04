@@ -18,10 +18,9 @@ var handlers = {
 
         handler.network.cap.negotiating = false;
 
-        let time = command.getServerTime();
-        if (time) {
-            handler.network.addServerTimeOffset(time);
-        } else if (handler.network.cap.isEnabled('server-time')) {
+        // We can't use the time given here as ZNC actually replays the time when it first connects
+        // to an IRC server, not now(). Send a PING so that we can get a reliable time from PONG
+        if (handler.network.cap.isEnabled('server-time')) {
             // Ping to try get a server-time in its response as soon as possible
             handler.connection.write('PING ' + Date.now());
         }
