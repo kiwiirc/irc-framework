@@ -157,9 +157,9 @@ var handlers = {
                 // CAP 3.2 multline support. Only send our CAP requests on the last CAP LS
                 // line which will not have * set for params[2]
                 if (command.params[2] !== '*') {
-                    if (request_caps.length > 0) {
+                    if (handler.network.cap.requested.length > 0) {
                         handler.network.cap.negotiating = true;
-                        handler.connection.write('CAP REQ :' + request_caps.join(' '));
+                        handler.connection.write('CAP REQ :' + handler.network.cap.requested.join(' '));
                     } else if(handler.network.cap.negotiating) {
                         handler.connection.write('CAP END');
                         handler.network.cap.negotiating = false;
@@ -218,6 +218,7 @@ var handlers = {
                         request_caps.indexOf(cap) === -1 &&
                         !handler.network.cap.isEnabled(cap)
                     ) {
+                        handler.network.cap.requested.push(cap);
                         request_caps.push(cap);
                     }
                 }

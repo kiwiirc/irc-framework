@@ -106,9 +106,10 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         client.connection.on('connecting', function() {
-            // Reset cap negotiation to false on a new connection
+            // Reset cap negotiation on a new connection
             // This prevents stale state if a connection gets closed during CAP negotiation
             client.network.cap.negotiating = false;
+            client.network.cap.requested = [];
         });
 
         // IRC command routing
