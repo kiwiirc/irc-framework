@@ -22,7 +22,8 @@ var handlers = {
                 target: target,
                 type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
                 message: message.substring(1, message.length - 1),
-                time: time
+                time: time,
+                tags: command.tags
             });
         } else {
             var parsed_target = handler.network.extractTargetGroup(target);
@@ -98,7 +99,8 @@ var handlers = {
                     type: ctcp_command || null,
                     message: message.substring(1, message.length - 1),
                     time: time,
-                    account: command.getTag('account')
+                    account: command.getTag('account'),
+                    tags: command.tags
                 });
             }
         } else {
@@ -135,7 +137,8 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             message: command.params[command.params.length - 1],
-            account: command.getTag('account')
+            account: command.getTag('account'),
+            tags: command.tags
         });
     }
 };

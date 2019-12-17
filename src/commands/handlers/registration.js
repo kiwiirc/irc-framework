@@ -276,7 +276,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: command.params[2],
-            time: time
+            time: time,
+            tags: command.tags
         });
 
         handler.emit('account', {
@@ -284,7 +285,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: command.params[2],
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -299,7 +301,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: false,
-            time: time
+            time: time,
+            tags: command.tags
         });
 
         handler.emit('account', {
@@ -307,7 +310,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: false,
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 

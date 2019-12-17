@@ -16,7 +16,8 @@ var handlers = {
             channel: channel,
             modes: modes,
             raw_modes: raw_modes,
-            raw_params: raw_params
+            raw_params: raw_params,
+            tags: command.tags
         });
     },
 
@@ -26,7 +27,8 @@ var handlers = {
 
         handler.emit('channel info', {
             channel: channel,
-            created_at: parseInt(command.params[2], 10)
+            created_at: parseInt(command.params[2], 10),
+            tags: command.tags
         });
     },
 
@@ -36,7 +38,8 @@ var handlers = {
 
         handler.emit('channel info', {
             channel: channel,
-            url: command.params[command.params.length - 1]
+            url: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
@@ -74,7 +77,8 @@ var handlers = {
                 nick: user.nick,
                 ident: user.user,
                 hostname: user.host,
-                modes: modes
+                modes: modes,
+                tags: command.tags
             });
         });
     },
@@ -100,7 +104,8 @@ var handlers = {
             channel: command.params[1],
             invited: command.params[2],
             invited_by: command.params[3],
-            invited_at: command.params[4]
+            invited_at: command.params[4],
+            tags: command.tags
         });
     },
 
@@ -126,7 +131,8 @@ var handlers = {
             channel: command.params[1],
             banned: command.params[2],
             banned_by: command.params[3],
-            banned_at: command.params[4]
+            banned_at: command.params[4],
+            tags: command.tags
         });
     },
 
@@ -145,7 +151,8 @@ var handlers = {
     RPL_TOPIC: function(command, handler) {
         handler.emit('topic', {
             channel: command.params[1],
-            topic: command.params[command.params.length - 1]
+            topic: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
@@ -153,7 +160,8 @@ var handlers = {
     RPL_NOTOPIC: function(command, handler) {
         handler.emit('topic', {
             channel: command.params[1],
-            topic: ''
+            topic: '',
+            tags: command.tags
         });
     },
 
@@ -165,7 +173,8 @@ var handlers = {
             ident: parsed.user,
             hostname: parsed.host,
             channel: command.params[1],
-            when: command.params[3]
+            when: command.params[3],
+            tags: command.tags
         });
     },
 
@@ -190,7 +199,7 @@ var handlers = {
         data.gecos = command.params[gecos_idx] || '';
         data.channel = channel;
         data.time = command.getServerTime();
-
+        data.tags = command.tags;
         handler.emit('join', data);
     },
 
@@ -204,7 +213,8 @@ var handlers = {
             hostname: command.hostname,
             channel: command.params[0],
             message: command.params[command.params.length - 1] || '',
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -219,7 +229,8 @@ var handlers = {
             hostname: command.hostname,
             channel: command.params[0],
             message: command.params[command.params.length - 1] || '',
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -232,7 +243,8 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             message: command.params[command.params.length - 1] || '',
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -253,7 +265,8 @@ var handlers = {
             nick: command.nick,
             channel: channel,
             topic: topic,
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -267,7 +280,8 @@ var handlers = {
             hostname: command.hostname,
             invited: command.params[0],
             channel: command.params[1],
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -275,7 +289,8 @@ var handlers = {
     RPL_INVITING: function(command, handler) {
         handler.emit('invited', {
             nick: command.params[0],
-            channel: command.params[1]
+            channel: command.params[1],
+            tags: command.tags
         });
     }
 };
