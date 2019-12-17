@@ -42,6 +42,9 @@ describe('src/commands/handlers/misc.js', function() {
             expect(mock.spies.emit).to.have.been.calledWith('pong', {
                 message: "two.example.com",
                 time: 1318258080000,
+                tags: {
+                    time: '2011-10-10T14:48:00Z'
+                }
             });
         });
 
