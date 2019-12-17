@@ -64,7 +64,8 @@ var handlers = {
         var params = _.clone(command.params);
         params.shift();
         handler.emit('motd', {
-            error: command.params[command.params.length - 1]
+            error: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 

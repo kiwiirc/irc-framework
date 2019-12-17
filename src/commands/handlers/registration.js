@@ -26,7 +26,8 @@ var handlers = {
         }
 
         handler.emit('registered', {
-            nick: nick
+            nick: nick,
+            tags: command.tags
         });
     },
 
@@ -84,7 +85,8 @@ var handlers = {
 
         handler.emit('server options', {
             options: handler.network.options,
-            cap: handler.network.cap.enabled
+            cap: handler.network.cap.enabled,
+            tags: command.tags
         });
     },
 

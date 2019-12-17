@@ -133,6 +133,7 @@ var handlers = {
     RPL_ISON: function(command, handler) {
         handler.emit('users online', {
             nicks: (command.params[command.params.length - 1] || '').split(' '),
+            tags: command.tags
         });
     },
 
@@ -140,14 +141,16 @@ var handlers = {
     ERR_NICKNAMEINUSE: function(command, handler) {
         handler.emit('nick in use', {
             nick: command.params[1],
-            reason: command.params[command.params.length - 1]
+            reason: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
     ERR_ERRONEOUSNICKNAME: function(command, handler) {
         handler.emit('nick invalid', {
             nick: command.params[1],
-            reason: command.params[command.params.length - 1]
+            reason: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
