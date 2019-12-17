@@ -107,6 +107,7 @@ var handlers = {
             num_hops_away: hops_away,
             channel: params[1],
             channel_modes: chan_modes,
+            tags: command.tags
         });
     },
 
@@ -144,6 +145,7 @@ var handlers = {
             num_hops_away: parseInt(params[7], 10),
             channel: params[1],
             channel_modes: chan_modes,
+            tags: command.tags
         });
     },
 
