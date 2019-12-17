@@ -16,7 +16,8 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             new_nick: command.params[0],
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -35,7 +36,8 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             account: account,
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -52,7 +54,8 @@ var handlers = {
             hostname: command.hostname,
             new_ident: command.params[0],
             new_hostname: command.params[1],
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -67,7 +70,8 @@ var handlers = {
             ident: command.ident,
             hostname: command.hostname,
             new_gecos: command.params[0],
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -82,14 +86,16 @@ var handlers = {
                 self: false,
                 nick: command.nick,
                 message: '',
-                time: time
+                time: time,
+                tags: command.tags
             });
         } else {
             handler.emit('away', {
                 self: false,
                 nick: command.nick,
                 message: message,
-                time: time
+                time: time,
+                tags: command.tags
             });
         }
     },
@@ -104,7 +110,8 @@ var handlers = {
             self: true,
             nick: command.params[0],
             message: command.params[1] || '',
-            time: time
+            time: time,
+            tags: command.tags,
         });
     },
 
@@ -118,13 +125,15 @@ var handlers = {
             self: true,
             nick: command.params[0],
             message: command.params[1] || '', // example: "<nick> is now back."
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
     RPL_ISON: function(command, handler) {
         handler.emit('users online', {
             nicks: (command.params[command.params.length - 1] || '').split(' '),
+            tags: command.tags
         });
     },
 
@@ -132,14 +141,16 @@ var handlers = {
     ERR_NICKNAMEINUSE: function(command, handler) {
         handler.emit('nick in use', {
             nick: command.params[1],
-            reason: command.params[command.params.length - 1]
+            reason: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
     ERR_ERRONEOUSNICKNAME: function(command, handler) {
         handler.emit('nick invalid', {
             nick: command.params[1],
-            reason: command.params[command.params.length - 1]
+            reason: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
@@ -171,7 +182,8 @@ var handlers = {
                 self: false,
                 nick: command.params[1],
                 message: message,
-                time: time
+                time: time,
+                tags: command.tags
             });
 
             return;
@@ -353,7 +365,8 @@ var handlers = {
     RPL_HOSTCLOAKING: function(command, handler) {
         handler.emit('displayed host', {
             nick: command.params[0],
-            hostname: command.params[1]
+            hostname: command.params[1],
+            tags: command.tags
         });
     }
 };

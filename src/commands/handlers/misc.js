@@ -29,7 +29,8 @@ var handlers = {
         cache.channels.push({
             channel: command.params[1],
             num_users: parseInt(command.params[2], 10),
-            topic: command.params[3] || ''
+            topic: command.params[3] || '',
+            tags: command.tags
         });
 
         if (cache.channels.length >= 50) {
@@ -53,7 +54,8 @@ var handlers = {
     RPL_ENDOFMOTD: function(command, handler) {
         var cache = handler.cache('motd');
         handler.emit('motd', {
-            motd: cache.motd
+            motd: cache.motd,
+            tags: command.tags
         });
         cache.destroy();
     },
@@ -62,7 +64,8 @@ var handlers = {
         var params = _.clone(command.params);
         params.shift();
         handler.emit('motd', {
-            error: command.params[command.params.length - 1]
+            error: command.params[command.params.length - 1],
+            tags: command.tags
         });
     },
 
@@ -107,6 +110,7 @@ var handlers = {
             num_hops_away: hops_away,
             channel: params[1],
             channel_modes: chan_modes,
+            tags: command.tags
         });
     },
 
@@ -144,6 +148,7 @@ var handlers = {
             num_hops_away: parseInt(params[7], 10),
             channel: params[1],
             channel_modes: chan_modes,
+            tags: command.tags
         });
     },
 
@@ -173,6 +178,7 @@ var handlers = {
         handler.emit('pong', {
             message: command.params[1],
             time: time,
+            tags: command.tags
         });
     },
 
@@ -192,7 +198,8 @@ var handlers = {
             modes: modes,
             time: time,
             raw_modes: raw_modes,
-            raw_params: raw_params
+            raw_params: raw_params,
+            tags: command.tags
         });
     },
 
@@ -204,7 +211,8 @@ var handlers = {
             address: command.params[1],
             access_via: command.params[2],
             hops: parseInt(command.params[3].split(' ')[0]),
-            description: command.params[3].split(' ').splice(1).join(' ')
+            description: command.params[3].split(' ').splice(1).join(' '),
+            tags: command.tags
         });
     },
 

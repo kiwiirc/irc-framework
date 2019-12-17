@@ -26,7 +26,8 @@ var handlers = {
         }
 
         handler.emit('registered', {
-            nick: nick
+            nick: nick,
+            tags: command.tags
         });
     },
 
@@ -84,7 +85,8 @@ var handlers = {
 
         handler.emit('server options', {
             options: handler.network.options,
-            cap: handler.network.cap.enabled
+            cap: handler.network.cap.enabled,
+            tags: command.tags
         });
     },
 
@@ -276,7 +278,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: command.params[2],
-            time: time
+            time: time,
+            tags: command.tags
         });
 
         handler.emit('account', {
@@ -284,7 +287,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: command.params[2],
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
@@ -299,7 +303,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: false,
-            time: time
+            time: time,
+            tags: command.tags
         });
 
         handler.emit('account', {
@@ -307,7 +312,8 @@ var handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: false,
-            time: time
+            time: time,
+            tags: command.tags
         });
     },
 
