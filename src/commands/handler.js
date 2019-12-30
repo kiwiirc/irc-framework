@@ -112,6 +112,10 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         var j;
         var add;
 
+        if (!mode_string) {
+            return modes;
+        }
+
         prefixes = _.reduce(prefixes, function(list, prefix) {
             list.push(prefix.mode);
             return list;
