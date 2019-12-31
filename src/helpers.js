@@ -28,7 +28,7 @@ function parseMask(mask) {
 		user = mask.substring(sep1 + 1);
 	} else {
 		// something!something@something
-		nick = nick = mask.substring(0, sep1);
+		nick = mask.substring(0, sep1);
 		user = mask.substring(sep1 + 1, sep2);
 		host = mask.substring(sep2 + 1);
 	}
