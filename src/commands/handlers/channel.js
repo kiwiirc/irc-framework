@@ -21,7 +21,6 @@ var handlers = {
         });
     },
 
-
     RPL_CREATIONTIME: function(command, handler) {
         var channel = command.params[1];
 
@@ -32,7 +31,6 @@ var handlers = {
         });
     },
 
-
     RPL_CHANNEL_URL: function(command, handler) {
         var channel = command.params[1];
 
@@ -42,7 +40,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     RPL_NAMEREPLY: function(command, handler) {
         var members = command.params[command.params.length - 1].split(' ');
@@ -83,7 +80,6 @@ var handlers = {
         });
     },
 
-
     RPL_ENDOFNAMES: function(command, handler) {
         var cache = handler.cache('names.' + command.params[1]);
         handler.emit('userlist', {
@@ -92,7 +88,6 @@ var handlers = {
         });
         cache.destroy();
     },
-
 
     RPL_INVITELIST: function(command, handler) {
         var cache = handler.cache('inviteList.' + command.params[1]);
@@ -109,7 +104,6 @@ var handlers = {
         });
     },
 
-
     RPL_ENDOFINVITELIST: function(command, handler) {
         var cache = handler.cache('inviteList.' + command.params[1]);
         handler.emit('inviteList', {
@@ -119,7 +113,6 @@ var handlers = {
 
         cache.destroy();
     },
-
 
     RPL_BANLIST: function(command, handler) {
         var cache = handler.cache('banlist.' + command.params[1]);
@@ -136,7 +129,6 @@ var handlers = {
         });
     },
 
-
     RPL_ENDOFBANLIST: function(command, handler) {
         var cache = handler.cache('banlist.' + command.params[1]);
         handler.emit('banlist', {
@@ -147,7 +139,6 @@ var handlers = {
         cache.destroy();
     },
 
-
     RPL_TOPIC: function(command, handler) {
         handler.emit('topic', {
             channel: command.params[1],
@@ -156,7 +147,6 @@ var handlers = {
         });
     },
 
-
     RPL_NOTOPIC: function(command, handler) {
         handler.emit('topic', {
             channel: command.params[1],
@@ -164,7 +154,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     RPL_TOPICWHOTIME: function(command, handler) {
         var parsed = Helpers.parseMask(command.params[2]);
@@ -177,7 +166,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     JOIN: function(command, handler) {
         var channel;
@@ -203,7 +191,6 @@ var handlers = {
         handler.emit('join', data);
     },
 
-
     PART: function(command, handler) {
         var time = command.getServerTime();
 
@@ -217,7 +204,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     KICK: function(command, handler) {
         var time = command.getServerTime();
@@ -234,7 +220,6 @@ var handlers = {
         });
     },
 
-
     QUIT: function(command, handler) {
         var time = command.getServerTime();
 
@@ -247,7 +232,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     TOPIC: function(command, handler) {
         // If we don't have an associated channel, no need to continue
@@ -270,7 +254,6 @@ var handlers = {
         });
     },
 
-
     INVITE: function(command, handler) {
         var time = command.getServerTime();
 
@@ -284,7 +267,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     RPL_INVITING: function(command, handler) {
         handler.emit('invited', {

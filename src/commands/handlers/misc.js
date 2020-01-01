@@ -39,8 +39,6 @@ var handlers = {
         }
     },
 
-
-
     RPL_MOTD: function(command, handler) {
         var cache = handler.cache('motd');
         cache.motd += command.params[command.params.length - 1] + '\n';
@@ -69,8 +67,6 @@ var handlers = {
         });
     },
 
-
-
     RPL_WHOREPLY: function(command, handler) {
         var cache = handler.cache('who');
         if (!cache.members) {
@@ -79,9 +75,7 @@ var handlers = {
 
         var params = command.params;
         // G = Gone, H = Here
-        var is_away = params[6][0].toUpperCase() === 'G' ?
-            true :
-            false;
+        var is_away = params[6][0].toUpperCase() === 'G';
 
         // get user channel modes
         var net_prefixes = handler.network.options.PREFIX;
@@ -122,9 +116,7 @@ var handlers = {
         var params = command.params;
 
         // G = Gone, H = Here
-        var is_away = params[6][0].toUpperCase() === 'G' ?
-            true :
-            false;
+        var is_away = params[6][0].toUpperCase() === 'G';
 
         // get user channel modes
         var net_prefixes = handler.network.options.PREFIX;
@@ -152,7 +144,6 @@ var handlers = {
         });
     },
 
-
     RPL_ENDOFWHO: function(command, handler) {
         var cache = handler.cache('who');
         handler.emit('wholist', {
@@ -162,11 +153,9 @@ var handlers = {
         cache.destroy();
     },
 
-
     PING: function(command, handler) {
         handler.connection.write('PONG ' + command.params[command.params.length - 1]);
     },
-
 
     PONG: function(command, handler) {
         let time = command.getServerTime();
@@ -181,7 +170,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     MODE: function(command, handler) {
         // Check if we have a server-time
@@ -202,7 +190,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     RPL_LINKS: function(command, handler) {
         var cache = handler.cache('links');
@@ -240,7 +227,6 @@ var handlers = {
             cache.commands = [];
             cache.type = command.params[1];
             cache.params = command.params.slice(2);
-
         } else {
             cache = handler.cache('batch.' + batch_id);
             emit_obj = {
@@ -253,7 +239,6 @@ var handlers = {
             // Destroy the cache object before executing each command. If one
             // errors out then we don't have the cache object stuck in memory.
             cache.destroy();
-
 
             handler.emit('batch start', emit_obj);
             handler.emit('batch start ' + emit_obj.type, emit_obj);

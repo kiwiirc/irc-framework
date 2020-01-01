@@ -30,7 +30,6 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         require('./handlers/generics')(this);
     }
 
-
     dispatch(message) {
         var irc_command = new IrcCommand(message.command.toUpperCase(), message);
 
@@ -45,7 +44,6 @@ module.exports = class IrcCommandHandler extends EventEmitter {
                 // server hasn't sent the starting batch command or that the server
                 // has already sent the end batch command.
             }
-
         } else {
             this.executeCommand(irc_command);
         }
@@ -66,11 +64,9 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         }
     }
 
-
     requestExtraCaps(cap) {
         this.request_extra_caps = _.uniq(this.request_extra_caps.concat(cap));
     }
-
 
     addHandler(command, handler) {
         if (typeof handler !== 'function') {
@@ -79,11 +75,9 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         this.handlers[command] = handler;
     }
 
-
     emitUnknownCommand(command) {
         this.emit('unknown command', command);
     }
-
 
     // Adds an 'all' event to .emit()
     addAllEventName() {
@@ -95,8 +89,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         };
     }
 
-
-/**
+    /**
  * Convert a mode string such as '+k pass', or '-i' to a readable
  * format.
  * [ { mode: '+k', param: 'pass' } ]
@@ -141,26 +134,24 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         j = 0;
         for (i = 0; i < mode_string.length; i++) {
             switch (mode_string[i]) {
-                case '+':
-                    add = true;
-                    break;
-                case '-':
-                    add = false;
-                    break;
-                default:
-                    if (hasParam(mode_string[i], add)) {
-                        modes.push({mode: (add ? '+' : '-') + mode_string[i], param: mode_params[j]});
-                        j++;
-                    } else {
-                        modes.push({mode: (add ? '+' : '-') + mode_string[i], param: null});
-                    }
+            case '+':
+                add = true;
+                break;
+            case '-':
+                add = false;
+                break;
+            default:
+                if (hasParam(mode_string[i], add)) {
+                    modes.push({ mode: (add ? '+' : '-') + mode_string[i], param: mode_params[j] });
+                    j++;
+                } else {
+                    modes.push({ mode: (add ? '+' : '-') + mode_string[i], param: null });
+                }
             }
         }
 
         return modes;
     }
-
-
 
     /**
      * Cache object for commands buffering data before emitting them

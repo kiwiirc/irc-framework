@@ -3,8 +3,8 @@
 var _ = {
     pull: require('lodash/pull'),
 };
-var EventEmitter    = require('eventemitter3');
-var ircLineParser   = require('./irclineparser');
+var EventEmitter = require('eventemitter3');
+var ircLineParser = require('./irclineparser');
 
 module.exports = class Connection extends EventEmitter {
     constructor(options) {
@@ -61,7 +61,7 @@ module.exports = class Connection extends EventEmitter {
         }
 
         // Some transports may emit extra events
-        transport.on('extra', function(/*event_name, argN*/) {
+        transport.on('extra', function(/* event_name, argN */) {
             that.emit.apply(that, arguments);
         });
 
@@ -114,7 +114,7 @@ module.exports = class Connection extends EventEmitter {
             // being registered to be sure that we are connected properly.
             safely_registered = that.registered !== false && registered_ms_ago > 5000;
 
-            that.debugOut('Socket closed. was_connected=' + was_connected + ' safely_registered=' + safely_registered + ' requested_disconnect='+that.requested_disconnect);
+            that.debugOut('Socket closed. was_connected=' + was_connected + ' safely_registered=' + safely_registered + ' requested_disconnect=' + that.requested_disconnect);
 
             that.connected = false;
             that.clearTimers();
@@ -131,7 +131,6 @@ module.exports = class Connection extends EventEmitter {
             // If we were originally connected OK, reconnect
             } else if (was_connected && safely_registered) {
                 should_reconnect = true;
-
             } else {
                 should_reconnect = false;
             }
@@ -145,7 +144,7 @@ module.exports = class Connection extends EventEmitter {
                 });
             } else {
                 unbindTransportEvents(that.transport);
-                that.emit('close', err ? true : false);
+                that.emit('close', !!err);
                 that.reconnect_attempts = 0;
             }
 
@@ -172,19 +171,18 @@ module.exports = class Connection extends EventEmitter {
         return this.transport.writeLine(data, callback);
     }
 
-
     /**
      * Create and keep track of all timers so they can be easily removed
      */
-    setTimeout(/*fn, length, argN */) {
+    setTimeout(/* fn, length, argN */) {
         var that = this;
         var tmr = null;
         var args = Array.prototype.slice.call(arguments, 0);
         var callback = args[0];
 
         args[0] = function() {
-           _.pull(that._timers, tmr);
-           callback.apply(null, args);
+            _.pull(that._timers, tmr);
+            callback.apply(null, args);
         };
 
         tmr = setTimeout.apply(null, args);
@@ -193,8 +191,8 @@ module.exports = class Connection extends EventEmitter {
     }
 
     clearTimeout(tmr) {
-    	clearTimeout(tmr);
-    	_.pull(this._timers, tmr);
+        clearTimeout(tmr);
+        _.pull(this._timers, tmr);
     }
 
     clearTimers() {
@@ -235,7 +233,6 @@ module.exports = class Connection extends EventEmitter {
         }
     }
 
-
     setEncoding(encoding) {
         this.debugOut('Connection.setEncoding() encoding=' + encoding);
 
@@ -243,7 +240,6 @@ module.exports = class Connection extends EventEmitter {
             return this.transport.setEncoding(encoding);
         }
     }
-
 
     /**
      * Process the buffered messages recieved from the IRCd

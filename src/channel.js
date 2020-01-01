@@ -28,7 +28,6 @@ module.exports = class IrcChannel {
         this.ban = _.partial(irc_client.ban.bind(irc_client), channel_name);
         this.unban = _.partial(irc_client.unban.bind(irc_client), channel_name);
 
-
         this.users = [];
         irc_client.on('userlist', (event) => {
             if (event.channel.toLowerCase() === this.name.toLowerCase()) {
@@ -61,7 +60,7 @@ module.exports = class IrcChannel {
         });
         irc_client.on('nick', (event) => {
             _.find(this.users, function(o) {
-                if(o.nick.toLowerCase() === event.nick.toLowerCase()) {
+                if (o.nick.toLowerCase() === event.nick.toLowerCase()) {
                     o.nick = event.new_nick;
                     return true;
                 }

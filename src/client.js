@@ -59,13 +59,12 @@ module.exports = class IrcClient extends EventEmitter {
         var props = Object.keys(defaults);
         for (var i = 0; i < props.length; i++) {
             if (typeof user_options[props[i]] === 'undefined') {
-                user_options[ props[ i ] ] = defaults[ props[ i ] ];
+                user_options[props[i]] = defaults[props[i]];
             }
         }
 
         return user_options;
     }
-
 
     createStructure() {
         var client = this;
@@ -147,17 +146,14 @@ module.exports = class IrcClient extends EventEmitter {
         });
     }
 
-
     requestCap(cap) {
         this.request_extra_caps = this.request_extra_caps.concat(cap);
     }
-
 
     use(middleware_fn) {
         middleware_fn(this, this.raw_middleware, this.parsed_middleware);
         return this;
     }
-
 
     connect(options) {
         var client = this;
@@ -187,7 +183,6 @@ module.exports = class IrcClient extends EventEmitter {
         client.connection.connect(options);
     }
 
-
     // Proxy the command handler events onto the client object, with some added sugar
     // Events are handled in order:
     // 1. Received from the command handler
@@ -212,7 +207,7 @@ module.exports = class IrcClient extends EventEmitter {
 
                 // These events with .reply() function are all messages. Emit it separately
                 // TODO: Should this consider a notice a message?
-                client.command_handler.emit('message', _.extend({type: event_name}, event_arg));
+                client.command_handler.emit('message', _.extend({ type: event_name }, event_arg));
             }
 
             client.parsed_middleware.handle([event_name, event_arg, client], function(err) {
@@ -225,7 +220,6 @@ module.exports = class IrcClient extends EventEmitter {
             });
         });
     }
-
 
     addCommandHandlerListeners() {
         var client = this;
@@ -251,7 +245,7 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         commands.on('wholist', function(event) {
-            var thisUser = _.find(event.users, {nick: client.user.nick});
+            var thisUser = _.find(event.users, { nick: client.user.nick });
             if (thisUser) {
                 client.user.username = thisUser.ident;
                 client.user.host = thisUser.hostname;
@@ -275,7 +269,6 @@ module.exports = class IrcClient extends EventEmitter {
         });
     }
 
-
     registerToNetwork() {
         var webirc = this.options.webirc;
 
@@ -293,26 +286,25 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw('USER', this.options.username, 0, '*', this.user.gecos);
     }
 
-
     startPeriodicPing() {
         let that = this;
         let ping_timer = null;
         let timeout_timer = null;
 
-        if(that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
+        if (that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
             return;
         }
 
         // Constantly ping the server for lag and time syncing functions
         function pingServer() {
             that.ping();
-            ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
+            ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
         }
 
         // Data from the server was detected so restart the timeout
         function resetPingTimeoutTimer() {
             that.connection.clearTimeout(timeout_timer);
-            timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout*1000);
+            timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout * 1000);
         }
 
         function pingTimeout() {
@@ -322,15 +314,11 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         this.resetPingTimeoutTimer = resetPingTimeoutTimer;
-        ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval*1000);
+        ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
     }
-
 
     // Gets overridden with a function in startPeriodicPing(). Only set here for completeness.
     resetPingTimeoutTimer() {}
-
-
-
 
     /**
      * Client API
@@ -342,7 +330,6 @@ module.exports = class IrcClient extends EventEmitter {
             this.connection.write(this.rawString.apply(this, arguments));
         }
     }
-
 
     rawString(input) {
         var args;
@@ -364,21 +351,17 @@ module.exports = class IrcClient extends EventEmitter {
         return args.join(' ');
     }
 
-
     quit(message) {
         this.connection.end(this.rawString('QUIT', message));
     }
-
 
     ping(message) {
         this.raw('PING', message || 'kiwitime-' + Date.now());
     }
 
-
     changeNick(nick) {
         this.raw('NICK', nick);
     }
-
 
     sendMessage(commandName, target, message) {
         var that = this;
@@ -395,17 +378,15 @@ module.exports = class IrcClient extends EventEmitter {
         return blocks;
     }
 
-
     say(target, message) {
         return this.sendMessage('PRIVMSG', target, message);
     }
-
 
     notice(target, message) {
         return this.sendMessage('NOTICE', target, message);
     }
 
-    tagmsg(target, tags={}) {
+    tagmsg(target, tags = {}) {
         let msg = new IrcMessage('TAGMSG', target);
         msg.tags = tags;
         this.raw(msg);
@@ -418,7 +399,6 @@ module.exports = class IrcClient extends EventEmitter {
         }
         this.raw(raw);
     }
-
 
     part(channel, message) {
         var raw = ['PART', channel];
@@ -434,8 +414,7 @@ module.exports = class IrcClient extends EventEmitter {
         if (extra_args) {
             if (Array.isArray(extra_args)) {
                 raw = raw.concat(extra_args);
-            }
-            else {
+            } else {
                 raw.push(extra_args);
             }
         }
@@ -541,8 +520,7 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw('TOPIC', channel, newTopic);
     }
 
-
-    ctcpRequest(target, type /*, paramN*/) {
+    ctcpRequest(target, type /*, paramN */) {
         var params = Array.prototype.slice.call(arguments, 1);
 
         // make sure the CTCP type is uppercased
@@ -555,8 +533,7 @@ module.exports = class IrcClient extends EventEmitter {
         );
     }
 
-
-    ctcpResponse(target, type /*, paramN*/) {
+    ctcpResponse(target, type /*, paramN */) {
         var params = Array.prototype.slice.call(arguments, 1);
 
         // make sure the CTCP type is uppercased
@@ -568,7 +545,6 @@ module.exports = class IrcClient extends EventEmitter {
             String.fromCharCode(1) + params.join(' ') + String.fromCharCode(1)
         );
     }
-
 
     action(target, message) {
         var that = this;
@@ -590,7 +566,6 @@ module.exports = class IrcClient extends EventEmitter {
 
         return blocks;
     }
-
 
     whois(target, _cb) {
         var client = this;
@@ -657,7 +632,6 @@ module.exports = class IrcClient extends EventEmitter {
         this.processNextWhoQueue();
     }
 
-
     processNextWhoQueue() {
         var client = this;
 
@@ -709,7 +683,6 @@ module.exports = class IrcClient extends EventEmitter {
         }
     }
 
-
     /**
      * Explicitely start a channel list, avoiding potential issues with broken IRC servers not sending RPL_LISTSTART
      */
@@ -720,11 +693,9 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw(args);
     }
 
-
     channel(channel_name) {
         return new Channel(this, channel_name);
     }
-
 
     match(match_regex, cb, message_type) {
         var client = this;
@@ -747,9 +718,11 @@ module.exports = class IrcClient extends EventEmitter {
     matchNotice(match_regex, cb) {
         return this.match(match_regex, cb, 'notice');
     }
+
     matchMessage(match_regex, cb) {
         return this.match(match_regex, cb, 'privmsg');
     }
+
     matchAction(match_regex, cb) {
         return this.match(match_regex, cb, 'action');
     }

@@ -9,10 +9,10 @@ module.exports.encode = encode;
 
 const tokens_map = {
     '\\\\': '\\',
-    '\\:':  ';',
-    '\\s':  ' ',
-    '\\n':  '\n',
-    '\\r':  '\r',
+    '\\:': ';',
+    '\\s': ' ',
+    '\\n': '\n',
+    '\\r': '\r',
     '\\': '', // remove invalid backslashes
 };
 
@@ -24,8 +24,8 @@ function decodeValue(value) {
 
 const vals_map = {
     '\\': '\\\\',
-    ';':  '\\:',
-    ' ':  '\\s',
+    ';': '\\:',
+    ' ': '\\s',
     '\n': '\\n',
     '\r': '\\r',
 };

@@ -1,15 +1,15 @@
 'use strict';
 
-var sinon = require('sinon'),
-    _ = require('lodash');
+var sinon = require('sinon');
+var _ = require('lodash');
 
 module.exports = {
-    IrcCommandHandler: function (modules) {
+    IrcCommandHandler: function(modules) {
         var handlers = {};
-        modules.map(function (m) {
+        modules.map(function(m) {
             m({
-                addHandler: function (command, handler) {
-                  handlers[command] = handler;
+                addHandler: function(command, handler) {
+                    handlers[command] = handler;
                 }
             });
         });
