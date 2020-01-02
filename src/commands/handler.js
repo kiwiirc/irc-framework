@@ -1,13 +1,13 @@
 'use strict';
 
-var _ = {
+const _ = {
     reduce: require('lodash/reduce'),
     find: require('lodash/find'),
     uniq: require('lodash/uniq'),
 };
-var EventEmitter = require('eventemitter3');
-var irc_numerics = require('./numerics');
-var IrcCommand = require('./command');
+const EventEmitter = require('eventemitter3');
+const irc_numerics = require('./numerics');
+const IrcCommand = require('./command');
 
 module.exports = class IrcCommandHandler extends EventEmitter {
     constructor(connection, network_info) {
@@ -33,10 +33,10 @@ module.exports = class IrcCommandHandler extends EventEmitter {
     }
 
     dispatch(message) {
-        var irc_command = new IrcCommand(message.command.toUpperCase(), message);
+        const irc_command = new IrcCommand(message.command.toUpperCase(), message);
 
         // Batched commands will be collected and executed as a transaction
-        var batch_id = irc_command.getTag('batch');
+        const batch_id = irc_command.getTag('batch');
         if (batch_id) {
             const cache_key = 'batch.' + batch_id;
             if (this.hasCache(cache_key)) {
@@ -53,7 +53,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
     }
 
     executeCommand(irc_command) {
-        var command_name = irc_command.command;
+        let command_name = irc_command.command;
 
         // Check if we have a numeric->command name- mapping for this command
         if (irc_numerics[irc_command.command.toUpperCase()]) {
@@ -84,9 +84,9 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
     // Adds an 'all' event to .emit()
     addAllEventName() {
-        var original_emit = this.emit;
+        const original_emit = this.emit;
         this.emit = function() {
-            var args = Array.prototype.slice.call(arguments, 0);
+            const args = Array.prototype.slice.call(arguments, 0);
             original_emit.apply(this, ['all'].concat(args));
             original_emit.apply(this, args);
         };
@@ -99,14 +99,13 @@ module.exports = class IrcCommandHandler extends EventEmitter {
  * [ { mode: '-i', param: null } ]
  */
     parseModeList(mode_string, mode_params) {
-        var chanmodes = this.network.options.CHANMODES || [];
-        var prefixes = this.network.options.PREFIX || [];
-        var always_param = (chanmodes[0] || '').concat((chanmodes[1] || ''));
-        var modes = [];
-        var hasParam;
-        var i;
-        var j;
-        var add;
+        const chanmodes = this.network.options.CHANMODES || [];
+        let prefixes = this.network.options.PREFIX || [];
+        let always_param = (chanmodes[0] || '').concat((chanmodes[1] || ''));
+        const modes = [];
+        let i;
+        let j;
+        let add;
 
         if (!mode_string) {
             return modes;
@@ -118,8 +117,8 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         }, []);
         always_param = always_param.split('').concat(prefixes);
 
-        hasParam = function(mode, add) {
-            var matchMode = function(m) {
+        const hasParam = function(mode, isAdd) {
+            const matchMode = function(m) {
                 return m === mode;
             };
 
@@ -127,7 +126,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
                 return true;
             }
 
-            if (add && _.find((chanmodes[2] || '').split(''), matchMode)) {
+            if (isAdd && _.find((chanmodes[2] || '').split(''), matchMode)) {
                 return true;
             }
 
@@ -167,9 +166,9 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         let cache = this._caches[id];
 
         if (!cache) {
-            let destroyCacheFn = (cache, id) => {
+            const destroyCacheFn = (cacheToDestroy, idInCache) => {
                 return function() {
-                    delete cache[id];
+                    delete cacheToDestroy[idInCache];
                 };
             };
 

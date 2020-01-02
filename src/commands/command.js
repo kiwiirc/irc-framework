@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = {
+const _ = {
     clone: require('lodash/clone'),
 };
 
@@ -24,17 +24,16 @@ module.exports = class IrcCommand {
 
     getServerTime() {
         const timeTag = this.getTag('time');
-        let time;
 
         // Explicitly return undefined if theres no time
         // or the value is an empty string
         if (!timeTag) {
-            return time;
+            return undefined;
         }
 
         // If parsing fails for some odd reason, also fallback to
         // undefined, instead of returning NaN
-        time = Date.parse(timeTag) || undefined;
+        const time = Date.parse(timeTag) || undefined;
 
         // Support for znc.in/server-time unix timestamps
         if (!time && numberRegex.test(timeTag)) {

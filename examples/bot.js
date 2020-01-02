@@ -1,4 +1,4 @@
-var IRC = require('../');
+const IRC = require('../');
 
 /**
  * Example middleware structure to handle NickServ authentication
@@ -12,7 +12,7 @@ function NickservMiddleware() { // eslint-disable-line
     function theMiddleware(command, event, client, next) {
         if (command === '005') {
             if (client.options.nickserv) {
-                var options = client.options.nickserv;
+                const options = client.options.nickserv;
                 client.say('nickserv', 'identify ' + options.account + ' ' + options.password);
             }
         }
@@ -42,7 +42,7 @@ function MyIrcMiddleware() {
     }
 }
 
-var bot = new IRC.Client();
+const bot = new IRC.Client();
 bot.use(MyIrcMiddleware());
 bot.connect({
     host: 'irc.snoonet.org',

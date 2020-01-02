@@ -1,16 +1,16 @@
 'use strict';
 
 /* globals describe, it */
-let chai = require('chai');
-let Helper = require('../src/helpers');
-let expect = chai.expect;
+const chai = require('chai');
+const Helper = require('../src/helpers');
+const expect = chai.expect;
 
 chai.use(require('chai-subset'));
 
 describe('src/irclineparser.js', function() {
     describe('mask parsing', function() {
         it('should recognize when just passed a nick', function() {
-            var msgObj = Helper.parseMask('something');
+            const msgObj = Helper.parseMask('something');
 
             expect(msgObj).to.containSubset({
                 nick: 'something',
@@ -18,7 +18,7 @@ describe('src/irclineparser.js', function() {
         });
 
         it('should recognize when just passed a host', function() {
-            var msgObj = Helper.parseMask('irc.server.com');
+            const msgObj = Helper.parseMask('irc.server.com');
 
             expect(msgObj).to.containSubset({
                 nick: '',
@@ -27,7 +27,7 @@ describe('src/irclineparser.js', function() {
         });
 
         it('should recognize when just passed a nick and user', function() {
-            var msgObj = Helper.parseMask('something!something');
+            const msgObj = Helper.parseMask('something!something');
 
             expect(msgObj).to.containSubset({
                 nick: 'something',
@@ -36,7 +36,7 @@ describe('src/irclineparser.js', function() {
         });
 
         it('should recognize when just passed a nick and host', function() {
-            var msgObj = Helper.parseMask('something@something');
+            const msgObj = Helper.parseMask('something@something');
 
             expect(msgObj).to.containSubset({
                 host: 'something',
@@ -45,7 +45,7 @@ describe('src/irclineparser.js', function() {
         });
 
         it('should recognize when just passed a nick, user, and host', function() {
-            var msgObj = Helper.parseMask('something!something@something');
+            const msgObj = Helper.parseMask('something!something@something');
 
             expect(msgObj).to.containSubset({
                 nick: 'something',

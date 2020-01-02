@@ -1,6 +1,6 @@
 'use strict';
 
-var Helper = {
+const Helper = {
     parseMask: parseMask,
     splitOnce: splitOnce,
 };
@@ -8,12 +8,12 @@ var Helper = {
 module.exports = Helper;
 
 function parseMask(mask) {
-    var nick = '';
-    var user = '';
-    var host = '';
+    let nick = '';
+    let user = '';
+    let host = '';
 
-    var sep1 = mask.indexOf('!');
-    var sep2 = mask.indexOf('@');
+    const sep1 = mask.indexOf('!');
+    const sep2 = mask.indexOf('@');
 
     if (sep1 === -1 && sep2 === -1) {
         // something

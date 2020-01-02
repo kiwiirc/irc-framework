@@ -4,15 +4,15 @@
  * TCP / TLS transport
  */
 
-var net = require('net');
-var tls = require('tls');
-var EventEmitter = require('events').EventEmitter;
-var Socks = require('socksjs');
-var iconv = require('iconv-lite');
+const net = require('net');
+const tls = require('tls');
+const EventEmitter = require('events').EventEmitter;
+const Socks = require('socksjs');
+const iconv = require('iconv-lite');
 
-var SOCK_DISCONNECTED = 0;
-var SOCK_CONNECTING = 1;
-var SOCK_CONNECTED = 2;
+const SOCK_DISCONNECTED = 0;
+const SOCK_CONNECTING = 1;
+const SOCK_CONNECTED = 2;
 
 module.exports = class Connection extends EventEmitter {
     constructor(options) {
@@ -54,7 +54,7 @@ module.exports = class Connection extends EventEmitter {
 
     _bindEvent(obj, event, fn) {
         obj.on(event, fn);
-        var unbindEvent = () => {
+        const unbindEvent = () => {
             obj.off(event, fn);
         };
         this.socket_events.push(unbindEvent);
@@ -66,11 +66,11 @@ module.exports = class Connection extends EventEmitter {
     }
 
     connect() {
-        var socket_connect_event_name = 'connect';
-        var options = this.options;
-        var ircd_host = options.host;
-        var ircd_port = options.port || 6667;
-        var socket = null;
+        let socket_connect_event_name = 'connect';
+        const options = this.options;
+        const ircd_host = options.host;
+        const ircd_port = options.port || 6667;
+        let socket = null;
         let sni;
 
         this.debugOut('connect()');
@@ -237,7 +237,7 @@ module.exports = class Connection extends EventEmitter {
     }
 
     setEncoding(encoding) {
-        var encoded_test;
+        let encoded_test;
 
         this.debugOut('Connection.setEncoding() encoding=' + encoding);
 

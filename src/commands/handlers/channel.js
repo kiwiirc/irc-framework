@@ -1,16 +1,16 @@
 'use strict';
 
-var _ = {
+const _ = {
     each: require('lodash/each'),
 };
-var Helpers = require('../../helpers');
+const Helpers = require('../../helpers');
 
-var handlers = {
+const handlers = {
     RPL_CHANNELMODEIS: function(command, handler) {
-        var channel = command.params[1];
-        var raw_modes = command.params[2];
-        var raw_params = command.params.slice(3);
-        var modes = handler.parseModeList(raw_modes, raw_params);
+        const channel = command.params[1];
+        const raw_modes = command.params[2];
+        const raw_params = command.params.slice(3);
+        const modes = handler.parseModeList(raw_modes, raw_params);
 
         handler.emit('channel info', {
             channel: channel,
@@ -22,7 +22,7 @@ var handlers = {
     },
 
     RPL_CREATIONTIME: function(command, handler) {
-        var channel = command.params[1];
+        const channel = command.params[1];
 
         handler.emit('channel info', {
             channel: channel,
@@ -32,7 +32,7 @@ var handlers = {
     },
 
     RPL_CHANNEL_URL: function(command, handler) {
-        var channel = command.params[1];
+        const channel = command.params[1];
 
         handler.emit('channel info', {
             channel: channel,
@@ -42,8 +42,8 @@ var handlers = {
     },
 
     RPL_NAMEREPLY: function(command, handler) {
-        var members = command.params[command.params.length - 1].split(' ');
-        var cache = handler.cache('names.' + command.params[2]);
+        const members = command.params[command.params.length - 1].split(' ');
+        const cache = handler.cache('names.' + command.params[2]);
 
         if (!cache.members) {
             cache.members = [];
@@ -53,9 +53,9 @@ var handlers = {
             if (!member) {
                 return;
             }
-            var j = 0;
-            var modes = [];
-            var user = null;
+            let j = 0;
+            const modes = [];
+            let user = null;
 
             // If we have prefixes, strip them from the nick and keep them separate
             if (handler.network.options.PREFIX) {
@@ -81,7 +81,7 @@ var handlers = {
     },
 
     RPL_ENDOFNAMES: function(command, handler) {
-        var cache = handler.cache('names.' + command.params[1]);
+        const cache = handler.cache('names.' + command.params[1]);
         handler.emit('userlist', {
             channel: command.params[1],
             users: cache.members || []
@@ -90,7 +90,7 @@ var handlers = {
     },
 
     RPL_INVITELIST: function(command, handler) {
-        var cache = handler.cache('inviteList.' + command.params[1]);
+        const cache = handler.cache('inviteList.' + command.params[1]);
         if (!cache.invites) {
             cache.invites = [];
         }
@@ -105,7 +105,7 @@ var handlers = {
     },
 
     RPL_ENDOFINVITELIST: function(command, handler) {
-        var cache = handler.cache('inviteList.' + command.params[1]);
+        const cache = handler.cache('inviteList.' + command.params[1]);
         handler.emit('inviteList', {
             channel: command.params[1],
             invites: cache.invites || []
@@ -115,7 +115,7 @@ var handlers = {
     },
 
     RPL_BANLIST: function(command, handler) {
-        var cache = handler.cache('banlist.' + command.params[1]);
+        const cache = handler.cache('banlist.' + command.params[1]);
         if (!cache.bans) {
             cache.bans = [];
         }
@@ -130,7 +130,7 @@ var handlers = {
     },
 
     RPL_ENDOFBANLIST: function(command, handler) {
-        var cache = handler.cache('banlist.' + command.params[1]);
+        const cache = handler.cache('banlist.' + command.params[1]);
         handler.emit('banlist', {
             channel: command.params[1],
             bans: cache.bans || []
@@ -156,7 +156,7 @@ var handlers = {
     },
 
     RPL_TOPICWHOTIME: function(command, handler) {
-        var parsed = Helpers.parseMask(command.params[2]);
+        const parsed = Helpers.parseMask(command.params[2]);
         handler.emit('topicsetby', {
             nick: parsed.nick,
             ident: parsed.user,
@@ -168,9 +168,9 @@ var handlers = {
     },
 
     JOIN: function(command, handler) {
-        var channel;
-        var gecos_idx = 1;
-        var data = {};
+        let channel;
+        let gecos_idx = 1;
+        const data = {};
 
         if (typeof command.params[0] === 'string' && command.params[0] !== '') {
             channel = command.params[0];
@@ -192,7 +192,7 @@ var handlers = {
     },
 
     PART: function(command, handler) {
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
         handler.emit('part', {
             nick: command.nick,
@@ -206,7 +206,7 @@ var handlers = {
     },
 
     KICK: function(command, handler) {
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
         handler.emit('kick', {
             kicked: command.params[1],
@@ -221,7 +221,7 @@ var handlers = {
     },
 
     QUIT: function(command, handler) {
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
         handler.emit('quit', {
             nick: command.nick,
@@ -240,10 +240,10 @@ var handlers = {
         }
 
         // Check if we have a server-time
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
-        var channel = command.params[0];
-        var topic = command.params[command.params.length - 1] || '';
+        const channel = command.params[0];
+        const topic = command.params[command.params.length - 1] || '';
 
         handler.emit('topic', {
             nick: command.nick,
@@ -255,7 +255,7 @@ var handlers = {
     },
 
     INVITE: function(command, handler) {
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
         handler.emit('invite', {
             nick: command.nick,

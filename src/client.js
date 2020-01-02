@@ -1,24 +1,24 @@
 'use strict';
 
-var _ = {
+const _ = {
     extend: require('lodash/extend'),
     find: require('lodash/find'),
     each: require('lodash/each'),
     defer: require('lodash/defer'),
     bind: require('lodash/bind'),
 };
-var EventEmitter = require('eventemitter3');
-var MiddlewareHandler = require('middleware-handler');
-var IrcCommandHandler = require('./commands/').CommandHandler;
-var IrcMessage = require('./ircmessage');
-var Connection = require('./connection');
-var NetworkInfo = require('./networkinfo');
-var User = require('./user');
-var Channel = require('./channel');
-var { lineBreak } = require('./linebreak');
+const EventEmitter = require('eventemitter3');
+const MiddlewareHandler = require('middleware-handler');
+const IrcCommandHandler = require('./commands/').CommandHandler;
+const IrcMessage = require('./ircmessage');
+const Connection = require('./connection');
+const NetworkInfo = require('./networkinfo');
+const User = require('./user');
+const Channel = require('./channel');
+const { lineBreak } = require('./linebreak');
 const MessageTags = require('./messagetags');
 
-var default_transport = null;
+let default_transport = null;
 
 module.exports = class IrcClient extends EventEmitter {
     constructor(options) {
@@ -39,7 +39,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     _applyDefaultOptions(user_options) {
-        var defaults = {
+        const defaults = {
             nick: 'ircbot',
             username: 'ircbot',
             gecos: 'ircbot',
@@ -57,8 +57,8 @@ module.exports = class IrcClient extends EventEmitter {
             transport: default_transport
         };
 
-        var props = Object.keys(defaults);
-        for (var i = 0; i < props.length; i++) {
+        const props = Object.keys(defaults);
+        for (let i = 0; i < props.length; i++) {
             if (typeof user_options[props[i]] === 'undefined') {
                 user_options[props[i]] = defaults[props[i]];
             }
@@ -68,7 +68,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     createStructure() {
-        var client = this;
+        const client = this;
 
         // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
         client.raw_middleware = new MiddlewareHandler();
@@ -94,7 +94,7 @@ module.exports = class IrcClient extends EventEmitter {
             'raw'
         ].forEach(function(event_name) {
             client.connection.on(event_name, function() {
-                var args = Array.prototype.slice.call(arguments);
+                const args = Array.prototype.slice.call(arguments);
                 client.emit.apply(client, [event_name].concat(args));
             });
         });
@@ -159,7 +159,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     connect(options) {
-        var client = this;
+        const client = this;
 
         // Use the previous options object if we're calling .connect() again
         if (!options && !client.options) {
@@ -194,7 +194,7 @@ module.exports = class IrcClient extends EventEmitter {
     // 3. Routed through middleware
     // 4. Emitted from the client instance
     proxyIrcEvents() {
-        var client = this;
+        const client = this;
 
         this.command_handler.on('all', function(event_name, event_arg) {
             client.resetPingTimeoutTimer();
@@ -202,7 +202,7 @@ module.exports = class IrcClient extends EventEmitter {
             // Add a reply() function to selected message events
             if (['privmsg', 'notice', 'action'].indexOf(event_name) > -1) {
                 event_arg.reply = function(message) {
-                    var dest = event_arg.target === client.user.nick ?
+                    const dest = event_arg.target === client.user.nick ?
                         event_arg.nick :
                         event_arg.target;
 
@@ -226,8 +226,8 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     addCommandHandlerListeners() {
-        var client = this;
-        var commands = this.command_handler;
+        const client = this;
+        const commands = this.command_handler;
 
         commands.on('nick', function(event) {
             if (client.user.nick === event.nick) {
@@ -249,7 +249,7 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         commands.on('wholist', function(event) {
-            var thisUser = _.find(event.users, { nick: client.user.nick });
+            const thisUser = _.find(event.users, { nick: client.user.nick });
             if (thisUser) {
                 client.user.username = thisUser.ident;
                 client.user.host = thisUser.hostname;
@@ -274,7 +274,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     registerToNetwork() {
-        var webirc = this.options.webirc;
+        const webirc = this.options.webirc;
 
         if (webirc) {
             let address = String(webirc.address);
@@ -306,7 +306,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     startPeriodicPing() {
-        let that = this;
+        const that = this;
         let timeout_timer = null;
 
         if (that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
@@ -328,7 +328,7 @@ module.exports = class IrcClient extends EventEmitter {
         function pingTimeout() {
             that.debugOut('Ping timeout (' + that.options.ping_timeout + ' seconds)');
             that.emit('ping timeout');
-            var end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
+            const end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
             that.connection.end(end_msg, true);
         }
 
@@ -355,7 +355,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     rawString(input) {
-        var args;
+        let args;
 
         if (input.constructor === Array) {
             args = input;
@@ -387,7 +387,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     sendMessage(commandName, target, message) {
-        let lines = message
+        const lines = message
             .split(/\r\n|\n|\r/)
             .filter(i => i);
 
@@ -395,7 +395,7 @@ module.exports = class IrcClient extends EventEmitter {
             // Maximum length of target + message we can send to the IRC server is 500 characters
             // but we need to leave extra room for the sender prefix so the entire message can
             // be sent from the IRCd to the target without being truncated.
-            let blocks = [
+            const blocks = [
                 ...lineBreak(line, {
                     bytes: this.options.message_max_length,
                     allowBreakingWords: true,
@@ -416,13 +416,13 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     tagmsg(target, tags = {}) {
-        let msg = new IrcMessage('TAGMSG', target);
+        const msg = new IrcMessage('TAGMSG', target);
         msg.tags = tags;
         this.raw(msg);
     }
 
     join(channel, key) {
-        var raw = ['JOIN', channel];
+        const raw = ['JOIN', channel];
         if (key) {
             raw.push(key);
         }
@@ -430,7 +430,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     part(channel, message) {
-        var raw = ['PART', channel];
+        const raw = ['PART', channel];
         if (message) {
             raw.push(message);
         }
@@ -438,7 +438,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     mode(channel, mode, extra_args) {
-        var raw = ['MODE', channel, mode];
+        let raw = ['MODE', channel, mode];
 
         if (extra_args) {
             if (Array.isArray(extra_args)) {
@@ -452,9 +452,9 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     inviteList(channel, cb) {
-        var client = this;
-        var invex = this.network.supports('INVEX');
-        var mode = 'I';
+        const client = this;
+        const invex = this.network.supports('INVEX');
+        let mode = 'I';
 
         if (typeof invex === 'string' && invex) {
             mode = invex;
@@ -493,35 +493,35 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     invite(channel, nick) {
-        var raw = ['INVITE', channel, nick];
+        const raw = ['INVITE', channel, nick];
         this.raw(raw);
     }
 
     addInvite(channel, mask) {
-        var mode = 'I';
-        var invex = this.network.supports('INVEX');
+        let mode = 'I';
+        const invex = this.network.supports('INVEX');
         if (typeof invex === 'string') {
             mode = invex;
         }
 
-        var raw = ['MODE', channel, '+' + mode, mask];
+        const raw = ['MODE', channel, '+' + mode, mask];
         this.raw(raw);
     }
 
     removeInvite(channel, mask) {
-        var mode = 'I';
-        var invex = this.network.supports('INVEX');
+        let mode = 'I';
+        const invex = this.network.supports('INVEX');
         if (typeof invex === 'string') {
             mode = invex;
         }
 
-        var raw = ['MODE', channel, '-' + mode, mask];
+        const raw = ['MODE', channel, '-' + mode, mask];
         this.raw(raw);
     }
 
     banlist(channel, cb) {
-        var client = this;
-        var raw = ['MODE', channel, 'b'];
+        const client = this;
+        const raw = ['MODE', channel, 'b'];
 
         this.on('banlist', function onBanlist(event) {
             if (event.channel.toLowerCase() === channel.toLowerCase()) {
@@ -536,12 +536,12 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     ban(channel, mask) {
-        var raw = ['MODE', channel, '+b', mask];
+        const raw = ['MODE', channel, '+b', mask];
         this.raw(raw);
     }
 
     unban(channel, mask) {
-        var raw = ['MODE', channel, '-b', mask];
+        const raw = ['MODE', channel, '-b', mask];
         this.raw(raw);
     }
 
@@ -550,7 +550,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     ctcpRequest(target, type /*, paramN */) {
-        var params = Array.prototype.slice.call(arguments, 1);
+        const params = Array.prototype.slice.call(arguments, 1);
 
         // make sure the CTCP type is uppercased
         params[0] = params[0].toUpperCase();
@@ -563,7 +563,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     ctcpResponse(target, type /*, paramN */) {
-        var params = Array.prototype.slice.call(arguments, 1);
+        const params = Array.prototype.slice.call(arguments, 1);
 
         // make sure the CTCP type is uppercased
         params[0] = params[0].toUpperCase();
@@ -576,7 +576,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     action(target, message) {
-        var that = this;
+        const that = this;
 
         // Maximum length of target + message we can send to the IRC server is 500 characters
         // but we need to leave extra room for the sender prefix so the entire message can
@@ -585,9 +585,9 @@ module.exports = class IrcClient extends EventEmitter {
         // The block length here is the max, but without the non-content characters:
         // the command name, the space, and the two SOH chars
 
-        var commandName = 'ACTION';
-        var blockLength = this.options.message_max_length - (commandName.length + 3);
-        var blocks = [...lineBreak(message, { bytes: blockLength, allowBreakingWords: true, allowBreakingGraphemes: true })];
+        const commandName = 'ACTION';
+        const blockLength = this.options.message_max_length - (commandName.length + 3);
+        const blocks = [...lineBreak(message, { bytes: blockLength, allowBreakingWords: true, allowBreakingGraphemes: true })];
 
         blocks.forEach(function(block) {
             that.ctcpRequest(target, commandName, block);
@@ -597,9 +597,9 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     whois(target, _cb) {
-        var client = this;
-        var cb;
-        var irc_args = ['WHOIS'];
+        const client = this;
+        let cb;
+        const irc_args = ['WHOIS'];
 
         // Support whois(target, arg1, arg2, argN, cb)
         _.each(arguments, function(arg) {
@@ -623,9 +623,9 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     whowas(target, _cb) {
-        var client = this;
-        var cb;
-        var irc_args = ['WHOWAS'];
+        const client = this;
+        let cb;
+        const irc_args = ['WHOWAS'];
 
         // Support whowas(target, arg1, arg2, argN, cb)
         _.each(arguments, function(arg) {
@@ -662,7 +662,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     processNextWhoQueue() {
-        var client = this;
+        const client = this;
 
         // No items in the queue or the queue is already running?
         if (client.who_queue.length === 0 || client.who_queue.is_running) {
@@ -671,9 +671,9 @@ module.exports = class IrcClient extends EventEmitter {
 
         client.who_queue.is_running = true;
 
-        var this_who = client.who_queue.shift();
-        var target = this_who[0];
-        var cb = this_who[1];
+        const this_who = client.who_queue.shift();
+        const target = this_who[0];
+        const cb = this_who[1];
 
         if (!target || typeof target !== 'string') {
             if (typeof cb === 'function') {
@@ -716,7 +716,7 @@ module.exports = class IrcClient extends EventEmitter {
      * Explicitely start a channel list, avoiding potential issues with broken IRC servers not sending RPL_LISTSTART
      */
     list(/* paramN */) {
-        var args = Array.prototype.slice.call(arguments);
+        const args = Array.prototype.slice.call(arguments);
         this.command_handler.cache('chanlist').channels = [];
         args.unshift('LIST');
         this.raw(args);
@@ -727,9 +727,9 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     match(match_regex, cb, message_type) {
-        var client = this;
+        const client = this;
 
-        var onMessage = function(event) {
+        const onMessage = function(event) {
             if (event.message.match(match_regex)) {
                 cb(event);
             }

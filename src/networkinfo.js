@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = {
+const _ = {
     find: require('lodash/find'),
 };
 
@@ -39,13 +39,13 @@ function NetworkInfo() {
     };
 
     this.getServerTimeOffset = function getServerTimeOffset() {
-        var sortedOffsets = this.time_offsets.slice(0).sort(function(a, b) { return a - b; });
+        const sortedOffsets = this.time_offsets.slice(0).sort(function(a, b) { return a - b; });
         return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
     };
 
     this.addServerTimeOffset = function addServerTimeOffset(time) {
         // add our new offset
-        let newOffset = time - Date.now();
+        const newOffset = time - Date.now();
         this.time_offsets.push(newOffset);
 
         // limit out offsets array to 7 enteries
@@ -53,7 +53,7 @@ function NetworkInfo() {
             this.time_offsets = this.time_offsets.slice(this.time_offsets.length - 7);
         }
 
-        let currentOffset = this.getServerTimeOffset();
+        const currentOffset = this.getServerTimeOffset();
         if (newOffset - currentOffset > 2000 || newOffset - currentOffset < -2000) {
             // skew was over 2 seconds, invalidate all but last offset
             // > 2sec skew is a little large so just use that. Possible
@@ -78,13 +78,13 @@ function NetworkInfo() {
 
     // Support '@#channel' and '++channel' formats
     this.extractTargetGroup = function extractTargetGroup(target) {
-        var statusMsg = this.supports('STATUSMSG');
+        const statusMsg = this.supports('STATUSMSG');
 
         if (!statusMsg) {
             return null;
         }
 
-        var target_group = _.find(statusMsg, function(prefix) {
+        const target_group = _.find(statusMsg, function(prefix) {
             if (prefix === target[0]) {
                 target = target.substring(1);
 

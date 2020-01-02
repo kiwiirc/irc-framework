@@ -14,8 +14,8 @@ module.exports = class User {
     }
 
     toggleModes(modestr) {
-        var adding = true;
-        var i;
+        let adding = true;
+        let i;
 
         for (i in modestr) {
             switch (modestr[i]) {
