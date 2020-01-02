@@ -288,7 +288,6 @@ module.exports = class IrcClient extends EventEmitter {
 
     startPeriodicPing() {
         let that = this;
-        let ping_timer = null;
         let timeout_timer = null;
 
         if (that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
@@ -298,7 +297,7 @@ module.exports = class IrcClient extends EventEmitter {
         // Constantly ping the server for lag and time syncing functions
         function pingServer() {
             that.ping();
-            ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
+            that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
         }
 
         // Data from the server was detected so restart the timeout
@@ -314,7 +313,7 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         this.resetPingTimeoutTimer = resetPingTimeoutTimer;
-        ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
+        that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
     }
 
     // Gets overridden with a function in startPeriodicPing(). Only set here for completeness.
