@@ -3,3 +3,6 @@
 /*.sublime-project
 /*.sublime-workspace
 /irc-framework-*.tgz
+/babel.config.js
+/webpack.config.js
+/.*

@@ -4,9 +4,6 @@
  * Websocket transport
  */
 
-var _ = {
-    bind: require('lodash/bind'),
-};
 var EventEmitter = require('eventemitter3');
 
 module.exports = class Connection extends EventEmitter {
@@ -23,16 +20,15 @@ module.exports = class Connection extends EventEmitter {
         this.incoming_buffer = '';
     }
 
-
     isConnected() {
         return this.connected;
     }
 
     writeLine(line, cb) {
-        this.debugOut('writeLine() socket=' + (this.socket?'yes':'no') + ' connected=' + this.connected);
-    	if (this.socket && this.connected) {
-    		this.socket.send(line, cb);
-    	}
+        this.debugOut('writeLine() socket=' + (this.socket ? 'yes' : 'no') + ' connected=' + this.connected);
+        if (this.socket && this.connected) {
+            this.socket.send(line, cb);
+        }
     }
 
     debugOut(out) {
@@ -56,7 +52,7 @@ module.exports = class Connection extends EventEmitter {
         ws_addr += options.port ? ':' + options.port : '';
         ws_addr += options.path ? options.path : '';
 
-        socket = this.socket = new WebSocket(ws_addr); // jshint ignore:line
+        socket = this.socket = new WebSocket(ws_addr);
 
         socket.onopen = function() {
             that.onSocketFullyConnected();
@@ -82,30 +78,30 @@ module.exports = class Connection extends EventEmitter {
     }
 
     onSocketClose() {
-    	this.debugOut('socketClose()');
+        this.debugOut('socketClose()');
         this.connected = false;
         this.emit('close', this.last_socket_error ? this.last_socket_error : false);
     }
 
     onSocketMessage(data) {
-    	this.debugOut('socketData() ' + JSON.stringify(data));
+        this.debugOut('socketData() ' + JSON.stringify(data));
 
         var that = this;
         var lines = null;
 
-    	this.incoming_buffer += data + '\n';
+        this.incoming_buffer += data + '\n';
 
-    	lines = this.incoming_buffer.split('\n');
-    	if (lines[lines.length - 1] !== '') {
-    		this.incoming_buffer = lines.pop();
-    	} else {
-    		lines.pop();
-    		this.incoming_buffer = '';
-    	}
+        lines = this.incoming_buffer.split('\n');
+        if (lines[lines.length - 1] !== '') {
+            this.incoming_buffer = lines.pop();
+        } else {
+            lines.pop();
+            this.incoming_buffer = '';
+        }
 
-    	lines.forEach(function(line) {
-    		that.emit('line', line);
-    	});
+        lines.forEach(function(line) {
+            that.emit('line', line);
+        });
     }
 
     disposeSocket() {

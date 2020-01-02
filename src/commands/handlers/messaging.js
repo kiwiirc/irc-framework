@@ -47,7 +47,6 @@ var handlers = {
         }
     },
 
-
     PRIVMSG: function(command, handler) {
         var time = command.getServerTime();
         var message = command.params[command.params.length - 1];
@@ -75,20 +74,17 @@ var handlers = {
                     time: time,
                     account: command.getTag('account')
                 });
-
             } else if (ctcp_command === 'VERSION' && handler.connection.options.version) {
                 handler.connection.write(util.format(
                     'NOTICE %s :\x01VERSION %s\x01',
                     command.nick,
                     handler.connection.options.version
                 ));
-
             } else if (ctcp_command === 'CLIENTINFO') {
                 handler.connection.write(util.format(
                     'NOTICE %s :\x01CLIENTINFO VERSION\x01',
                     command.nick
                 ));
-
             } else {
                 handler.emit('ctcp request', {
                     nick: command.nick,

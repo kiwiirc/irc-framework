@@ -137,7 +137,6 @@ var handlers = {
         });
     },
 
-
     ERR_NICKNAMEINUSE: function(command, handler) {
         handler.emit('nick in use', {
             nick: command.params[1],
@@ -153,7 +152,6 @@ var handlers = {
             tags: command.tags
         });
     },
-
 
     RPL_ENDOFWHOIS: function(command, handler) {
         var cache_key = command.params[1].toLowerCase();
@@ -264,7 +262,7 @@ var handlers = {
 
         var last_param = command.params[command.params.length - 1];
         // <source> 378 <target> <nick> :is connecting from <user>@<host> <ip>
-        var match = last_param.match(/.*@([^ ]+) ([^ ]+).*$/);  // https://regex101.com/r/AQz7RE/2
+        var match = last_param.match(/.*@([^ ]+) ([^ ]+).*$/); // https://regex101.com/r/AQz7RE/2
 
         if (!match) {
             return;
@@ -305,7 +303,7 @@ var handlers = {
 
         // <source> 338 <target> <nick> <user>@<host> <ip> :Actual user@host, Actual IP
         var user_host = command.params[command.params.length - 3] || '';
-        var host = user_host.substring(user_host.indexOf("@") + 1);
+        var host = user_host.substring(user_host.indexOf('@') + 1);
         var ip = command.params[command.params.length - 2];
 
         // UnrealIRCd uses this numeric for something else resulting in ip+host

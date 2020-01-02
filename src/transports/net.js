@@ -4,11 +4,11 @@
  * TCP / TLS transport
  */
 
-var net             = require('net');
-var tls             = require('tls');
-var EventEmitter    = require('events').EventEmitter;
-var Socks           = require('socksjs');
-var iconv           = require('iconv-lite');
+var net = require('net');
+var tls = require('tls');
+var EventEmitter = require('events').EventEmitter;
+var Socks = require('socksjs');
+var iconv = require('iconv-lite');
 
 var SOCK_DISCONNECTED = 0;
 var SOCK_CONNECTING = 1;
@@ -33,13 +33,13 @@ module.exports = class Connection extends EventEmitter {
     }
 
     writeLine(line, cb) {
-    	if (this.socket && this.isConnected()) {
-    		if (this.encoding !== 'utf8') {
-    			this.socket.write(iconv.encode(line + '\r\n', this.encoding), cb);
-    		} else {
-    			this.socket.write(line + '\r\n', cb);
-    		}
-    	}
+        if (this.socket && this.isConnected()) {
+            if (this.encoding !== 'utf8') {
+                this.socket.write(iconv.encode(line + '\r\n', this.encoding), cb);
+            } else {
+                this.socket.write(line + '\r\n', cb);
+            }
+        }
     }
 
     debugOut(out) {
@@ -47,16 +47,16 @@ module.exports = class Connection extends EventEmitter {
     }
 
     _bindEvent(obj, event, fn) {
-    	obj.on(event, fn);
-    	var unbindEvent = () => {
-    		obj.off(event, fn);
-    	};
-    	this.socket_events.push(unbindEvent);
-    	return unbindEvent;
+        obj.on(event, fn);
+        var unbindEvent = () => {
+            obj.off(event, fn);
+        };
+        this.socket_events.push(unbindEvent);
+        return unbindEvent;
     }
 
     _unbindEvents() {
-    	this.socket_events.forEach(fn => fn());
+        this.socket_events.forEach(fn => fn());
     }
 
     connect() {
@@ -112,7 +112,6 @@ module.exports = class Connection extends EventEmitter {
                 });
 
                 socket_connect_event_name = 'secureConnect';
-
             } else {
                 socket = this.socket = net.connect({
                     host: ircd_host,
@@ -151,7 +150,7 @@ module.exports = class Connection extends EventEmitter {
     }
 
     onSocketClose() {
-    	this.debugOut('socketClose()');
+        this.debugOut('socketClose()');
         this.state = SOCK_DISCONNECTED;
         this.emit('close', this.last_socket_error ? this.last_socket_error : false);
     }
@@ -159,7 +158,7 @@ module.exports = class Connection extends EventEmitter {
     onSocketError(err) {
         this.debugOut('socketError() ' + err.message);
         this.last_socket_error = err;
-        //this.emit('error', err);
+        // this.emit('error', err);
     }
 
     onSocketData(data) {
@@ -193,8 +192,6 @@ module.exports = class Connection extends EventEmitter {
         }
     }
 
-
-
     disposeSocket() {
         this.debugOut('disposeSocket() connected=' + this.isConnected());
 
@@ -208,7 +205,6 @@ module.exports = class Connection extends EventEmitter {
         }
     }
 
-
     close(force) {
         // Cleanly close the socket if we can
         if ((this.socket && this.state === SOCK_CONNECTING) || force) {
@@ -220,18 +216,19 @@ module.exports = class Connection extends EventEmitter {
         }
     }
 
-
     setEncoding(encoding) {
         var encoded_test;
 
         this.debugOut('Connection.setEncoding() encoding=' + encoding);
 
         try {
-            encoded_test = iconv.encode('TEST', encoding);
+            const testString = 'TEST\r\ntest';
+
+            encoded_test = iconv.encode(testString, encoding);
             // This test is done to check if this encoding also supports
             // the ASCII charset required by the IRC protocols
             // (Avoid the use of base64 or incompatible encodings)
-            if (encoded_test == 'TEST') { // jshint ignore:line
+            if (encoded_test.toString('ascii') === testString) {
                 this.encoding = encoding;
                 return true;
             }

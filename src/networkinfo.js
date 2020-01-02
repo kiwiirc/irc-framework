@@ -19,11 +19,11 @@ function NetworkInfo() {
     // Network provided options
     this.options = {
         PREFIX: [
-            {symbol: '~', mode: 'q'},
-            {symbol: '&', mode: 'a'},
-            {symbol: '@', mode: 'o'},
-            {symbol: '%', mode: 'h'},
-            {symbol: '+', mode: 'v'}
+            { symbol: '~', mode: 'q' },
+            { symbol: '&', mode: 'a' },
+            { symbol: '@', mode: 'o' },
+            { symbol: '%', mode: 'h' },
+            { symbol: '+', mode: 'v' }
         ]
     };
 
@@ -39,7 +39,7 @@ function NetworkInfo() {
     };
 
     this.getServerTimeOffset = function getServerTimeOffset() {
-        var sortedOffsets = this.time_offsets.slice(0).sort(function (a, b) {  return a - b;  });
+        var sortedOffsets = this.time_offsets.slice(0).sort(function(a, b) { return a - b; });
         return sortedOffsets[Math.floor(this.time_offsets.length / 2)] || 0;
     };
 
