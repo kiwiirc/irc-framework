@@ -222,11 +222,13 @@ module.exports = class Connection extends EventEmitter {
         this.debugOut('Connection.setEncoding() encoding=' + encoding);
 
         try {
-            encoded_test = iconv.encode('TEST', encoding);
+            const testString = 'TEST\r\ntest';
+
+            encoded_test = iconv.encode(testString, encoding);
             // This test is done to check if this encoding also supports
             // the ASCII charset required by the IRC protocols
             // (Avoid the use of base64 or incompatible encodings)
-            if (encoded_test == 'TEST') {
+            if (encoded_test.toString('ascii') === testString) {
                 this.encoding = encoding;
                 return true;
             }
