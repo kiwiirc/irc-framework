@@ -213,41 +213,47 @@ var handlers = {
     },
 
     BATCH: function(command, handler) {
-        var batch_start = command.params[0].substr(0, 1) === '+';
-        var batch_id = command.params[0].substr(1);
-        var cache;
-        var emit_obj;
+        const batch_start = command.params[0].substr(0, 1) === '+';
+        const batch_id = command.params[0].substr(1);
+        const cache_key = 'batch.' + batch_id;
 
         if (!batch_id) {
             return;
         }
 
         if (batch_start) {
-            cache = handler.cache('batch.' + batch_id);
+            const cache = handler.cache(cache_key);
             cache.commands = [];
             cache.type = command.params[1];
             cache.params = command.params.slice(2);
-        } else {
-            cache = handler.cache('batch.' + batch_id);
-            emit_obj = {
-                id: batch_id,
-                type: cache.type,
-                params: cache.params,
-                commands: cache.commands
-            };
 
-            // Destroy the cache object before executing each command. If one
-            // errors out then we don't have the cache object stuck in memory.
-            cache.destroy();
-
-            handler.emit('batch start', emit_obj);
-            handler.emit('batch start ' + emit_obj.type, emit_obj);
-            emit_obj.commands.forEach(function(c) {
-                handler.executeCommand(c);
-            });
-            handler.emit('batch end', emit_obj);
-            handler.emit('batch end ' + emit_obj.type, emit_obj);
+            return;
         }
+
+        if (!handler.hasCache(cache_key)) {
+            // If we don't have this batch ID in cache, it either means that the
+            // server hasn't sent the starting batch command or that the server
+            // has already sent the end batch command.
+            return;
+        }
+
+        const cache = handler.cache(cache_key);
+        const emit_obj = {
+            id: batch_id,
+            type: cache.type,
+            params: cache.params,
+            commands: cache.commands
+        };
+
+        // Destroy the cache object before executing each command. If one
+        // errors out then we don't have the cache object stuck in memory.
+        cache.destroy();
+
+        handler.emit('batch start', emit_obj);
+        handler.emit('batch start ' + emit_obj.type, emit_obj);
+        emit_obj.commands.forEach(c => handler.executeCommand(c));
+        handler.emit('batch end', emit_obj);
+        handler.emit('batch end ' + emit_obj.type, emit_obj);
     }
 };
 
