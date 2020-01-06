@@ -274,7 +274,14 @@ module.exports = class IrcClient extends EventEmitter {
         var webirc = this.options.webirc;
 
         if (webirc) {
-            this.raw('WEBIRC', webirc.password, webirc.username, webirc.hostname, webirc.address);
+            this.raw(
+                'WEBIRC',
+                webirc.password,
+                webirc.username,
+                webirc.hostname,
+                webirc.address,
+                buildWebircTags(webirc.options || {})
+            );
         }
 
         this.raw('CAP LS 302');
@@ -732,3 +739,17 @@ module.exports = class IrcClient extends EventEmitter {
         return this.match(match_regex, cb, 'action');
     }
 };
+
+function buildWebircTags(options) {
+    const str = [];
+
+    _.each(options, (val, key) => {
+        if (val) {
+            str.push(key + '=' + val);
+        } else {
+            str.push(key);
+        }
+    });
+
+    return str.join(' ');
+}
