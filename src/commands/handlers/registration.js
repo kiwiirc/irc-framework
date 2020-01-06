@@ -159,7 +159,7 @@ var handlers = {
                 if (handler.network.cap.requested.length > 0) {
                     handler.network.cap.negotiating = true;
                     handler.connection.write('CAP REQ :' + handler.network.cap.requested.join(' '));
-                } else if (handler.network.cap.negotiating) {
+                } else {
                     handler.connection.write('CAP END');
                     handler.network.cap.negotiating = false;
                 }
