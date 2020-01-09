@@ -124,6 +124,17 @@ Debugging messages.
 ~~~
 
 
+**channel list**
+~~~javascript
+{
+    channel: '#channel',
+    num_users: 123;
+    topic: 'My topic';
+    tags: {};
+}
+~~~
+
+
 **channel info**
 ~~~javascript
 {
