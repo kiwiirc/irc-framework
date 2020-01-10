@@ -124,6 +124,12 @@ Debugging messages.
 ~~~
 
 
+**channel list start**
+~~~javascript
+{}
+~~~
+
+
 **channel list**
 ~~~javascript
 {
@@ -132,6 +138,12 @@ Debugging messages.
     topic: 'My topic';
     tags: {};
 }
+~~~
+
+
+**channel list end**
+~~~javascript
+{}
 ~~~
 
 
