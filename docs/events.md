@@ -132,12 +132,21 @@ Debugging messages.
 
 **channel list**
 ~~~javascript
-{
-    channel: '#channel',
-    num_users: 123;
-    topic: 'My topic';
-    tags: {};
-}
+[
+    {
+        channel: '#channel1',
+        num_users: 123,
+        topic: 'My topic',
+        tags: {},
+    },
+    {
+        channel: '#channel2',
+        num_users: 456,
+        topic: 'My topic',
+        tags: {},
+    },
+    ...
+]
 ~~~
 
 
@@ -147,7 +156,7 @@ Debugging messages.
 ~~~
 
 
-**channel info**
+**channel info **
 ~~~javascript
 {
     channel: '#channel',
