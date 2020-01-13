@@ -124,6 +124,38 @@ Debugging messages.
 ~~~
 
 
+**channel list start**
+~~~javascript
+{ }
+~~~
+
+
+**channel list**
+~~~javascript
+[
+    {
+        channel: '#channel1',
+        num_users: 123,
+        topic: 'My topic',
+        tags: {},
+    },
+    {
+        channel: '#channel2',
+        num_users: 456,
+        topic: 'My topic',
+        tags: {},
+    },
+    ...
+]
+~~~
+
+
+**channel list end**
+~~~javascript
+{ }
+~~~
+
+
 **channel info**
 ~~~javascript
 {
