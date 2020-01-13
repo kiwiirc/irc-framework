@@ -170,6 +170,7 @@ module.exports = class IrcClient extends EventEmitter {
         client._applyDefaultOptions(options);
 
         if (client.connection && client.connection.connected) {
+            client.debugOut('connect() called when already connected');
             client.connection.end();
         }
 
@@ -307,6 +308,7 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         function pingTimeout() {
+            that.debugOut('Ping timeout (' + that.options.ping_timeout + ' seconds)');
             that.emit('ping timeout');
             var end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
             that.connection.end(end_msg, true);
@@ -318,6 +320,10 @@ module.exports = class IrcClient extends EventEmitter {
 
     // Gets overridden with a function in startPeriodicPing(). Only set here for completeness.
     resetPingTimeoutTimer() {}
+
+    debugOut(out) {
+        this.emit('debug', 'Client ' + out);
+    }
 
     /**
      * Client API

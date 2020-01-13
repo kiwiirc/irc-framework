@@ -39,6 +39,9 @@ module.exports = class Connection extends EventEmitter {
             } else {
                 this.socket.write(line + '\r\n', cb);
             }
+        } else {
+            this.debugOut('writeLine() called when not connected');
+            cb();
         }
     }
 
