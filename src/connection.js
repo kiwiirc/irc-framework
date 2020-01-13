@@ -165,7 +165,7 @@ module.exports = class Connection extends EventEmitter {
     write(data, callback) {
         if (!this.connected || this.requested_disconnect) {
             this.debugOut('write() called when not connected');
-            callback();
+            setTimeout(callback, 0); // fire in next tick
             return false;
         }
 
