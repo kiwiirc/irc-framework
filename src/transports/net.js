@@ -122,19 +122,21 @@ module.exports = class Connection extends EventEmitter {
                     localAddress: options.outgoing_addr,
                     family: this.getAddressFamily(options.outgoing_addr)
                 });
-
-                socket_connect_event_name = 'connect';
             }
         }
 
+        if (options.ping_interval > 0 && options.ping_timeout > 0) {
+            socket.setTimeout((options.ping_interval + options.ping_timeout) * 1000);
+        }
+
         // We need the raw socket connect event.
-        // node.js 0.12 no longer has a .socket property.
-        this._bindEvent(socket.socket || socket, 'connect', this.onSocketRawConnected.bind(this));
+        this._bindEvent(socket, 'connect', this.onSocketRawConnected.bind(this));
         this._bindEvent(socket, socket_connect_event_name, this.onSocketFullyConnected.bind(this));
 
         this._bindEvent(socket, 'close', this.onSocketClose.bind(this));
         this._bindEvent(socket, 'error', this.onSocketError.bind(this));
         this._bindEvent(socket, 'data', this.onSocketData.bind(this));
+        this._bindEvent(socket, 'timeout', this.onSocketTimeout.bind(this));
     }
 
     // Called when the socket is connected and before any TLS handshaking if applicable.
@@ -162,6 +164,11 @@ module.exports = class Connection extends EventEmitter {
         this.debugOut('socketError() ' + err.message);
         this.last_socket_error = err;
         // this.emit('error', err);
+    }
+
+    onSocketTimeout() {
+        this.debugOut('socketTimeout()');
+        this.close(true);
     }
 
     onSocketData(data) {
@@ -209,11 +216,16 @@ module.exports = class Connection extends EventEmitter {
     }
 
     close(force) {
+        if (!this.socket) {
+            this.debugOut('close() called with no socket');
+            return;
+        }
+
         // Cleanly close the socket if we can
-        if ((this.socket && this.state === SOCK_CONNECTING) || force) {
+        if (this.state === SOCK_CONNECTING || force) {
             this.debugOut('close() destroying');
             this.socket.destroy();
-        } else if (this.socket && this.state === SOCK_CONNECTED) {
+        } else if (this.state === SOCK_CONNECTED) {
             this.debugOut('close() ending');
             this.socket.end();
         }
