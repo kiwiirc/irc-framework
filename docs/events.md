@@ -126,7 +126,7 @@ Debugging messages.
 
 **channel list start**
 ~~~javascript
-{}
+{ }
 ~~~
 
 
@@ -152,7 +152,7 @@ Debugging messages.
 
 **channel list end**
 ~~~javascript
-{}
+{ }
 ~~~
 
 
