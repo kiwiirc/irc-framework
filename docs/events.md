@@ -156,7 +156,7 @@ Debugging messages.
 ~~~
 
 
-**channel info **
+**channel info**
 ~~~javascript
 {
     channel: '#channel',
