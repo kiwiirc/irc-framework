@@ -17,6 +17,15 @@ describe('src/irclineparser.js', function() {
             });
         });
 
+        it('should recognize when just passed a host', function() {
+            var msgObj = Helper.parseMask('irc.server.com');
+
+            expect(msgObj).to.containSubset({
+                nick: '',
+                host: 'irc.server.com',
+            });
+        });
+
         it('should recognize when just passed a nick and user', function() {
             var msgObj = Helper.parseMask('something!something');
 

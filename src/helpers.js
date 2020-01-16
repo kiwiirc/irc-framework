@@ -17,7 +17,11 @@ function parseMask(mask) {
 
     if (sep1 === -1 && sep2 === -1) {
         // something
-        nick = mask;
+        if (mask.indexOf('.') > -1) {
+            host = mask;
+        } else {
+            nick = mask;
+        }
     } else if (sep1 === -1 && sep2 !== -1) {
         // something@something
         nick = mask.substring(0, sep2);

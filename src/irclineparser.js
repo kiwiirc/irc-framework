@@ -2,43 +2,75 @@
 
 var MessageTags = require('./messagetags');
 var IrcMessage = require('./ircmessage');
+var helpers = require('./helpers');
 
 module.exports = parseIrcLine;
 
-/**
- * The regex that parses a line of data from the IRCd
- * Deviates from the RFC a little to support the '/' character now used in some
- * IRCds
- */
-var parse_regex = /^(?:@([^ ]+) )?(?::((?:(?:([^\s!@]+)(?:!([^\s@]+))?)@)?(\S+)) )?((?:[a-zA-Z]+)|(?:[0-9]{3}))(?: ([^:].*?))?(?: :(.*))?$/i;
 var newline_regex = /^[\r\n]+|[\r\n]+$/g;
 
-function parseIrcLine(line) {
-    // Parse the complete line, removing any carriage returns
-    let matches = parse_regex.exec(line.replace(newline_regex, ''));
-    if (!matches) {
-        // The line was not parsed correctly, must be malformed
-        return;
+function parseIrcLine(input_) {
+    let input = input_.replace(newline_regex, '');
+    let cPos = 0;
+    let inParams = false;
+
+    let nextToken = () => {
+        // Fast forward to somewhere with actual data
+        while (input[cPos] === ' ' && cPos < input.length) {
+            cPos++;
+        }
+
+        if (cPos === input.length) {
+            // If reading the params then return null to indicate no more params available.
+            // The trailing parameter may be empty but should still be included as an empty string.
+            return inParams ? null : '';
+        }
+
+        let end = input.indexOf(' ', cPos);
+        if (end === -1) {
+            // No more spaces means were on the last token
+            end = input.length;
+        }
+
+        if (inParams && input[cPos] === ':' && input[cPos - 1] === ' ') {
+            // If a parameter start with : then we're in the last parameter which may incude spaces
+            cPos++;
+            end = input.length;
+        }
+
+        let token = input.substring(cPos, end);
+        cPos = end;
+
+        // Fast forward our current position so we can peek what's next via input[cPos]
+        while (input[cPos] === ' ' && cPos < input.length) {
+            cPos++;
+        }
+
+        return token;
+    };
+
+    let ret = new IrcMessage();
+
+    if (input[cPos] === '@') {
+        ret.tags = MessageTags.decode(nextToken().substr(1));
     }
 
-    let msg = new IrcMessage();
-
-    if (matches[1]) {
-        msg.tags = MessageTags.decode(matches[1]);
+    if (input[cPos] === ':') {
+        ret.prefix = nextToken().substr(1);
+        let mask = helpers.parseMask(ret.prefix);
+        ret.nick = mask.nick;
+        ret.ident = mask.user;
+        ret.hostname = mask.host;
     }
 
-    msg.prefix = matches[2] || '';
-    // Nick will be in the prefix slot if a full user mask is not used
-    msg.nick = matches[3] || matches[2] || '';
-    msg.ident = matches[4] || '';
-    msg.hostname = matches[5] || '';
-    msg.command = matches[6] || '';
-    msg.params = matches[7] ? matches[7].split(/ +/) : [];
+    ret.command = nextToken().toUpperCase();
 
-    // Add the trailing param to the params list
-    if (typeof matches[8] !== 'undefined') {
-        msg.params.push(matches[8]);
+    inParams = true;
+
+    let token = nextToken();
+    while (token !== null) {
+        ret.params.push(token);
+        token = nextToken();
     }
 
-    return msg;
+    return ret;
 }

@@ -76,7 +76,8 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
-                nick: 'irc.example.org',
+                nick: '',
+                ident: '',
                 hostname: 'irc.example.org',
                 command: 'TEST',
             });
