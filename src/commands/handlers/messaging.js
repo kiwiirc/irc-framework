@@ -34,7 +34,7 @@ var handlers = {
 
             handler.emit('notice', {
                 from_server: command.nick.indexOf('.') > -1,
-                nick: command.nick || undefined,
+                nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
                 target: target,
