@@ -28,6 +28,8 @@ module.exports = class Connection extends EventEmitter {
         this.debugOut('writeLine() socket=' + (this.socket ? 'yes' : 'no') + ' connected=' + this.connected);
         if (this.socket && this.connected) {
             this.socket.send(line, cb);
+        } else {
+            setTimeout(cb, 0);
         }
     }
 

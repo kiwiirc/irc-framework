@@ -164,7 +164,9 @@ module.exports = class Connection extends EventEmitter {
 
     write(data, callback) {
         if (!this.connected || this.requested_disconnect) {
-            return 0;
+            this.debugOut('write() called when not connected');
+            setTimeout(callback, 0); // fire in next tick
+            return false;
         }
 
         this.emit('raw', { line: data, from_server: false });
