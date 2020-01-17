@@ -44,6 +44,33 @@ describe('src/irclineparser.js', function() {
             });
         });
 
+        it('should parse a command with a colon in parameter', function() {
+            var msgObj = parseIrcLine('TEST foo:bar');
+
+            expect(msgObj).to.containSubset({
+                command: 'TEST',
+                params: ['foo:bar']
+            });
+        });
+
+        it('should parse a command with a colon in "trailing" parameter', function() {
+            var msgObj = parseIrcLine('TEST :foo:bar');
+
+            expect(msgObj).to.containSubset({
+                command: 'TEST',
+                params: ['foo:bar']
+            });
+        });
+
+        it('should parse a command with a colon and space in "trailing" parameter', function() {
+            var msgObj = parseIrcLine('TEST :foo :bar');
+
+            expect(msgObj).to.containSubset({
+                command: 'TEST',
+                params: ['foo :bar']
+            });
+        });
+
         it('should parse a command with a multiple parameters', function() {
             var msgObj = parseIrcLine('TEST foo bar');
 
@@ -68,6 +95,18 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 command: 'TEST',
                 params: ['hello world']
+            });
+        });
+
+        it('should parse a message that has a hostname as a prefix with no command', function() {
+            var msgObj = parseIrcLine(':irc.example.org');
+
+            expect(msgObj).to.containSubset({
+                prefix: 'irc.example.org',
+                nick: '',
+                ident: '',
+                hostname: 'irc.example.org',
+                command: '',
             });
         });
 
@@ -268,6 +307,16 @@ describe('src/irclineparser.js', function() {
             });
         });
 
+        it('should parse a message that has a tag with no command', function() {
+            var msgObj = parseIrcLine('@foo');
+
+            expect(msgObj).to.containSubset({
+                tags: {
+                    foo: '',
+                },
+            });
+        });
+
         it('should parse a message that has a tag with no value', function() {
             var msgObj = parseIrcLine('@foo TEST');
 
@@ -333,6 +382,18 @@ describe('src/irclineparser.js', function() {
                     baz: '',
                 },
                 command: 'TEST'
+            });
+        });
+
+        it('should parse a message that has a tag with no value and a hostname prefix with no command', function() {
+            var msgObj = parseIrcLine('@foo :irc.example.org');
+
+            expect(msgObj).to.containSubset({
+                tags: {
+                    foo: '',
+                },
+                command: '',
+                prefix: 'irc.example.org'
             });
         });
 
