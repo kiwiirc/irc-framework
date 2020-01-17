@@ -22,6 +22,11 @@ new Irc.Client({
         username: '*',
         hostname: 'users.host.isp.net',
         ip: '1.1.1.1',
+        options: {
+            secure: true,
+            'local-port': 6697,
+            'remote-port': 21726,
+        },
     }
 });
 ~~~

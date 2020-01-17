@@ -55,7 +55,7 @@ function decode(tag_str) {
     return tags;
 }
 
-function encode(tags) {
+function encode(tags, separator = ';') {
     let parts = Object.keys(tags).map(key => {
         let val = tags[key];
 
@@ -66,5 +66,5 @@ function encode(tags) {
         return key + '=' + encodeValue(val.toString());
     });
 
-    return parts.join(';');
+    return parts.join(separator);
 }

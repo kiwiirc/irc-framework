@@ -16,6 +16,7 @@ var NetworkInfo = require('./networkinfo');
 var User = require('./user');
 var Channel = require('./channel');
 var { lineBreak } = require('./linebreak');
+const MessageTags = require('./messagetags');
 
 var default_transport = null;
 
@@ -274,7 +275,14 @@ module.exports = class IrcClient extends EventEmitter {
         var webirc = this.options.webirc;
 
         if (webirc) {
-            this.raw('WEBIRC', webirc.password, webirc.username, webirc.hostname, webirc.address);
+            this.raw(
+                'WEBIRC',
+                webirc.password,
+                webirc.username,
+                webirc.hostname,
+                webirc.address,
+                MessageTags.encode(webirc.options || {}, ' ')
+            );
         }
 
         this.raw('CAP LS 302');
