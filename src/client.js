@@ -16,6 +16,7 @@ var NetworkInfo = require('./networkinfo');
 var User = require('./user');
 var Channel = require('./channel');
 var { lineBreak } = require('./linebreak');
+const MessageTags = require('./messagetags');
 
 var default_transport = null;
 
@@ -280,7 +281,7 @@ module.exports = class IrcClient extends EventEmitter {
                 webirc.username,
                 webirc.hostname,
                 webirc.address,
-                buildWebircTags(webirc.options || {})
+                MessageTags.encode(webirc.options || {}, ' ')
             );
         }
 
@@ -739,17 +740,3 @@ module.exports = class IrcClient extends EventEmitter {
         return this.match(match_regex, cb, 'action');
     }
 };
-
-function buildWebircTags(options) {
-    const str = [];
-
-    _.each(options, (val, key) => {
-        if (val) {
-            str.push(key + '=' + val);
-        } else {
-            str.push(key);
-        }
-    });
-
-    return str.join(' ');
-}

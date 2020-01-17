@@ -24,6 +24,34 @@ describe('src/messagetags.js', function() {
         });
     });
 
+    describe('encoding', function() {
+        it('should encode from an object', function() {
+            let plain = {
+                foo: 'bar',
+                tls: true,
+                string: 'with space',
+            };
+            let encoded = 'foo=bar;tls;string=with\\sspace';
+
+            assert.equal(MessageTags.encode(plain), encoded);
+        });
+
+        it('should allow changing separator to space', function() {
+            let plain = {
+                foo: 'bar',
+                tls: true,
+                string: 'with space',
+            };
+            let encoded = 'foo=bar tls string=with\\sspace';
+
+            assert.equal(MessageTags.encode(plain, ' '), encoded);
+        });
+
+        it('should return an empty string', function() {
+            assert.equal(MessageTags.encode({}), '');
+        });
+    });
+
     describe('parsing', function() {
         it('should decode tag string into an object', function() {
             let plain = 'foo=bar;baz;';
