@@ -4,3 +4,4 @@
 /*.sublime-project
 /*.sublime-workspace
 /irc-framework-*.tgz
+/.nyc_output/

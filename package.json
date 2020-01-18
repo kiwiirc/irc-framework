@@ -30,8 +30,8 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "iltorb": "^2.4.4",
-    "istanbul": "^0.4.5",
-    "mocha": "^6.2.2",
+    "mocha": "^7.0.0",
+    "nyc": "^15.0.0",
     "shx": "^0.3.2",
     "sinon": "^8.0.2",
     "sinon-chai": "^3.4.0",
@@ -39,10 +39,10 @@
     "webpack-cli": "^3.3.10"
   },
   "scripts": {
-    "test": "npm run lint && npm run coverage -- -R dot test/ --recursive",
+    "test": "npm run lint && npm run coverage",
     "lint": "eslint src/ examples/ test/",
     "unit-test": "mocha --recursive",
-    "coverage": "istanbul cover --include-all-sources _mocha --",
+    "coverage": "nyc mocha -R dot test/ --recursive",
     "build": "npm run build-browser-es5 && npm run build-browser-bundle",
     "build-browser-es5": "babel src/ -d dist/browser/src/ --delete-dir-on-start && shx mv ./dist/browser/src/transports/default_browser.js ./dist/browser/src/transports/default.js && shx rm ./dist/browser/src/transports/net.js",
     "build-browser-bundle": "webpack --config webpack.config.js",
