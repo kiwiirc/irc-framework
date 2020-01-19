@@ -41,7 +41,10 @@ module.exports = class Connection extends EventEmitter {
             }
         } else {
             this.debugOut('writeLine() called when not connected');
-            process.nextTick(cb);
+
+            if (cb) {
+                process.nextTick(cb);
+            }
         }
     }
 
