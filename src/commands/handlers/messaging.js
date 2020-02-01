@@ -33,7 +33,7 @@ var handlers = {
             }
 
             handler.emit('notice', {
-                from_server: (!command.nick && !!command.hostname),
+                from_server: !command.nick,
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
