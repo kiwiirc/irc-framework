@@ -5,3 +5,4 @@
 /*.sublime-workspace
 /irc-framework-*.tgz
 /.nyc_output/
+/yarn-error.log
