@@ -179,8 +179,8 @@ var handlers = {
             }
             if (handler.network.cap.negotiating) {
                 if (handler.network.cap.isEnabled('sasl')) {
-                    if (handler.connection.options.sasl_mechanism === 'AUTHCOOKIE') {
-                        handler.connection.write('AUTHENTICATE AUTHCOOKIE');
+                    if (typeof handler.connection.options.sasl_mechanism === 'string') {
+                        handler.connection.write('AUTHENTICATE ' + handler.connection.options.sasl_mechanism);
                     } else {
                         handler.connection.write('AUTHENTICATE PLAIN');
                     }
