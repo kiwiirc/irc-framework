@@ -131,7 +131,7 @@ var handlers = {
         ];
 
         // Optional CAPs depending on settings
-        if (handler.connection.options.password) {
+        if (handler.connection.options.password || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
             want.push('sasl');
         }
         if (handler.connection.options.enable_chghost) {
