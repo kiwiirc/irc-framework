@@ -105,6 +105,13 @@ var generics = {
         error: 'chanop_privs_needed',
         channel: 1,
         reason: -1
+    },
+
+    ERR_UNKNOWNCOMMAND: {
+        event: 'irc error',
+        error: 'unknown_command',
+        command: 1,
+        reason: -1
     }
 };
 
