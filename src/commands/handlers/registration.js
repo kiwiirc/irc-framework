@@ -137,7 +137,7 @@ var handlers = {
             want.push('chghost');
         }
         if (handler.connection.options.enable_setname) {
-            want.push('draft/setname');
+            want.push('setname');
         }
         if (handler.connection.options.enable_echomessage) {
             want.push('echo-message');
