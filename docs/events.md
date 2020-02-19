@@ -575,3 +575,17 @@ A `batch end <type>` event is also triggered.
     commands: []
 }
 ~~~
+
+
+**cap ls**, **cap ack**, **cap nak**, **cap list**, **cap new**, **cap del**
+
+Triggered for each `CAP` command, lists the sent capabilities list.
+
+~~~javascript
+{
+    command: 'LS',
+    capabilities: {
+        'sts': 'port=6697'
+    }
+}
+~~~
