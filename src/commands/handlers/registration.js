@@ -101,6 +101,7 @@ var handlers = {
                 // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
                 var sep = cap.indexOf('=');
                 if (sep === -1) {
+                    capability_values[cap] = '';
                     return cap;
                 }
 
@@ -232,6 +233,11 @@ var handlers = {
             );
             break;
         }
+
+        handler.emit('cap ' + command.params[1].toLowerCase(), {
+            command: command.params[1],
+            capabilities: capability_values,
+        });
     },
 
     AUTHENTICATE: function(command, handler) {
