@@ -22,6 +22,8 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
         this.request_extra_caps = [];
 
+        this.resetCache();
+
         require('./handlers/registration')(this);
         require('./handlers/channel')(this);
         require('./handlers/user')(this);
@@ -162,10 +164,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
      * cache.destroy();
      */
     cache(id) {
-        var cache;
-
-        this._caches = this._caches || Object.create(null);
-        cache = this._caches[id];
+        let cache = this._caches[id];
 
         if (!cache) {
             let destroyCacheFn = (cache, id) => {
@@ -188,5 +187,9 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
     hasCache(id) {
         return this._caches && Object.prototype.hasOwnProperty.call(this._caches, id);
+    }
+
+    resetCache() {
+        this._caches = Object.create(null);
     }
 };
