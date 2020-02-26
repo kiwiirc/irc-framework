@@ -110,6 +110,8 @@ module.exports = class IrcClient extends EventEmitter {
             // This prevents stale state if a connection gets closed during CAP negotiation
             client.network.cap.negotiating = false;
             client.network.cap.requested = [];
+
+            client.command_handler.resetCache();
         });
 
         // IRC command routing
