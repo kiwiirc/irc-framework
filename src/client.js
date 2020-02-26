@@ -381,7 +381,7 @@ module.exports = class IrcClient extends EventEmitter {
     sendMessage(commandName, target, message) {
         let lines = message
             .split(/\r\n|\n|\r/)
-            .filter(i=>i);
+            .filter(i => i);
 
         lines.forEach(line => {
             // Maximum length of target + message we can send to the IRC server is 500 characters
