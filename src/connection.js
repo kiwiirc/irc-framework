@@ -53,6 +53,7 @@ module.exports = class Connection extends EventEmitter {
         if (this.transport) {
             this.clearTimers();
             this.transport.removeAllListeners();
+            this.transport.disposeSocket();
         }
         this.transport = new options.transport(options);
 
