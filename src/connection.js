@@ -51,6 +51,7 @@ module.exports = class Connection extends EventEmitter {
         this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
 
         if (this.transport) {
+            this.clearTimers();
             this.transport.removeAllListeners();
         }
         this.transport = new options.transport(options);
