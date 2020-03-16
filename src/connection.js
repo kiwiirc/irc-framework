@@ -40,7 +40,6 @@ module.exports = class Connection extends EventEmitter {
 
     connect(options) {
         var that = this;
-        var transport;
 
         if (options) {
             this.options = options;
@@ -52,42 +51,36 @@ module.exports = class Connection extends EventEmitter {
         this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
 
         if (this.transport) {
-            unbindTransportEvents(this.transport);
+            this.transport.removeAllListeners();
         }
-        transport = this.transport = new options.transport(options);
+        this.transport = new options.transport(options);
 
         if (!options.encoding || !this.setEncoding(options.encoding)) {
             this.setEncoding('utf8');
         }
 
-        // Some transports may emit extra events
-        transport.on('extra', function(/* event_name, argN */) {
-            that.emit.apply(that, arguments);
-        });
-
-        bindTransportEvents(transport);
+        bindTransportEvents(this.transport);
 
         this.registered = false;
         this.requested_disconnect = false;
         this.emit('connecting');
-        transport.connect();
+        this.transport.connect();
 
         function bindTransportEvents(transport) {
             transport.on('open', socketOpen);
             transport.on('line', socketLine);
             transport.on('close', socketClose);
             transport.on('debug', transportDebug);
-        }
-
-        function unbindTransportEvents(transport) {
-            transport.removeListener('open', socketOpen);
-            transport.removeListener('line', socketLine);
-            transport.removeListener('close', socketClose);
-            transport.removeListener('debug', transportDebug);
+            transport.on('extra', transportExtra);
         }
 
         function transportDebug(out) {
             that.debugOut(out);
+        }
+
+        function transportExtra() {
+            // Some transports may emit extra events
+            that.emit.apply(that, arguments);
         }
 
         // Called when the socket is connected and ready to start sending/receiving data.
@@ -143,7 +136,7 @@ module.exports = class Connection extends EventEmitter {
                     wait: that.auto_reconnect_wait
                 });
             } else {
-                unbindTransportEvents(that.transport);
+                that.transport.removeAllListeners();
                 that.emit('close', !!err);
                 that.reconnect_attempts = 0;
             }
