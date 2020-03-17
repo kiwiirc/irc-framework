@@ -149,7 +149,6 @@ module.exports = class Connection extends EventEmitter {
             }
 
             if (should_reconnect) {
-
                 that.debugOut('Scheduling reconnect');
                 that.setTimeout(function() {
                     that.connect();
