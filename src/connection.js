@@ -136,30 +136,33 @@ module.exports = class Connection extends EventEmitter {
             }
 
             if (should_reconnect) {
+                var reconnect_wait = that.calculateExponentialBackoff();
+                
                 that.reconnect_attempts++;
                 that.emit('reconnecting', {
                     attempt: that.reconnect_attempts,
                     max_retries: that.auto_reconnect_max_retries,
-                    wait: that.auto_reconnect_wait
+                    wait: reconnect_wait
                 });
+                
+                that.debugOut('Scheduling reconnect');
+                that.setTimeout(function() {
+                    that.connect();
+                }, reconnect_wait);
             } else {
                 unbindTransportEvents(that.transport);
                 that.emit('close', !!err);
                 that.reconnect_attempts = 0;
             }
 
-            if (should_reconnect) {
-                that.debugOut('Scheduling reconnect');
-                that.setTimeout(function() {
-                    that.connect();
-                }, that.calculateExponentialBackoff());
-            }
         }
     }
     
     calculateExponentialBackoff() {
-        var jitter = Math.floor(Math.random() * 100) - 50;
-        return this.auto_reconnect_wait * Math.pow(2, this.reconnect_attempts) + jitter;
+        var jitter = Math.floor(Math.random() * 10000);
+        var exponent = Math.min(this.reconnect_attempts, 11); 
+        var time = this.auto_reconnect_wait * Math.pow(2, exponent) + jitter;
+        return time;
     }
 
     addReadBuffer(line) {
