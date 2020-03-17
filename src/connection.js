@@ -149,12 +149,18 @@ module.exports = class Connection extends EventEmitter {
             }
 
             if (should_reconnect) {
+
                 that.debugOut('Scheduling reconnect');
                 that.setTimeout(function() {
                     that.connect();
-                }, that.auto_reconnect_wait);
+                }, that.calculateExponentialBackoff());
             }
         }
+    }
+    
+    calculateExponentialBackoff() {
+        var jitter = Math.floor(Math.random() * 100) - 50;
+        return this.auto_reconnect_wait * Math.pow(2, this.reconnect_attempts) + jitter;
     }
 
     addReadBuffer(line) {
