@@ -50,7 +50,7 @@ module.exports = class Connection extends EventEmitter {
         this.auto_reconnect = options.auto_reconnect || false;
         this.auto_reconnect_wait = options.auto_reconnect_wait || 4000;
         this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
-        this.auto_reconnect_max_wait = options.auto_reconnect_max_wait || 50000;
+        this.auto_reconnect_max_wait = options.auto_reconnect_max_wait || 300000;
 
         if (this.transport) {
             unbindTransportEvents(this.transport);
