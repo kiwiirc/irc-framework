@@ -136,7 +136,7 @@ module.exports = class Connection extends EventEmitter {
             }
 
             if (should_reconnect) {
-                var reconnect_wait = that.calculateExponentialBackoff();
+                const reconnect_wait = that.calculateExponentialBackoff();
                 
                 that.reconnect_attempts++;
                 that.emit('reconnecting', {
