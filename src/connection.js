@@ -146,7 +146,7 @@ module.exports = class Connection extends EventEmitter {
                 });
                 
                 that.debugOut('Scheduling reconnect');
-                that.setTimeout(function() {
+                that.setTimeout(() => that.connect(), reconnect_wait);
                     that.connect();
                 }, reconnect_wait);
             } else {
