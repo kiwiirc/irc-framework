@@ -158,7 +158,7 @@ module.exports = class Connection extends EventEmitter {
     }
     
     calculateExponentialBackoff() {
-        const jitter = 1 + Math.floor(Math.random() * 9000);
+        const jitter = 1000 + Math.floor(Math.random() * 9000);
         const exponent = Math.min(this.reconnect_attempts, 30);
         const time = this.auto_reconnect_wait * Math.pow(2, exponent) + jitter;
         return Math.min(time, this.auto_reconnect_max_wait);
