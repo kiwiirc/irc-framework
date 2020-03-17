@@ -146,7 +146,7 @@ module.exports = class Connection extends EventEmitter {
                     wait: reconnect_wait
                 });
                 
-                that.debugOut('Scheduling reconnect. Attempt: ' + that.reconnect_attempts + ' Wait: ' + reconnect_wait + 'ms');
+                that.debugOut('Scheduling reconnect. Attempt: ' + that.reconnect_attempts '/' + that.auto_reconnect_max_retries + ' Wait: ' + reconnect_wait + 'ms');
                 that.setTimeout(() => that.connect(), reconnect_wait);
             } else {
                 unbindTransportEvents(that.transport);
