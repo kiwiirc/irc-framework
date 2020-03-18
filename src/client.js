@@ -277,12 +277,20 @@ module.exports = class IrcClient extends EventEmitter {
         var webirc = this.options.webirc;
 
         if (webirc) {
+            let address = String(webirc.address);
+
+            // Prepend a zero to addresses that begin with colon (like ::1)
+            // as colon is using to denote last argument in IRC
+            if (address[0] === ':') {
+                address = '0' + address;
+            }
+
             this.raw(
                 'WEBIRC',
                 webirc.password,
                 webirc.username,
                 webirc.hostname,
-                webirc.address,
+                address,
                 MessageTags.encode(webirc.options || {}, ' ')
             );
         }
