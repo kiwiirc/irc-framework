@@ -131,7 +131,7 @@ var handlers = {
         ];
 
         // Optional CAPs depending on settings
-        if (handler.connection.options.password) {
+        if (handler.connection.options.password || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
             want.push('sasl');
         }
         if (handler.connection.options.enable_chghost) {
@@ -179,8 +179,8 @@ var handlers = {
             }
             if (handler.network.cap.negotiating) {
                 if (handler.network.cap.isEnabled('sasl')) {
-                    if (handler.connection.options.sasl_mechanism === 'AUTHCOOKIE') {
-                        handler.connection.write('AUTHENTICATE AUTHCOOKIE');
+                    if (typeof handler.connection.options.sasl_mechanism === 'string') {
+                        handler.connection.write('AUTHENTICATE ' + handler.connection.options.sasl_mechanism);
                     } else {
                         handler.connection.write('AUTHENTICATE PLAIN');
                     }
@@ -241,25 +241,35 @@ var handlers = {
     },
 
     AUTHENTICATE: function(command, handler) {
-        var auth_str = handler.connection.options.nick + '\0' +
+        if (command.params[0] !== '+') {
+            if (handler.network.cap.negotiating) {
+                handler.connection.write('CAP END');
+                handler.network.cap.negotiating = false;
+            }
+
+            return;
+        }
+
+        // Send blank authenticate for EXTERNAL mechanism
+        if (handler.connection.options.sasl_mechanism === 'EXTERNAL') {
+            handler.connection.write('AUTHENTICATE +');
+            return;
+        }
+
+        const auth_str = handler.connection.options.nick + '\0' +
             handler.connection.options.nick + '\0' +
             handler.connection.options.password;
-        var b = Buffer.from(auth_str, 'utf8');
-        var b64 = b.toString('base64');
+        const b = Buffer.from(auth_str, 'utf8');
+        let b64 = b.toString('base64');
 
-        if (command.params[0] === '+') {
-            while (b64.length >= 400) {
-                handler.connection.write('AUTHENTICATE ' + b64.slice(0, 399));
-                b64 = b64.slice(399);
-            }
-            if (b64.length > 0) {
-                handler.connection.write('AUTHENTICATE ' + b64);
-            } else {
-                handler.connection.write('AUTHENTICATE +');
-            }
-        } else if (handler.network.cap.negotiating) {
-            handler.connection.write('CAP END');
-            handler.network.cap.negotiating = false;
+        while (b64.length >= 400) {
+            handler.connection.write('AUTHENTICATE ' + b64.slice(0, 399));
+            b64 = b64.slice(399);
+        }
+        if (b64.length > 0) {
+            handler.connection.write('AUTHENTICATE ' + b64);
+        } else {
+            handler.connection.write('AUTHENTICATE +');
         }
     },
 

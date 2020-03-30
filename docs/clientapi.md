@@ -27,7 +27,11 @@ new Irc.Client({
             'local-port': 6697,
             'remote-port': 21726,
         },
-    }
+    },
+    client_certificate: {
+        private_key: '-----BEGIN RSA PRIVATE KEY-----[...]',
+        certificate: '-----BEGIN CERTIFICATE-----[...]',
+    },
 });
 ~~~
 
