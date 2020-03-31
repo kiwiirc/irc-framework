@@ -358,18 +358,22 @@ var handlers = {
 
 /**
  * Only use the nick+password combo if an account has not been specifically given.
- * If no account:{account,password} has been given, use the nick+password if available
+ * If an account:{account,password} has been given, use it for SASL auth.
  */
 function getSaslAuth(handler) {
     let options = handler.connection.options;
     if (options.account && options.account.account) {
+        // An account username has been given, use it for SASL auth
         return {
             account: options.account.account,
             password: options.account.password || '',
         };
-    } else if (options.account && options.password) {
+    } else if (options.account) {
+        // An account object existed but without auth credentials
         return null;
     } else if (options.password) {
+        // No account credentials found but we have a server password. Also use it for SASL
+        // for ease of use
         return {
             account: options.nick,
             password: options.password,
