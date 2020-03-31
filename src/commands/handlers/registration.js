@@ -131,7 +131,7 @@ var handlers = {
         ];
 
         // Optional CAPs depending on settings
-        let saslAuth = getSaslAuth(handler);
+        const saslAuth = getSaslAuth(handler);
         if (saslAuth || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
             want.push('sasl');
         }
@@ -361,7 +361,7 @@ var handlers = {
  * If an account:{account,password} has been given, use it for SASL auth.
  */
 function getSaslAuth(handler) {
-    let options = handler.connection.options;
+    const options = handler.connection.options;
     if (options.account && options.account.account) {
         // An account username has been given, use it for SASL auth
         return {
