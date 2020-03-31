@@ -17,6 +17,10 @@ new Irc.Client({
     auto_reconnect_max_retries: 3,
     ping_interval: 30,
     ping_timeout: 120,
+    account: {
+        account: 'username',
+        password: 'account_password',
+    },
     webirc: {
         password: '',
         username: '*',

@@ -131,7 +131,8 @@ var handlers = {
         ];
 
         // Optional CAPs depending on settings
-        if (handler.connection.options.password || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
+        const saslAuth = getSaslAuth(handler);
+        if (saslAuth || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
             want.push('sasl');
         }
         if (handler.connection.options.enable_chghost) {
@@ -256,9 +257,10 @@ var handlers = {
             return;
         }
 
-        const auth_str = handler.connection.options.nick + '\0' +
-            handler.connection.options.nick + '\0' +
-            handler.connection.options.password;
+        const saslAuth = getSaslAuth(handler);
+        const auth_str = saslAuth.account + '\0' +
+            saslAuth.account + '\0' +
+            saslAuth.password;
         const b = Buffer.from(auth_str, 'utf8');
         let b64 = b.toString('base64');
 
@@ -353,6 +355,33 @@ var handlers = {
         // noop
     }
 };
+
+/**
+ * Only use the nick+password combo if an account has not been specifically given.
+ * If an account:{account,password} has been given, use it for SASL auth.
+ */
+function getSaslAuth(handler) {
+    const options = handler.connection.options;
+    if (options.account && options.account.account) {
+        // An account username has been given, use it for SASL auth
+        return {
+            account: options.account.account,
+            password: options.account.password || '',
+        };
+    } else if (options.account) {
+        // An account object existed but without auth credentials
+        return null;
+    } else if (options.password) {
+        // No account credentials found but we have a server password. Also use it for SASL
+        // for ease of use
+        return {
+            account: options.nick,
+            password: options.password,
+        };
+    }
+
+    return null;
+}
 
 module.exports = function AddCommandHandlers(command_controller) {
     _.each(handlers, function(handler, handler_command) {
