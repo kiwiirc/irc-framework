@@ -115,7 +115,10 @@ module.exports = class Connection extends EventEmitter {
         }
 
         if (this.socket) {
-            this._unbindEvents();
+            this.socket.onopen = null;
+            this.socket.onclose = null;
+            this.socket.onmessage = null;
+            this.socket.onerror = null;
             this.socket = null;
         }
     }
