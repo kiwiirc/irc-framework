@@ -11,7 +11,7 @@ Example
     },
 */
 
-var generics = {
+const generics = {
     ERROR: {
         event: 'irc error',
         error: 'irc',
@@ -115,18 +115,18 @@ var generics = {
     }
 };
 
-var generic_keys = Object.keys(generics);
+const generic_keys = Object.keys(generics);
 
 module.exports = function AddCommandHandlers(command_controller) {
     generic_keys.forEach(function(generic_command) {
-        var generic = generics[generic_command];
+        const generic = generics[generic_command];
 
         command_controller.addHandler(generic_command, function(command, handler) {
-            var event_obj = {};
-            var event_keys = Object.keys(generic);
-            var val;
+            const event_obj = {};
+            const event_keys = Object.keys(generic);
+            let val;
 
-            for (var i = 0; i < event_keys.length; i++) {
+            for (let i = 0; i < event_keys.length; i++) {
                 if (event_keys[i] === 'event') {
                     continue;
                 }
@@ -144,7 +144,7 @@ module.exports = function AddCommandHandlers(command_controller) {
             if (event_obj.channel) {
                 // Extract the group from any errors targetted towards channels with a statusmsg prefix
                 // Eg. @#channel
-                var parsed = handler.network.extractTargetGroup(event_obj.channel);
+                const parsed = handler.network.extractTargetGroup(event_obj.channel);
                 if (parsed) {
                     event_obj.channel = parsed.target;
                     event_obj.target_group = parsed.target_group;

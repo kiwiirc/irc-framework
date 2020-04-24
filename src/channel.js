@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = {
+const _ = {
     partial: require('lodash/partial'),
     filter: require('lodash/filter'),
     find: require('lodash/find'),
@@ -9,7 +9,7 @@ var _ = {
     extend: require('lodash/extend'),
 };
 
-var DuplexStream = require('stream').Duplex;
+const DuplexStream = require('stream').Duplex;
 
 module.exports = class IrcChannel {
     constructor(irc_client, channel_name, key) {
@@ -84,7 +84,7 @@ module.exports = class IrcChannel {
             _.each(event.modes, mode => {
                 // If this mode has a user prefix then we need to update the user object
                 // eg. +o +h +v
-                let user_prefix = _.find(irc_client.network.options.PREFIX, {
+                const user_prefix = _.find(irc_client.network.options.PREFIX, {
                     mode: mode.mode[1],
                 });
 
@@ -92,8 +92,8 @@ module.exports = class IrcChannel {
                     // TODO : manage channel mode changes
                 } else { // It's a user mode
                     // Find the user affected
-                    let user = _.find(this.users, user =>
-                        user.nick.toLowerCase() === mode.param.toLowerCase()
+                    const user = _.find(this.users, u =>
+                        u.nick.toLowerCase() === mode.param.toLowerCase()
                     );
 
                     if (!user) {
@@ -131,8 +131,8 @@ module.exports = class IrcChannel {
         if (typeof target_chan === 'string') {
             target_chan = this.irc_client.channel(target_chan);
         }
-        var this_stream = this.stream(opts);
-        var other_stream = target_chan.stream(opts);
+        const this_stream = this.stream(opts);
+        const other_stream = target_chan.stream(opts);
 
         this_stream.pipe(other_stream);
         if (!opts.one_way) {
@@ -141,10 +141,10 @@ module.exports = class IrcChannel {
     }
 
     stream(stream_opts) {
-        var read_queue = [];
-        var is_reading = false;
+        const read_queue = [];
+        let is_reading = false;
 
-        var stream = new DuplexStream({
+        const stream = new DuplexStream({
             objectMode: true,
 
             write: (chunk, encoding, next) => {
@@ -165,7 +165,7 @@ module.exports = class IrcChannel {
                 is_reading = true;
 
                 while (read_queue.length > 0) {
-                    let message = read_queue.shift();
+                    const message = read_queue.shift();
                     if (stream.push(message) === false) {
                         is_reading = false;
                         break;
@@ -188,7 +188,7 @@ module.exports = class IrcChannel {
     }
 
     updateUsers(cb) {
-        let updateUserList = (event) => {
+        const updateUserList = (event) => {
             if (event.channel.toLowerCase() === this.name.toLowerCase()) {
                 this.irc_client.removeListener('userlist', updateUserList);
                 if (typeof cb === 'function') { cb(this); }

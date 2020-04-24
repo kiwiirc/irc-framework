@@ -1,4 +1,4 @@
-let MessageTags = require('./messagetags');
+const MessageTags = require('./messagetags');
 
 module.exports = class IrcMessage {
     constructor(command, ...args) {
@@ -12,9 +12,9 @@ module.exports = class IrcMessage {
     }
 
     to1459() {
-        let parts = [];
+        const parts = [];
 
-        let tags = MessageTags.encode(this.tags);
+        const tags = MessageTags.encode(this.tags);
         if (tags) {
             parts.push('@' + tags);
         }

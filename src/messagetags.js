@@ -37,11 +37,11 @@ function encodeValue(value) {
 }
 
 function decode(tag_str) {
-    let tags = Object.create(null);
+    const tags = Object.create(null);
 
     tag_str.split(';').forEach(tag => {
-        let parts = Helpers.splitOnce(tag, '=');
-        let key = parts[0].toLowerCase();
+        const parts = Helpers.splitOnce(tag, '=');
+        const key = parts[0].toLowerCase();
         let value = parts[1] || '';
 
         if (!key) {
@@ -56,8 +56,8 @@ function decode(tag_str) {
 }
 
 function encode(tags, separator = ';') {
-    let parts = Object.keys(tags).map(key => {
-        let val = tags[key];
+    const parts = Object.keys(tags).map(key => {
+        const val = tags[key];
 
         if (typeof val === 'boolean') {
             return key;

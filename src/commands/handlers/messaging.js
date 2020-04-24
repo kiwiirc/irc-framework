@@ -1,17 +1,17 @@
 'use strict';
 
-var _ = {
+const _ = {
     each: require('lodash/each'),
     find: require('lodash/find'),
 };
-var util = require('util');
+const util = require('util');
 
-var handlers = {
+const handlers = {
     NOTICE: function(command, handler) {
-        var time = command.getServerTime();
-        var message = command.params[command.params.length - 1];
-        var target = command.params[0];
-        var target_group;
+        const time = command.getServerTime();
+        const message = command.params[command.params.length - 1];
+        let target = command.params[0];
+        let target_group;
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // It's a CTCP response
@@ -26,7 +26,7 @@ var handlers = {
                 tags: command.tags
             });
         } else {
-            var parsed_target = handler.network.extractTargetGroup(target);
+            const parsed_target = handler.network.extractTargetGroup(target);
             if (parsed_target) {
                 target = parsed_target.target;
                 target_group = parsed_target.target_group;
@@ -48,12 +48,12 @@ var handlers = {
     },
 
     PRIVMSG: function(command, handler) {
-        var time = command.getServerTime();
-        var message = command.params[command.params.length - 1];
-        var target = command.params[0];
-        var target_group;
+        const time = command.getServerTime();
+        const message = command.params[command.params.length - 1];
+        let target = command.params[0];
+        let target_group;
 
-        var parsed_target = handler.network.extractTargetGroup(target);
+        const parsed_target = handler.network.extractTargetGroup(target);
         if (parsed_target) {
             target = parsed_target.target;
             target_group = parsed_target.target_group;
@@ -61,7 +61,7 @@ var handlers = {
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // CTCP request
-            var ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
+            const ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
             if (ctcp_command === 'ACTION') {
                 handler.emit('action', {
                     nick: command.nick,
@@ -114,8 +114,8 @@ var handlers = {
         }
     },
     TAGMSG: function(command, handler) {
-        let time = command.getServerTime();
-        let target = command.params[0];
+        const time = command.getServerTime();
+        const target = command.params[0];
         handler.emit('tagmsg', {
             nick: command.nick,
             ident: command.ident,

@@ -2,16 +2,16 @@
 
 const Helpers = require('../../helpers');
 
-var _ = {
+const _ = {
     intersection: require('lodash/intersection'),
     difference: require('lodash/difference'),
     each: require('lodash/each'),
     uniq: require('lodash/uniq'),
 };
 
-var handlers = {
+const handlers = {
     RPL_WELCOME: function(command, handler) {
-        var nick = command.params[0];
+        const nick = command.params[0];
 
         // Get the server name so we know which messages are by the server in future
         handler.network.server = command.prefix;
@@ -33,8 +33,8 @@ var handlers = {
 
     RPL_YOURHOST: function(command, handler) {
         // Your host is ircd.network.org, running version InspIRCd-2.0
-        let param = command.params[1] || '';
-        let m = param.match(/running version (.*)$/);
+        const param = command.params[1] || '';
+        const m = param.match(/running version (.*)$/);
         if (!m) {
             handler.network.ircd = '';
         } else {
@@ -43,11 +43,11 @@ var handlers = {
     },
 
     RPL_ISUPPORT: function(command, handler) {
-        var options = command.params;
-        var i;
-        var option;
-        var matches;
-        var j;
+        const options = command.params;
+        let i;
+        let option;
+        let matches;
+        let j;
 
         for (i = 1; i < options.length; i++) {
             option = Helpers.splitOnce(options[i], '=');
@@ -89,31 +89,31 @@ var handlers = {
     },
 
     CAP: function(command, handler) {
-        var request_caps = [];
-        var capability_values = Object.create(null);
+        let request_caps = [];
+        const capability_values = Object.create(null);
 
         // TODO: capability modifiers
         // i.e. - for disable, ~ for requires ACK, = for sticky
-        var capabilities = command.params[command.params.length - 1]
+        const capabilities = command.params[command.params.length - 1]
             .replace(/(?:^| )[-~=]/, '')
             .split(' ')
             .map(function(cap) {
                 // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
-                var sep = cap.indexOf('=');
+                const sep = cap.indexOf('=');
                 if (sep === -1) {
                     capability_values[cap] = '';
                     return cap;
                 }
 
-                var cap_name = cap.substr(0, sep);
-                var cap_value = cap.substr(sep + 1);
+                const cap_name = cap.substr(0, sep);
+                const cap_value = cap.substr(sep + 1);
 
                 capability_values[cap_name] = cap_value;
                 return cap_name;
             });
 
         // Which capabilities we want to enable
-        var want = [
+        let want = [
             'cap-notify',
             'batch',
             'multi-prefix',
@@ -213,7 +213,7 @@ var handlers = {
             // Request any new CAPs that we want but haven't already enabled
             request_caps = [];
             for (let i = 0; i < capabilities.length; i++) {
-                let cap = capabilities[i];
+                const cap = capabilities[i];
                 if (
                     want.indexOf(cap) > -1 &&
                         request_caps.indexOf(cap) === -1 &&
@@ -281,10 +281,10 @@ var handlers = {
             handler.network.cap.negotiating = false;
         }
 
-        var mask = Helpers.parseMask(command.params[1]);
+        const mask = Helpers.parseMask(command.params[1]);
 
         // Check if we have a server-time
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
         handler.emit('loggedin', {
             nick: command.params[0],
@@ -306,10 +306,10 @@ var handlers = {
     },
 
     RPL_LOGGEDOUT: function(command, handler) {
-        var mask = Helpers.parseMask(command.params[1]);
+        const mask = Helpers.parseMask(command.params[1]);
 
         // Check if we have a server-time
-        var time = command.getServerTime();
+        const time = command.getServerTime();
 
         handler.emit('loggedout', {
             nick: command.params[0],

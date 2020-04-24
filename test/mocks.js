@@ -1,11 +1,11 @@
 'use strict';
 
-var sinon = require('sinon');
-var _ = require('lodash');
+const sinon = require('sinon');
+const _ = require('lodash');
 
 module.exports = {
     IrcCommandHandler: function(modules) {
-        var handlers = {};
+        const handlers = {};
         modules.map(function(m) {
             m({
                 addHandler: function(command, handler) {
@@ -13,7 +13,7 @@ module.exports = {
                 }
             });
         });
-        var stubs = {
+        const stubs = {
             emit: sinon.stub(),
             connection: {
                 write: sinon.stub()
@@ -22,7 +22,7 @@ module.exports = {
                 addServerTimeOffset: sinon.stub()
             },
         };
-        var handler = _.mapValues(stubs, function spyify(value) {
+        const handler = _.mapValues(stubs, function spyify(value) {
             if (_.isFunction(value)) {
                 return sinon.spy(value);
             } else if (_.isObject(value)) {

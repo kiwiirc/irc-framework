@@ -4,7 +4,7 @@
  * Websocket transport
  */
 
-var EventEmitter = require('eventemitter3');
+const EventEmitter = require('eventemitter3');
 
 module.exports = class Connection extends EventEmitter {
     constructor(options) {
@@ -39,10 +39,10 @@ module.exports = class Connection extends EventEmitter {
     }
 
     connect() {
-        var that = this;
-        var options = this.options;
-        var socket = null;
-        var ws_addr = '';
+        const that = this;
+        const options = this.options;
+        let socket = null;
+        let ws_addr = '';
 
         this.debugOut('Connection.connect()');
 
@@ -89,8 +89,8 @@ module.exports = class Connection extends EventEmitter {
     onSocketMessage(data) {
         this.debugOut('socketData() ' + JSON.stringify(data));
 
-        var that = this;
-        var lines = null;
+        const that = this;
+        let lines = null;
 
         this.incoming_buffer += data + '\n';
 

@@ -1,19 +1,19 @@
 'use strict';
 
-var MessageTags = require('./messagetags');
-var IrcMessage = require('./ircmessage');
-var helpers = require('./helpers');
+const MessageTags = require('./messagetags');
+const IrcMessage = require('./ircmessage');
+const helpers = require('./helpers');
 
 module.exports = parseIrcLine;
 
-var newline_regex = /^[\r\n]+|[\r\n]+$/g;
+const newline_regex = /^[\r\n]+|[\r\n]+$/g;
 
 function parseIrcLine(input_) {
-    let input = input_.replace(newline_regex, '');
+    const input = input_.replace(newline_regex, '');
     let cPos = 0;
     let inParams = false;
 
-    let nextToken = () => {
+    const nextToken = () => {
         // Fast forward to somewhere with actual data
         while (input[cPos] === ' ' && cPos < input.length) {
             cPos++;
@@ -37,7 +37,7 @@ function parseIrcLine(input_) {
             end = input.length;
         }
 
-        let token = input.substring(cPos, end);
+        const token = input.substring(cPos, end);
         cPos = end;
 
         // Fast forward our current position so we can peek what's next via input[cPos]
@@ -48,7 +48,7 @@ function parseIrcLine(input_) {
         return token;
     };
 
-    let ret = new IrcMessage();
+    const ret = new IrcMessage();
 
     if (input[cPos] === '@') {
         ret.tags = MessageTags.decode(nextToken().substr(1));
@@ -56,7 +56,7 @@ function parseIrcLine(input_) {
 
     if (input[cPos] === ':') {
         ret.prefix = nextToken().substr(1);
-        let mask = helpers.parseMask(ret.prefix);
+        const mask = helpers.parseMask(ret.prefix);
         ret.nick = mask.nick;
         ret.ident = mask.user;
         ret.hostname = mask.host;

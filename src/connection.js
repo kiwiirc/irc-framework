@@ -1,10 +1,10 @@
 'use strict';
 
-var _ = {
+const _ = {
     pull: require('lodash/pull'),
 };
-var EventEmitter = require('eventemitter3');
-var ircLineParser = require('./irclineparser');
+const EventEmitter = require('eventemitter3');
+const ircLineParser = require('./irclineparser');
 
 module.exports = class Connection extends EventEmitter {
     constructor(options) {
@@ -39,7 +39,7 @@ module.exports = class Connection extends EventEmitter {
     }
 
     connect(options) {
-        var that = this;
+        const that = this;
 
         if (options) {
             this.options = options;
@@ -99,10 +99,10 @@ module.exports = class Connection extends EventEmitter {
         }
 
         function socketClose(err) {
-            var was_connected = that.connected;
-            var should_reconnect = false;
-            var safely_registered = false;
-            var registered_ms_ago = Date.now() - that.registered;
+            const was_connected = that.connected;
+            let should_reconnect = false;
+            let safely_registered = false;
+            const registered_ms_ago = Date.now() - that.registered;
 
             // Some networks use aKills which kill a user after succesfully
             // registering instead of a ban, so we must wait some time after
@@ -176,10 +176,10 @@ module.exports = class Connection extends EventEmitter {
      * Create and keep track of all timers so they can be easily removed
      */
     setTimeout(/* fn, length, argN */) {
-        var that = this;
-        var tmr = null;
-        var args = Array.prototype.slice.call(arguments, 0);
-        var callback = args[0];
+        const that = this;
+        let tmr = null;
+        const args = Array.prototype.slice.call(arguments, 0);
+        const callback = args[0];
 
         args[0] = function() {
             _.pull(that._timers, tmr);
@@ -208,7 +208,7 @@ module.exports = class Connection extends EventEmitter {
      * Close the connection to the IRCd after forcing one last line
      */
     end(data, had_error) {
-        var that = this;
+        const that = this;
 
         this.debugOut('Connection.end() connected=' + this.connected + ' with data=' + !!data + ' had_error=' + !!had_error);
 
@@ -254,11 +254,11 @@ module.exports = class Connection extends EventEmitter {
             return;
         }
 
-        var that = this;
-        var lines_per_js_tick = 40;
-        var processed_lines = 0;
-        var line;
-        var message;
+        const that = this;
+        const lines_per_js_tick = 40;
+        let processed_lines = 0;
+        let line;
+        let message;
 
         this.reading_buffer = true;
 
