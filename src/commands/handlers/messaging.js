@@ -64,6 +64,7 @@ const handlers = {
             const ctcp_command = message.slice(1, -1).split(' ')[0].toUpperCase();
             if (ctcp_command === 'ACTION') {
                 handler.emit('action', {
+                    from_server: !command.nick,
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -87,6 +88,7 @@ const handlers = {
                 ));
             } else {
                 handler.emit('ctcp request', {
+                    from_server: !command.nick,
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -101,6 +103,7 @@ const handlers = {
             }
         } else {
             handler.emit('privmsg', {
+                from_server: !command.nick,
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -117,6 +120,7 @@ const handlers = {
         const time = command.getServerTime();
         const target = command.params[0];
         handler.emit('tagmsg', {
+            from_server: !command.nick,
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
