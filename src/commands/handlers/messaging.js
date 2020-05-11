@@ -81,11 +81,6 @@ const handlers = {
                     command.nick,
                     handler.connection.options.version
                 ));
-            } else if (ctcp_command === 'CLIENTINFO') {
-                handler.connection.write(util.format(
-                    'NOTICE %s :\x01CLIENTINFO VERSION\x01',
-                    command.nick
-                ));
             } else {
                 handler.emit('ctcp request', {
                     from_server: !command.nick,
