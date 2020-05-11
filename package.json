@@ -39,14 +39,14 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "test": "npm run lint && npm run coverage",
+    "test": "yarn run lint && yarn run coverage",
     "lint": "eslint src/ examples/ test/",
     "unit-test": "mocha --recursive",
     "coverage": "nyc mocha -R dot test/ --recursive",
-    "build": "npm run build-browser-es5 && npm run build-browser-bundle",
+    "build": "yarn run build-browser-es5 && yarn run build-browser-bundle",
     "build-browser-es5": "babel src/ -d dist/browser/src/ --delete-dir-on-start && shx mv ./dist/browser/src/transports/default_browser.js ./dist/browser/src/transports/default.js && shx rm ./dist/browser/src/transports/net.js",
     "build-browser-bundle": "webpack --config webpack.config.js",
-    "prepare": "npm run build"
+    "prepare": "yarn run build"
   },
   "repository": {
     "type": "git",
