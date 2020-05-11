@@ -137,14 +137,14 @@ module.exports = class Connection extends EventEmitter {
 
             if (should_reconnect) {
                 const reconnect_wait = that.calculateExponentialBackoff();
-                
+
                 that.reconnect_attempts++;
                 that.emit('reconnecting', {
                     attempt: that.reconnect_attempts,
                     max_retries: that.auto_reconnect_max_retries,
                     wait: reconnect_wait
                 });
-                
+
                 that.debugOut('Scheduling reconnect. Attempt: ' + that.reconnect_attempts + '/' + that.auto_reconnect_max_retries + ' Wait: ' + reconnect_wait + 'ms');
                 that.setTimeout(() => that.connect(), reconnect_wait);
             } else {
@@ -152,15 +152,14 @@ module.exports = class Connection extends EventEmitter {
                 that.emit('close', !!err);
                 that.reconnect_attempts = 0;
             }
-
         }
     }
-    
+
     calculateExponentialBackoff() {
         const jitter = 1000 + Math.floor(Math.random() * 5000);
-        const attempts = Math.min(reconnect_attempts, 30);
+        const attempts = Math.min(this.reconnect_attempts, 30);
         const time = 1000 * Math.pow(2, attempts);
-        return Math.min(time, auto_reconnect_max_wait) + jitter;
+        return Math.min(time, this.auto_reconnect_max_wait) + jitter;
     }
 
     addReadBuffer(line) {
