@@ -387,24 +387,52 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     sendMessage(commandName, target, message) {
+        let blockCount = 0;
         const lines = message
             .split(/\r\n|\n|\r/)
-            .filter(i => i);
+            .filter(i => i)
+            .map(line => {
+                // Maximum length of target + message we can send to the IRC server is 500 characters
+                // but we need to leave extra room for the sender prefix so the entire message can
+                // be sent from the IRCd to the target without being truncated.
+                const blocks = [
+                    ...lineBreak(line, {
+                        bytes: this.options.message_max_length,
+                        allowBreakingWords: true,
+                        allowBreakingGraphemes: true,
+                    })
+                ];
 
-        lines.forEach(line => {
-            // Maximum length of target + message we can send to the IRC server is 500 characters
-            // but we need to leave extra room for the sender prefix so the entire message can
-            // be sent from the IRCd to the target without being truncated.
-            const blocks = [
-                ...lineBreak(line, {
-                    bytes: this.options.message_max_length,
-                    allowBreakingWords: true,
-                    allowBreakingGraphemes: true,
-                })
-            ];
+                blockCount += blocks.length;
+                return blocks;
+            });
 
-            blocks.forEach(block => this.raw(commandName, target, block));
+        if (blockCount <= 1 || commandName !== 'PRIVMSG' || !this.network.cap.isEnabled('draft/multiline')) {
+            lines.forEach(blocks => blocks.forEach(block => this.raw(commandName, target, block)));
+            return;
+        }
+
+        const batchTag = Math.floor(Math.random() * 1e10);
+        this.raw(new IrcMessage('BATCH', `+${batchTag}`, 'draft/multiline', target));
+
+        lines.forEach(blocks => {
+            blockCount = 0;
+
+            blocks.forEach(block => {
+                const msg = new IrcMessage(commandName, target, block);
+                msg.tags = {
+                    batch: batchTag
+                };
+
+                if (blockCount++ > 0) {
+                    msg.tags['draft/multiline-concat'] = true;
+                }
+
+                this.raw(msg);
+            });
         });
+
+        this.raw(new IrcMessage('BATCH', `-${batchTag}`));
     }
 
     say(target, message) {

@@ -117,6 +117,7 @@ const handlers = {
             'cap-notify',
             'batch',
             'multi-prefix',
+            'draft/multiline',
             'message-tags',
             'draft/message-tags-0.2',
             'away-notify',
