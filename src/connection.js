@@ -47,8 +47,8 @@ module.exports = class Connection extends EventEmitter {
         options = this.options;
 
         this.auto_reconnect = options.auto_reconnect || false;
-        this.auto_reconnect_wait = options.auto_reconnect_wait || 4000;
         this.auto_reconnect_max_retries = options.auto_reconnect_max_retries || 3;
+        this.auto_reconnect_max_wait = options.auto_reconnect_max_wait || 300000;
 
         if (this.transport) {
             this.clearTimers();
@@ -131,25 +131,30 @@ module.exports = class Connection extends EventEmitter {
             }
 
             if (should_reconnect) {
+                const reconnect_wait = that.calculateExponentialBackoff();
+
                 that.reconnect_attempts++;
                 that.emit('reconnecting', {
                     attempt: that.reconnect_attempts,
                     max_retries: that.auto_reconnect_max_retries,
-                    wait: that.auto_reconnect_wait
+                    wait: reconnect_wait
                 });
+
+                that.debugOut('Scheduling reconnect. Attempt: ' + that.reconnect_attempts + '/' + that.auto_reconnect_max_retries + ' Wait: ' + reconnect_wait + 'ms');
+                that.setTimeout(() => that.connect(), reconnect_wait);
             } else {
                 that.transport.removeAllListeners();
                 that.emit('close', !!err);
                 that.reconnect_attempts = 0;
             }
-
-            if (should_reconnect) {
-                that.debugOut('Scheduling reconnect');
-                that.setTimeout(function() {
-                    that.connect();
-                }, that.auto_reconnect_wait);
-            }
         }
+    }
+
+    calculateExponentialBackoff() {
+        const jitter = 1000 + Math.floor(Math.random() * 5000);
+        const attempts = Math.min(this.reconnect_attempts, 30);
+        const time = 1000 * Math.pow(2, attempts);
+        return Math.min(time, this.auto_reconnect_max_wait) + jitter;
     }
 
     addReadBuffer(line) {
