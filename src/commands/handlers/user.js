@@ -264,6 +264,12 @@ const handlers = {
         cache.secure = true;
     },
 
+    RPL_WHOISCERTFP: function(command, handler) {
+        const cache_key = command.params[1].toLowerCase();
+        const cache = handler.cache('whois.' + cache_key);
+        cache.certfp = command.params[command.params.length - 1];
+    },
+
     RPL_WHOISACCOUNT: function(command, handler) {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
