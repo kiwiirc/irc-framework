@@ -545,6 +545,30 @@ Only on supporting IRC servers with CHGHOST capabilities and 'enable_chghost' se
 
 
 #### Misc
+**motd**
+~~~javascript
+{
+    motd: 'combined motd text which will contain newlines',
+    tags: {},
+}
+~~~
+
+**info**
+~~~javascript
+{
+    info: 'combined info text which will contain newlines (RPL_INFO)',
+    tags: {},
+}
+~~~
+
+**help**
+~~~javascript
+{
+    help: 'combined help text which will contain newlines (RPL_HELPTXT)',
+    tags: {},
+}
+~~~
+
 **batch start**
 
 On capable networks a set of commands may be batched together. The commands will be

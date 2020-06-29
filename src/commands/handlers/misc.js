@@ -212,6 +212,42 @@ const handlers = {
         cache.destroy();
     },
 
+    RPL_INFO: function(command, handler) {
+        const cache = handler.cache('info');
+        if (!cache.info) {
+            cache.info = '';
+        }
+        cache.info += command.params[command.params.length - 1] + '\n';
+    },
+
+    RPL_ENDOFINFO: function(command, handler) {
+        const cache = handler.cache('info');
+        handler.emit('info', {
+            info: cache.info,
+            tags: command.tags
+        });
+        cache.destroy();
+    },
+
+    RPL_HELPSTART: function(command, handler) {
+        const cache = handler.cache('help');
+        cache.help = command.params[command.params.length - 1] + '\n';
+    },
+
+    RPL_HELPTXT: function(command, handler) {
+        const cache = handler.cache('help');
+        cache.help += command.params[command.params.length - 1] + '\n';
+    },
+
+    RPL_ENDOFHELP: function(command, handler) {
+        const cache = handler.cache('help');
+        handler.emit('help', {
+            help: cache.help,
+            tags: command.tags
+        });
+        cache.destroy();
+    },
+
     BATCH: function(command, handler) {
         const batch_start = command.params[0].substr(0, 1) === '+';
         const batch_id = command.params[0].substr(1);
