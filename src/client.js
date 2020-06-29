@@ -493,7 +493,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     invite(channel, nick) {
-        const raw = ['INVITE', channel, nick];
+        const raw = ['INVITE', nick, channel];
         this.raw(raw);
     }
 
