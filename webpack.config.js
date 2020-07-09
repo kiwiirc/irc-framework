@@ -20,6 +20,7 @@ module.exports = {
   },
   plugins: [
     new CompressionPlugin({
+      cache: false,
       test: shouldCompress,
     }),
     new BrotliPlugin({
