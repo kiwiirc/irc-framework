@@ -152,9 +152,19 @@ module.exports = class Connection extends EventEmitter {
     }
 
     addReadBuffer(line) {
-        const message = ircLineParser(line);
+        if (!line) {
+            // Empty line
+            return;
+        }
 
         this.emit('raw', { line: line, from_server: true });
+
+        const message = ircLineParser(line);
+        if (!message) {
+            // A malformed IRC line
+            return;
+        }
+
         this.emit('message', message, line);
     }
 
