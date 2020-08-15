@@ -16,8 +16,8 @@
     "socksjs": "^0.5.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.9.6",
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.9.6",
     "brotli-webpack-plugin": "^1.1.0",
     "chai": "^4.2.0",
