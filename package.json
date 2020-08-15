@@ -30,7 +30,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "iltorb": "^2.4.4",
-    "mocha": "^8.0.1",
+    "mocha": "^8.1.0",
     "nyc": "^15.0.1",
     "shx": "^0.3.2",
     "sinon": "^9.0.2",
