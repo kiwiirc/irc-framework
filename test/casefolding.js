@@ -45,7 +45,9 @@ describe('src/client.js', function() {
 
             expect(client.network.options.CASEMAPPING).to.equal('rfc1459'); // default
 
+            expect(client.caseCompare('abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')).to.be.true;
             expect(client.caseCompare('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')).to.be.true;
+            expect(client.caseCompare('Àtest{}~|', 'ÀTEST[]^\\')).to.be.true;
             expect(client.caseCompare('ÀTEST[]^\\', 'Àtest{}~|')).to.be.true;
             expect(client.caseCompare('Àtest{}~|', 'Àtest{}~|')).to.be.true;
             expect(client.caseCompare('@?A_`#&', '@?a_`#&')).to.be.true;
@@ -55,7 +57,9 @@ describe('src/client.js', function() {
             const client = new IrcClient();
             client.network.options.CASEMAPPING = 'strict-rfc1459';
 
+            expect(client.caseCompare('abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')).to.be.true;
             expect(client.caseCompare('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')).to.be.true;
+            expect(client.caseCompare('Àtest{}^|', 'ÀTEST[]^\\')).to.be.true;
             expect(client.caseCompare('ÀTEST[]^\\', 'Àtest{}^|')).to.be.true;
             expect(client.caseCompare('Àtest{}^|', 'Àtest{}^|')).to.be.true;
             expect(client.caseCompare('@?A^_`#&', '@?a^_`#&')).to.be.true;
@@ -65,7 +69,9 @@ describe('src/client.js', function() {
             const client = new IrcClient();
             client.network.options.CASEMAPPING = 'ascii';
 
+            expect(client.caseCompare('abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')).to.be.true;
             expect(client.caseCompare('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')).to.be.true;
+            expect(client.caseCompare('Àtest[]^\\{}~|#&', 'ÀTEST[]^\\{}~|#&')).to.be.true;
             expect(client.caseCompare('ÀTEST[]^\\{}~|#&', 'Àtest[]^\\{}~|#&')).to.be.true;
             expect(client.caseCompare('ПРИВЕТ, как дела? 👋', 'ПРИВЕТ, как дела? 👋')).to.be.true;
             expect(client.caseCompare('#HELLO1', '#HELLO2')).to.be.false;
