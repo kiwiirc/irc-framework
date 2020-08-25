@@ -755,4 +755,65 @@ module.exports = class IrcClient extends EventEmitter {
     matchAction(match_regex, cb) {
         return this.match(match_regex, cb, 'action');
     }
+
+    caseCompare(string1, string2) {
+        const length = string1.length;
+
+        if (length !== string2.length) {
+            return false;
+        }
+
+        const upperBound = this._getCaseMappingUpperAsciiBound();
+
+        for (let i = 0; i < length; i++) {
+            let charCode1 = string1.charCodeAt(i);
+            let charCode2 = string2.charCodeAt(i);
+
+            // TODO: There's got to be a more clever way of doing these ifs
+            if (charCode1 >= 65 && charCode1 <= upperBound) {
+                charCode1 += 32;
+            }
+
+            if (charCode2 >= 65 && charCode2 <= upperBound) {
+                charCode2 += 32;
+            }
+
+            if (charCode1 !== charCode2) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    caseLower(string) {
+        const upperBound = this._getCaseMappingUpperAsciiBound();
+        let result = '';
+
+        for (let i = 0; i < string.length; i++) {
+            const charCode = string.charCodeAt(i);
+
+            // ASCII character from 'A' to upper bound defined above
+            if (charCode >= 65 && charCode <= upperBound) {
+                // All the relevant uppercase characters are exactly
+                // 32 bytes apart from lowercase ones, so we simply add 32
+                // and get the equivalent character in lower case
+                result += String.fromCharCode(charCode + 32);
+            } else {
+                result += string[i];
+            }
+        }
+
+        return result;
+    }
+
+    _getCaseMappingUpperAsciiBound() {
+        if (this.network.options.CASEMAPPING === 'ascii') {
+            return 90; // 'Z'
+        } else if (this.network.options.CASEMAPPING === 'strict-rfc1459') {
+            return 93; // ']'
+        }
+
+        return 94; // '^' - default casemapping=rfc1459
+    }
 };

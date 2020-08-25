@@ -18,6 +18,7 @@ function NetworkInfo() {
 
     // Network provided options
     this.options = {
+        CASEMAPPING: 'rfc1459',
         PREFIX: [
             { symbol: '~', mode: 'q' },
             { symbol: '&', mode: 'a' },
