@@ -769,7 +769,6 @@ module.exports = class IrcClient extends EventEmitter {
             let charCode1 = string1.charCodeAt(i);
             let charCode2 = string2.charCodeAt(i);
 
-            // TODO: There's got to be a more clever way of doing these ifs
             if (charCode1 >= 65 && charCode1 <= upperBound) {
                 charCode1 += 32;
             }
@@ -799,6 +798,27 @@ module.exports = class IrcClient extends EventEmitter {
                 // 32 bytes apart from lowercase ones, so we simply add 32
                 // and get the equivalent character in lower case
                 result += String.fromCharCode(charCode + 32);
+            } else {
+                result += string[i];
+            }
+        }
+
+        return result;
+    }
+
+    caseUpper(string) {
+        const upperBound = this._getCaseMappingUpperAsciiBound() + 32;
+        let result = '';
+
+        for (let i = 0; i < string.length; i++) {
+            const charCode = string.charCodeAt(i);
+
+            // ASCII character from 'a' to upper bound defined above
+            if (charCode >= 97 && charCode <= upperBound) {
+                // All the relevant lowercase characters are exactly
+                // 32 bytes apart from lowercase ones, so we simply subtract 32
+                // and get the equivalent character in upper case
+                result += String.fromCharCode(charCode - 32);
             } else {
                 result += string[i];
             }

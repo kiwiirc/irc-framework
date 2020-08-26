@@ -38,6 +38,37 @@ describe('src/client.js', function() {
         });
     });
 
+    describe('caseUpper', function() {
+        it('CASEMAPPING=rfc1459', function() {
+            const client = new IrcClient();
+
+            expect(client.network.options.CASEMAPPING).to.equal('rfc1459'); // default
+            expect(client.caseUpper('abcdefghijklmnopqrstuvwxyz')).to.equal('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            expect(client.caseUpper('ÀTEST{}~|')).to.equal('ÀTEST[]^\\');
+            expect(client.caseUpper('ÀTEST[]^\\')).to.equal('ÀTEST[]^\\');
+            expect(client.caseUpper('@?a_`#&')).to.equal('@?A_`#&');
+        });
+
+        it('CASEMAPPING=strict-rfc1459', function() {
+            const client = new IrcClient();
+            client.network.options.CASEMAPPING = 'strict-rfc1459';
+
+            expect(client.caseUpper('abcdefghijklmnopqrstuvwxyz')).to.equal('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            expect(client.caseUpper('ÀTEST{}~|')).to.equal('ÀTEST[]~\\');
+            expect(client.caseUpper('ÀTEST[]^\\')).to.equal('ÀTEST[]^\\');
+            expect(client.caseUpper('@?a^~_`#&')).to.equal('@?A^~_`#&');
+        });
+
+        it('CASEMAPPING=ascii', function() {
+            const client = new IrcClient();
+            client.network.options.CASEMAPPING = 'ascii';
+
+            expect(client.caseUpper('abcdefghijklmnopqrstuvwxyz')).to.equal('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            expect(client.caseUpper('Àtest[]^\\{}~|#&')).to.equal('ÀTEST[]^\\{}~|#&');
+            expect(client.caseUpper('ПРИВЕТ, как дела? 👋')).to.equal('ПРИВЕТ, как дела? 👋');
+        });
+    });
+
     /* eslint-disable no-unused-expressions */
     describe('caseCompare', function() {
         it('CASEMAPPING=rfc1459', function() {
