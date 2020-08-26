@@ -127,13 +127,13 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         client.on('away', function(event) {
-            if (event.nick.toLowerCase() === client.user.nick.toLowerCase()) {
+            if (client.caseCompare(event.nick, client.user.nick)) {
                 client.user.away = true;
             }
         });
 
         client.on('back', function(event) {
-            if (event.nick.toLowerCase() === client.user.nick.toLowerCase()) {
+            if (client.caseCompare(event.nick, client.user.nick)) {
                 client.user.away = false;
             }
         });
@@ -461,7 +461,7 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         function onInviteList(event) {
-            if (event.channel.toLowerCase() === channel.toLowerCase()) {
+            if (client.caseCompare(event.channel, channel)) {
                 unbindEvents();
                 if (typeof cb === 'function') {
                     cb(event);
@@ -524,7 +524,7 @@ module.exports = class IrcClient extends EventEmitter {
         const raw = ['MODE', channel, 'b'];
 
         this.on('banlist', function onBanlist(event) {
-            if (event.channel.toLowerCase() === channel.toLowerCase()) {
+            if (client.caseCompare(event.channel, channel)) {
                 client.removeListener('banlist', onBanlist);
                 if (typeof cb === 'function') {
                     cb(event);
@@ -611,7 +611,7 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         this.on('whois', function onWhois(event) {
-            if (event.nick.toLowerCase() === target.toLowerCase()) {
+            if (client.caseCompare(event.nick, target)) {
                 client.removeListener('whois', onWhois);
                 if (typeof cb === 'function') {
                     cb(event);
@@ -637,7 +637,7 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         this.on('whowas', function onWhowas(event) {
-            if (event.nick.toLowerCase() === target.toLowerCase()) {
+            if (client.caseCompare(event.nick, target)) {
                 client.removeListener('whowas', onWhowas);
                 if (typeof cb === 'function') {
                     cb(event);

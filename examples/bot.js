@@ -17,7 +17,7 @@ function NickservMiddleware() { // eslint-disable-line
             }
         }
 
-        if (command === 'PRIVMSG' && event.params[0].toLowerCase() === 'nickserv') {
+        if (command === 'PRIVMSG' && client.caseCompare(event.params[0], 'nickserv')) {
             // Handle success/retries/failures
         }
 
