@@ -272,8 +272,8 @@ const handlers = {
         const time = command.getServerTime();
 
         handler.emit('invited', {
-            nick: command.params[0],
-            channel: command.params[1],
+            nick: command.params[1],
+            channel: command.params[2],
             time: time,
             tags: command.tags
         });
