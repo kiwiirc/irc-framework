@@ -92,7 +92,6 @@ const generics = {
         channel: 1,
         reason: -1
     },
-
     ERR_BADCHANNELKEY: {
         event: 'irc error',
         error: 'bad_channel_key',
@@ -112,7 +111,13 @@ const generics = {
         error: 'unknown_command',
         command: 1,
         reason: -1
-    }
+    },
+
+    ERR_YOUREBANNEDCREEP: {
+        event: 'irc error',
+        error: 'banned_from_network',
+        reason: -1,
+    },
 };
 
 const generic_keys = Object.keys(generics);
