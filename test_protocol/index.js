@@ -24,35 +24,48 @@ async function runScripts() {
 };
 
 async function runScript(script) {
+    let bot = null;
+
     const r = new TestRunner();
     r.load(script);
+    r.onReset = () => {
+        createNewIrcClient();
+    };
 
     // Start running the test runner before creating the client to be sure all events are caught
     let scriptRun = r.run();
-
-    const bot = new IRC.Client();
-    bot.use(CatchAllMiddleware(r));
-    bot.connect({
-        transport: createTestRunnerTransport(r),
-        host: 'irc.example.net',
-        nick: 'ircfrw_testrunner',
-    });
-    bot.on('registered', function() {
-        bot.join('#prawnsalad');
-    });
-    bot.on('join', event => {
-        if (event.nick === bot.user.nick) {
-            bot.who(event.channel);
-        }
-    });
-
-    if (isMain) {
-        //bot.on('debug', l => console.log('[debug]', l));
-        bot.on('raw', event => console.log(`[raw ${event.from_server?'s':'c'}]`, event.line));
+    createNewIrcClient();
+    await scriptRun;
+    if (bot) {
+        bot.connection.end();
     }
 
-    await scriptRun;
-    bot.connection.end();
+    function createNewIrcClient() {
+        if (bot) {
+            bot.connection.end();
+        }
+
+        bot = new IRC.Client();
+        bot.use(CatchAllMiddleware(r));
+        bot.connect({
+            transport: createTestRunnerTransport(r),
+            host: 'irc.example.net',
+            nick: 'ircfrw_testrunner',
+        });
+        bot.on('registered', function() {
+            bot.join('#prawnsalad');
+        });
+        bot.on('join', event => {
+            if (event.nick === bot.user.nick) {
+                bot.who(event.channel);
+            }
+        });
+
+        if (isMain) {
+            //bot.on('debug', l => console.log('[debug]', l));
+            bot.on('raw', event => console.log(`[raw ${event.from_server?'s':'c'}]`, event.line));
+        }
+    }
 };
 
 // Create an irc-framework transport

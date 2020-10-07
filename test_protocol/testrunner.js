@@ -81,6 +81,7 @@ class TestRunner {
         this.clientBuffer = new Queue();
         this.clientEvents = new Queue();
         this.onSendLine = (line) => {};
+        this.onReset = () => {};
     }
 
     load(input) {
@@ -100,10 +101,8 @@ class TestRunner {
                 return;
             }
 
-            let pos = trimmed.indexOf(' ');
-            let command = trimmed.substr(0, pos).toUpperCase();
-            let args = trimmed.substr(pos).trim();
-            let step = new TestStep(command, args);
+            let [command, args] = splitOnce(trimmed);
+            let step = new TestStep(command.toUpperCase(), args.trim());
             step.sourceLineNum = lineNum+1;
             steps.push(step);
         });
@@ -134,6 +133,13 @@ class TestRunner {
 
     getLineFromClient() {
         return this.clientBuffer.get();
+    }
+
+    async commandRESET(step) {
+        this.vars.clear();
+        if (typeof this.onReset === 'function') {
+            this.onReset();
+        }
     }
 
     async commandREADWAIT(step) {
