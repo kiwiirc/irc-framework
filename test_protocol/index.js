@@ -3,7 +3,17 @@ const TestRunner = require('./testrunner');
 const TestRunnerTransport = require('./testrunnertransport');
 const IRC = require('../src/');
 
-(async function () {
+module.exports = runScripts;
+
+isMain = require.main === module;
+
+(async function() {
+    if (isMain) {
+        await runScripts();
+    }
+})();
+
+async function runScripts() {
     // Run through each test runner script and run it
     let scriptsDir = __dirname + '/test_scripts/';
     let scripts = fs.readdirSync(scriptsDir);
@@ -11,7 +21,7 @@ const IRC = require('../src/');
         let scriptContent = fs.readFileSync(scriptsDir + scripts[i], 'utf8');
         await runScript(scriptContent);
     }
-})();
+};
 
 async function runScript(script) {
     const r = new TestRunner();
@@ -35,8 +45,11 @@ async function runScript(script) {
             bot.who(event.channel);
         }
     });
-    //bot.on('debug', l => console.log('[debug]', l));
-    bot.on('raw', event => console.log(`[raw ${event.from_server?'s':'c'}]`, event.line));
+
+    if (isMain) {
+        //bot.on('debug', l => console.log('[debug]', l));
+        bot.on('raw', event => console.log(`[raw ${event.from_server?'s':'c'}]`, event.line));
+    }
 
     await scriptRun;
     bot.connection.end();
