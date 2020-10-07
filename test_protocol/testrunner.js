@@ -136,8 +136,26 @@ class TestRunner {
         return this.clientBuffer.get();
     }
 
-    async commandREAD(step) {
-        let line = await this.getLineFromClient();
+    async commandREADWAIT(step) {
+        let [commandName] = splitOnce(step.args);
+        return this.commandREAD(step, commandName);
+    }
+
+    async commandREAD(step, waitForCommand='') {
+        let line = '';
+
+        if (waitForCommand) {
+            while (true) {
+                line = await this.getLineFromClient();
+                let [command] = splitOnce(line);
+                if (command.toLowerCase() === waitForCommand.toLowerCase()) {
+                    break;
+                }
+            }
+        } else {
+            line = await this.getLineFromClient();
+        }
+
         let lineParts = line.split(/\ +/);
         let stepParts = step.args.split(/\ +/);
 
