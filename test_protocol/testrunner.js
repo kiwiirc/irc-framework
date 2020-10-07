@@ -104,7 +104,7 @@ class TestRunner {
             let command = trimmed.substr(0, pos).toUpperCase();
             let args = trimmed.substr(pos).trim();
             let step = new TestStep(command, args);
-            step.sourceLineNum = lineNum;
+            step.sourceLineNum = lineNum+1;
             steps.push(step);
         });
         
