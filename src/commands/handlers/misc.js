@@ -187,7 +187,8 @@ const handlers = {
             time: time,
             raw_modes: raw_modes,
             raw_params: raw_params,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -287,7 +288,14 @@ const handlers = {
 
         handler.emit('batch start', emit_obj);
         handler.emit('batch start ' + emit_obj.type, emit_obj);
-        emit_obj.commands.forEach(c => handler.executeCommand(c));
+        emit_obj.commands.forEach((c) => {
+            c.batch = {
+                id: batch_id,
+                type: cache.type,
+                params: cache.params
+            };
+            handler.executeCommand(c);
+        });
         handler.emit('batch end', emit_obj);
         handler.emit('batch end ' + emit_obj.type, emit_obj);
     }
