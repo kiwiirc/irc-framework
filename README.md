@@ -105,3 +105,37 @@ function ExampleMiddleware() {
 var irc_bot = new IRC.Client();
 irc_bot.use(ExampleMiddleware());
 ~~~
+###Build
+yeni  Irc . Müşteri ( { 
+    ID : 'ircbot' , 
+    adı : 'ircbot' , 
+    gecos : 'ircbot' , 
+    kodlayan : 'utf8' , 
+    versiyon : 'IRC-çerçeve node.js' , 
+    enable_chghost : false , 
+    enable_echomessage : false , 
+    auto_reconnect : doğru , 
+    auto_reconnect_wait : 4000 , 
+    auto_reconnect_max_retries : 3 ,
+    ping_interval : 30 , 
+    ping_timeout : 120 , 
+    hesap : { 
+        hesap : 'kullanıcı adı' , 
+        şifre : 'account_password' , 
+    } , 
+    webirc : { 
+        şifre : '' , 
+        kullanıcı adı : '*' , 
+        ana bilgisayar adı : 'users.host.isp.net' , 
+        ip : '1.1.1.1' , 
+        seçenekler : { 
+            güvenli : doğru , 
+            'yerel bağlantı noktası' :6697 , 
+            'uzak bağlantı noktası' : 21726 , 
+        } , 
+    } , 
+    client_certificate : { 
+        private_key : '----- BEGIN RSA PRIVATE KEY ----- [...]' , 
+        sertifika : '----- BEGIN SERTİFİKA ----- [...] ' , 
+    } , 
+} ) ;
