@@ -1,4 +1,7 @@
 # irc-framework
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bcf63150516b4911b2a7f6b0b4db4359)](https://app.codacy.com/gh/turkdevops/irc-framework?utm_source=github.com&utm_medium=referral&utm_content=turkdevops/irc-framework&utm_campaign=Badge_Grade)
+
 A better IRC framework for node.js. For bots and full clients. Read the [documentation](https://github.com/kiwiirc/irc-framework/blob/master/docs/clientapi.md)
 
 ![SL Scan](https://github.com/turkdevops/irc-framework/workflows/SL%20Scan/badge.svg?branch=master)
