@@ -1,5 +1,5 @@
 # irc-framework
-A better IRC framework for node.js. For bots and full clients. Read the [documentation](https://github.com/kiwiirc/irc-framework/blob/master/docs/clientapi.md).
+A better IRC framework for node.js. For bots and full clients. Read the [documentation](https://github.com/kiwiirc/irc-framework/blob/master/docs/clientapi.md)
 
 ![SL Scan](https://github.com/turkdevops/irc-framework/workflows/SL%20Scan/badge.svg?branch=master)
 
