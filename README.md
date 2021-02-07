@@ -2,7 +2,7 @@
 A better IRC framework for node.js. For bots and full clients. Read the [documentation](https://github.com/kiwiirc/irc-framework/blob/master/docs/clientapi.md)
 
 ![SL Scan](https://github.com/turkdevops/irc-framework/workflows/SL%20Scan/badge.svg?branch=master)
-
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9e407202556b4e0b8fa544ccdc3b95a8)](https://www.codacy.com/gh/turkdevops/irc-framework/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=turkdevops/irc-framework&amp;utm_campaign=Badge_Grade)
 
 ### Aims
 * Lightweight
