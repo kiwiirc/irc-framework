@@ -49,7 +49,7 @@ module.exports = class IrcClient extends EventEmitter {
             enable_setname: false,
             enable_echomessage: false,
             auto_reconnect: true,
-            auto_reconnect_wait: 4000,
+            auto_reconnect_max_wait: 300000,
             auto_reconnect_max_retries: 3,
             ping_interval: 30,
             ping_timeout: 120,
