@@ -30,7 +30,7 @@ module.exports = class IrcChannel {
 
         this.users = [];
         irc_client.on('userlist', (event) => {
-            if (event.channel.toLowerCase() === this.name.toLowerCase()) {
+            if (irc_client.caseCompare(event.channel, this.name)) {
                 this.users = event.users;
             }
         });
@@ -42,25 +42,25 @@ module.exports = class IrcChannel {
         irc_client.on('part', (event) => {
             if (event.channel === this.name) {
                 this.users = _.filter(this.users, function(o) {
-                    return o.nick.toLowerCase() !== event.nick.toLowerCase();
+                    return !irc_client.caseCompare(event.nick, o.nick);
                 });
             }
         });
         irc_client.on('kick', (event) => {
             if (event.channel === this.name) {
                 this.users = _.filter(this.users, function(o) {
-                    return o.nick.toLowerCase() !== event.kicked.toLowerCase();
+                    return !irc_client.caseCompare(event.kicked, o.nick);
                 });
             }
         });
         irc_client.on('quit', (event) => {
             this.users = _.filter(this.users, function(o) {
-                return o.nick.toLowerCase() !== event.nick.toLowerCase();
+                return !irc_client.caseCompare(event.nick, o.nick);
             });
         });
         irc_client.on('nick', (event) => {
             _.find(this.users, function(o) {
-                if (o.nick.toLowerCase() === event.nick.toLowerCase()) {
+                if (irc_client.caseCompare(event.nick, o.nick)) {
                     o.nick = event.new_nick;
                     return true;
                 }
@@ -76,7 +76,7 @@ module.exports = class IrcChannel {
             }
             */
 
-            if (event.target.toLowerCase() !== this.name.toLowerCase()) {
+            if (irc_client.caseCompare(event.target, this.name)) {
                 return;
             }
 
@@ -93,7 +93,7 @@ module.exports = class IrcChannel {
                 } else { // It's a user mode
                     // Find the user affected
                     const user = _.find(this.users, u =>
-                        u.nick.toLowerCase() === mode.param.toLowerCase()
+                        irc_client.caseCompare(u.nick, mode.param)
                     );
 
                     if (!user) {
@@ -175,7 +175,7 @@ module.exports = class IrcChannel {
         });
 
         this.irc_client.on('privmsg', (event) => {
-            if (event.target.toLowerCase() === this.name.toLowerCase()) {
+            if (this.irc_client.caseCompare(event.target, this.name)) {
                 read_queue.push(event);
 
                 if (is_reading) {
@@ -189,7 +189,7 @@ module.exports = class IrcChannel {
 
     updateUsers(cb) {
         const updateUserList = (event) => {
-            if (event.channel.toLowerCase() === this.name.toLowerCase()) {
+            if (this.irc_client.caseCompare(event.channel, this.name)) {
                 this.irc_client.removeListener('userlist', updateUserList);
                 if (typeof cb === 'function') { cb(this); }
             }

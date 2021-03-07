@@ -83,7 +83,7 @@ function ExampleMiddleware() {
 			}
 		}
 
-		if (command === 'message' && event.event.nick.toLowerCase() === 'nickserv') {
+		if (command === 'message' && client.caseCompare(event.event.nick, 'nickserv')) {
 			// Handle success/retries/failures
 		}
 

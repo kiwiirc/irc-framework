@@ -72,6 +72,8 @@ const handlers = {
                 handler.network.options.STATUSMSG = handler.network.options.STATUSMSG.split('');
             } else if (option[0] === 'CHANMODES') {
                 handler.network.options.CHANMODES = option[1].split(',');
+            } else if (option[0] === 'CASEMAPPING') {
+                handler.network.options.CASEMAPPING = option[1];
             } else if (option[0] === 'NETWORK') {
                 handler.network.name = option[1];
             } else if (option[0] === 'NAMESX' && !handler.network.cap.isEnabled('multi-prefix')) {
