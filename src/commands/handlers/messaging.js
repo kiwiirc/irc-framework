@@ -42,7 +42,8 @@ const handlers = {
                 message: message,
                 tags: command.tags,
                 time: time,
-                account: command.getTag('account')
+                account: command.getTag('account'),
+                batch: command.batch
             });
         }
     },
@@ -73,7 +74,8 @@ const handlers = {
                     message: message.substring(8, message.length - 1),
                     tags: command.tags,
                     time: time,
-                    account: command.getTag('account')
+                    account: command.getTag('account'),
+                    batch: command.batch
                 });
             } else if (ctcp_command === 'VERSION' && handler.connection.options.version) {
                 handler.connection.write(util.format(
@@ -107,7 +109,8 @@ const handlers = {
                 message: message,
                 tags: command.tags,
                 time: time,
-                account: command.getTag('account')
+                account: command.getTag('account'),
+                batch: command.batch
             });
         }
     },
@@ -121,7 +124,8 @@ const handlers = {
             hostname: command.hostname,
             target: target,
             tags: command.tags,
-            time: time
+            time: time,
+            batch: command.batch
         });
     },
 

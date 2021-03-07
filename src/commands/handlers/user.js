@@ -15,7 +15,8 @@ const handlers = {
             hostname: command.hostname,
             new_nick: command.params[0],
             time: time,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -49,7 +50,8 @@ const handlers = {
             new_ident: command.params[0],
             new_hostname: command.params[1],
             time: time,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -63,7 +65,8 @@ const handlers = {
             hostname: command.hostname,
             new_gecos: command.params[0],
             time: time,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -99,7 +102,7 @@ const handlers = {
             nick: command.params[0],
             message: command.params[1] || '',
             time: time,
-            tags: command.tags,
+            tags: command.tags
         });
     },
 

@@ -143,7 +143,8 @@ const handlers = {
         handler.emit('topic', {
             channel: command.params[1],
             topic: command.params[command.params.length - 1],
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -151,7 +152,8 @@ const handlers = {
         handler.emit('topic', {
             channel: command.params[1],
             topic: '',
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -188,6 +190,7 @@ const handlers = {
         data.channel = channel;
         data.time = command.getServerTime();
         data.tags = command.tags;
+        data.batch = command.batch;
         handler.emit('join', data);
     },
 
@@ -201,7 +204,8 @@ const handlers = {
             channel: command.params[0],
             message: command.params[command.params.length - 1] || '',
             time: time,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -216,7 +220,8 @@ const handlers = {
             channel: command.params[0],
             message: command.params[command.params.length - 1] || '',
             time: time,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
@@ -229,7 +234,8 @@ const handlers = {
             hostname: command.hostname,
             message: command.params[command.params.length - 1] || '',
             time: time,
-            tags: command.tags
+            tags: command.tags,
+            batch: command.batch
         });
     },
 
