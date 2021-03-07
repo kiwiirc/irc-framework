@@ -131,6 +131,15 @@ Create a channel object with the following methods:
 * `part([part_message])`
 * `join([key])`
 
+##### `.caseCompare(string1, string2)`
+Compare two strings using the networks casemapping setting.
+
+##### `.caseUpper(string)`
+Uppercase the characters in string using the networks casemapping setting.
+
+##### `.caseLower(string)`
+Lowercase the characters in string using the networks casemapping setting.
+
 ##### `.match(match_regex, cb[, message_type])`
 Call `cb()` when any incoming message matches `match_regex`.
 
