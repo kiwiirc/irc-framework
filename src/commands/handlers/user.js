@@ -292,6 +292,12 @@ const handlers = {
         cache.country = command.params[command.params.length - 1];
     },
 
+    RPL_WHOISASN: function(command, handler) {
+        const cache_key = command.params[1].toLowerCase();
+        const cache = handler.cache('whois.' + cache_key);
+        cache.asn = command.params[command.params.length - 1];
+    },
+
     RPL_WHOISACTUALLY: function(command, handler) {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
