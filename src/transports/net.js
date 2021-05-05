@@ -7,7 +7,7 @@
 const net = require('net');
 const tls = require('tls');
 const EventEmitter = require('events').EventEmitter;
-const Socks = require('socksjs');
+const SocksClient = require('socks').SocksClient;
 const iconv = require('iconv-lite');
 
 const SOCK_DISCONNECTED = 0;
@@ -66,11 +66,9 @@ module.exports = class Connection extends EventEmitter {
     }
 
     connect() {
-        let socket_connect_event_name = 'connect';
         const options = this.options;
         const ircd_host = options.host;
         const ircd_port = options.port || 6667;
-        let socket = null;
         let sni;
 
         this.debugOut('connect()');
@@ -93,20 +91,41 @@ module.exports = class Connection extends EventEmitter {
 
         if (options.socks) {
             this.debugOut('Using SOCKS proxy');
-            socket = this.socket = Socks.connect({
-                host: ircd_host,
-                port: ircd_port,
-                ssl: options.tls || options.ssl,
-                rejectUnauthorized: options.rejectUnauthorized
-            }, {
-                host: options.socks.host,
-                port: options.socks.port || 8080,
-                user: options.socks.user,
-                pass: options.socks.pass,
-                localAddress: options.outgoing_addr,
-                family: this.getAddressFamily(options.outgoing_addr)
-            });
+            this.socket = null;
+
+            SocksClient.createConnection({
+                proxy: {
+                    host: options.socks.host,
+                    port: options.socks.port || 8080,
+                    type: 5, // Proxy version (4 or 5)
+
+                    userId: options.socks.user,
+                    password: options.socks.pass,
+                },
+
+                command: 'connect',
+
+                destination: {
+                    host: ircd_host,
+                    port: ircd_port,
+                }
+            }).then(info => {
+                let connection = info.socket;
+                if(options.tls || options.ssl) {
+                    connection = tls.connect({
+                        socket: connection,
+                        servername: sni,
+                        rejectUnauthorized: options.rejectUnauthorized,
+                        key: options.client_certificate && options.client_certificate.private_key,
+                        cert: options.client_certificate && options.client_certificate.certificate,
+                    });
+                }
+                this.socket = connection;
+                this.debugOut("SOCKS connection established.");
+                this._onSocketCreate(options, connection);
+            }).catch(this.onSocketError.bind(this));
         } else {
+            let socket = null;
             if (options.tls || options.ssl) {
                 socket = this.socket = tls.connect({
                     servername: sni,
@@ -118,8 +137,6 @@ module.exports = class Connection extends EventEmitter {
                     localAddress: options.outgoing_addr,
                     family: this.getAddressFamily(options.outgoing_addr)
                 });
-
-                socket_connect_event_name = 'secureConnect';
             } else {
                 socket = this.socket = net.connect({
                     host: ircd_host,
@@ -128,16 +145,31 @@ module.exports = class Connection extends EventEmitter {
                     family: this.getAddressFamily(options.outgoing_addr)
                 });
             }
+            this._onSocketCreate(options, socket);
         }
+    }
 
+  _onSocketCreate(options, socket) {
+        this.debugOut("Socket created!");
         if (options.ping_interval > 0 && options.ping_timeout > 0) {
             socket.setTimeout((options.ping_interval + options.ping_timeout) * 1000);
         }
 
         // We need the raw socket connect event.
-        this._bindEvent(socket, 'connect', this.onSocketRawConnected.bind(this));
-        this._bindEvent(socket, socket_connect_event_name, this.onSocketFullyConnected.bind(this));
-
+        // It seems SOCKS gives us the socket in an already open state! Deal with that:
+        if (socket.readyState != "opening") {
+            this.onSocketRawConnected();
+            if (!(socket instanceof tls.TLSSocket)) {
+                this.onSocketFullyConnected();
+            }
+        } else {
+            this._bindEvent(socket, 'connect', this.onSocketRawConnected.bind(this));
+        }
+        this._bindEvent(
+            socket,
+            socket instanceof tls.TLSSocket ? 'secureConnect' : 'connect',
+            this.onSocketFullyConnected.bind(this)
+        );
         this._bindEvent(socket, 'close', this.onSocketClose.bind(this));
         this._bindEvent(socket, 'error', this.onSocketError.bind(this));
         this._bindEvent(socket, 'data', this.onSocketData.bind(this));

@@ -13,7 +13,7 @@
     "lodash": "^4.17.15",
     "middleware-handler": "^0.2.0",
     "regenerator-runtime": "^0.13.5",
-    "socksjs": "^0.5.0"
+    "socks": "^2.6.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -39,14 +39,14 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "test": "yarn run lint && yarn run coverage",
+    "test": "npm run-script lint && npm run-script coverage",
     "lint": "eslint src/ examples/ test/",
     "unit-test": "mocha --recursive",
     "coverage": "nyc mocha -R dot test/ --recursive",
-    "build": "yarn run build-browser-es5 && yarn run build-browser-bundle",
+    "build": "npm run-script build-browser-es5 && npm run-script build-browser-bundle",
     "build-browser-es5": "babel src/ -d dist/browser/src/ --delete-dir-on-start && shx mv ./dist/browser/src/transports/default_browser.js ./dist/browser/src/transports/default.js && shx rm ./dist/browser/src/transports/net.js",
     "build-browser-bundle": "webpack --config webpack.config.js",
-    "prepare": "yarn run build"
+    "prepare": "npm run-script build"
   },
   "repository": {
     "type": "git",
