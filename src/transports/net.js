@@ -111,7 +111,7 @@ module.exports = class Connection extends EventEmitter {
                 }
             }).then(info => {
                 let connection = info.socket;
-                if(options.tls || options.ssl) {
+                if (options.tls || options.ssl) {
                     connection = tls.connect({
                         socket: connection,
                         servername: sni,
@@ -121,7 +121,7 @@ module.exports = class Connection extends EventEmitter {
                     });
                 }
                 this.socket = connection;
-                this.debugOut("SOCKS connection established.");
+                this.debugOut('SOCKS connection established.');
                 this._onSocketCreate(options, connection);
             }).catch(this.onSocketError.bind(this));
         } else {
@@ -149,15 +149,15 @@ module.exports = class Connection extends EventEmitter {
         }
     }
 
-  _onSocketCreate(options, socket) {
-        this.debugOut("Socket created!");
+    _onSocketCreate(options, socket) {
+        this.debugOut('Socket created!');
         if (options.ping_interval > 0 && options.ping_timeout > 0) {
             socket.setTimeout((options.ping_interval + options.ping_timeout) * 1000);
         }
 
         // We need the raw socket connect event.
         // It seems SOCKS gives us the socket in an already open state! Deal with that:
-        if (socket.readyState != "opening") {
+        if (socket.readyState !== 'opening') {
             this.onSocketRawConnected();
             if (!(socket instanceof tls.TLSSocket)) {
                 this.onSocketFullyConnected();
