@@ -65,6 +65,8 @@ const handlers = {
                             mode: matches[1].charAt(j)
                         });
                     }
+                } else if (option[1] === '') {
+                    handler.network.options.PREFIX = [];
                 }
             } else if (option[0] === 'CHANTYPES') {
                 handler.network.options.CHANTYPES = handler.network.options.CHANTYPES.split('');
