@@ -118,6 +118,12 @@ const generics = {
         error: 'banned_from_network',
         reason: -1,
     },
+
+    ERR_MONLISTFULL: {
+        event: 'irc error',
+        error: 'monitor_list_full',
+        reason: -1
+    },
 };
 
 const generic_keys = Object.keys(generics);
