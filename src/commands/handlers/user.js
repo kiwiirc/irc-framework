@@ -373,40 +373,38 @@ const handlers = {
 
     RPL_MONONLINE: function(command, handler) {
         const users = (command.params[command.params.length - 1] || '').split(',');
-        const parsed = _.map(users, user => Helpers.parseMask(user));
+        const parsed = _.map(users, user => Helpers.parseMask(user).nick);
 
         handler.emit('users online', {
-            users: parsed,
+            nicks: parsed,
             tags: command.tags
         });
     },
 
     RPL_MONOFFLINE: function(command, handler) {
         const users = (command.params[command.params.length - 1] || '').split(',');
-        const parsed = _.map(users, user => Helpers.parseMask(user));
 
         handler.emit('users offline', {
-            users: parsed,
+            nicks: users,
             tags: command.tags
         });
     },
 
     RPL_MONLIST: function(command, handler) {
         const cache = handler.cache('monitorList.' + command.params[0]);
-        if (!cache.users) {
-            cache.users = [];
+        if (!cache.nicks) {
+            cache.nicks = [];
         }
 
         const users = command.params[command.params.length - 1].split(',');
-        const parsed = _.map(users, user => Helpers.parseMask(user));
 
-        cache.users.push(...parsed);
+        cache.nicks.push(...users);
     },
 
     RPL_ENDOFMONLIST: function(command, handler) {
         const cache = handler.cache('monitorList.' + command.params[0]);
         handler.emit('monitorList', {
-            users: cache.users || []
+            nicks: cache.nicks || []
         });
 
         cache.destroy();
