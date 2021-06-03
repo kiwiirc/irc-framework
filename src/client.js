@@ -661,6 +661,44 @@ module.exports = class IrcClient extends EventEmitter {
         this.processNextWhoQueue();
     }
 
+    monitorlist(cb) {
+        const client = this;
+        const raw = ['MONITOR', 'L'];
+
+        this.on('monitorList', function onMonitorlist(event) {
+            client.removeListener('monitorList', onMonitorlist);
+            if (typeof cb === 'function') {
+                cb(event);
+            }
+        });
+
+        this.raw(raw);
+    }
+
+    addMonitor(target) {
+        const raw = ['MONITOR', '+', target];
+
+        this.raw(raw);
+    }
+
+    removeMonitor(target) {
+        const raw = ['MONITOR', '-', target];
+
+        this.raw(raw);
+    }
+
+    queryMonitor() {
+        const raw = ['MONITOR', 'S'];
+
+        this.raw(raw);
+    }
+
+    clearMonitor() {
+        const raw = ['MONITOR', 'C'];
+
+        this.raw(raw);
+    }
+
     processNextWhoQueue() {
         const client = this;
 

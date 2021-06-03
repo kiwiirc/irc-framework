@@ -151,3 +151,19 @@ Call `cb()` when an incoming plain message matches `match_regex`.
 
 ##### `.matchAction(match_regex, cb)`
 Call `cb()` when an incoming action message matches `match_regex`.
+
+##### `.addMonitor(target)`
+Add `target` to the list of targets being monitored. `target` can be a comma-separated list of nicks.
+
+##### `.removeMonitor(target)`
+Remove `target` from the list of targets being monitored. `target` can be a comma-separated list of nicks.
+
+##### `.clearMonitor()`
+Clear the list of targets being monitored.
+
+##### `.monitorlist([cb])`
+Return the current list of targets being monitored. Optionally calls `cb()` with the result.
+
+##### `.queryMonitor()`
+Query the current list of targets being monitored. Will emit `users online` with targets that are online,
+and `users offline` with targets that are offline.

@@ -2,7 +2,9 @@
 
 const _ = {
     each: require('lodash/each'),
+    map: require('lodash/map'),
 };
+const Helpers = require('../../helpers');
 
 const handlers = {
     NICK: function(command, handler) {
@@ -367,6 +369,45 @@ const handlers = {
             hostname: command.params[1],
             tags: command.tags
         });
+    },
+
+    RPL_MONONLINE: function(command, handler) {
+        const users = (command.params[command.params.length - 1] || '').split(',');
+        const parsed = _.map(users, user => Helpers.parseMask(user).nick);
+
+        handler.emit('users online', {
+            nicks: parsed,
+            tags: command.tags
+        });
+    },
+
+    RPL_MONOFFLINE: function(command, handler) {
+        const users = (command.params[command.params.length - 1] || '').split(',');
+
+        handler.emit('users offline', {
+            nicks: users,
+            tags: command.tags
+        });
+    },
+
+    RPL_MONLIST: function(command, handler) {
+        const cache = handler.cache('monitorList.' + command.params[0]);
+        if (!cache.nicks) {
+            cache.nicks = [];
+        }
+
+        const users = command.params[command.params.length - 1].split(',');
+
+        cache.nicks.push(...users);
+    },
+
+    RPL_ENDOFMONLIST: function(command, handler) {
+        const cache = handler.cache('monitorList.' + command.params[0]);
+        handler.emit('monitorList', {
+            nicks: cache.nicks || []
+        });
+
+        cache.destroy();
     }
 };
 
