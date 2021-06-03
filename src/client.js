@@ -693,6 +693,12 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw(raw);
     }
 
+    clearMonitor() {
+        const raw = ['MONITOR', 'C'];
+
+        this.raw(raw);
+    }
+
     processNextWhoQueue() {
         const client = this;
 
