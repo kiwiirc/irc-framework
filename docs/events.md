@@ -453,6 +453,14 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
 ~~~
 
 
+**monitorlist**
+~~~javascript
+{
+    nicks: ['nick1', 'nick2', 'nick3']
+}
+~~~
+
+
 **nick in use**
 ~~~javascript
 {
@@ -472,6 +480,14 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
 
 
 **users online**
+~~~javascript
+{
+    nicks: ['nick1', 'nick2', 'nick3'],
+}
+~~~
+
+
+**users offline**
 ~~~javascript
 {
     nicks: ['nick1', 'nick2', 'nick3'],
