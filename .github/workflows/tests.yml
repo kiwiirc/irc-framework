@@ -19,6 +19,9 @@ jobs:
         with:
             node-version: '14.x'
 
+      - name: Prepare Environment
+        run: npm config set scripts-prepend-node-path true
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -32,5 +35,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - run: yarn --frozen-lockfile --non-interactive
-      - run: yarn test
+      - name: Install dependencies
+        run: yarn --frozen-lockfile --non-interactive
+
+      - name: Test
+        run: yarn test
+
+      - name: Lint
+        run: yarn lint
