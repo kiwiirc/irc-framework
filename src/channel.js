@@ -76,7 +76,7 @@ module.exports = class IrcChannel {
             }
             */
 
-            if (irc_client.caseCompare(event.target, this.name)) {
+            if (!irc_client.caseCompare(event.target, this.name)) {
                 return;
             }
 
