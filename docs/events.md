@@ -559,6 +559,19 @@ Only on supporting IRC servers with CHGHOST capabilities and 'enable_chghost' se
 ~~~
 
 
+**user mode**
+
+May be sent upon connecting to a server or when a `MODE <nick>` was executed.
+Corresponds to 'RPL_UMODEIS'.
+~~~javascript
+{
+    nick: 'prawnsalad',
+    raw_modes: '+Ri',
+    tags: {}
+}
+~~~
+
+
 
 #### Misc
 **motd**

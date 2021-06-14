@@ -248,6 +248,13 @@ module.exports = class IrcClient extends EventEmitter {
             }
         });
 
+        commands.on('user mode', function(event) {
+            if (client.user.nick !== event.nick) {
+                return; // This should never happen
+            }
+            client.user.setModes(event.raw_modes);
+        });
+
         commands.on('wholist', function(event) {
             const thisUser = _.find(event.users, { nick: client.user.nick });
             if (thisUser) {

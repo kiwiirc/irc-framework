@@ -30,4 +30,9 @@ module.exports = class User {
             }
         }
     }
+
+    setModes(modestr) {
+        this.modes = new Set([]);
+        this.toggleModes(modestr);
+    }
 };
