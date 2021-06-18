@@ -386,7 +386,7 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw('NICK', nick);
     }
 
-    sendMessage(commandName, target, message) {
+    sendMessage(commandName, target, message, tags) {
         const lines = message
             .split(/\r\n|\n|\r/)
             .filter(i => i);
@@ -403,16 +403,24 @@ module.exports = class IrcClient extends EventEmitter {
                 })
             ];
 
-            blocks.forEach(block => this.raw(commandName, target, block));
+            blocks.forEach(block => {
+                if (tags && Object.keys(tags).length) {
+                    const msg = new IrcMessage(commandName, target, block);
+                    msg.tags = tags;
+                    this.raw(msg);
+                } else {
+                    this.raw(commandName, target, block);
+                }
+            });
         });
     }
 
-    say(target, message) {
-        return this.sendMessage('PRIVMSG', target, message);
+    say(target, message, tags) {
+        return this.sendMessage('PRIVMSG', target, message, tags);
     }
 
-    notice(target, message) {
-        return this.sendMessage('NOTICE', target, message);
+    notice(target, message, tags) {
+        return this.sendMessage('NOTICE', target, message, tags);
     }
 
     tagmsg(target, tags = {}) {
