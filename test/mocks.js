@@ -7,7 +7,7 @@ module.exports = {
     IrcCommandHandler: function(modules) {
         const handlers = {};
         modules.map(function(m) {
-            m({
+            return m({
                 addHandler: function(command, handler) {
                     handlers[command] = handler;
                 }
