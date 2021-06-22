@@ -16,13 +16,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
+          node-version: '14'
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Install
         run: yarn --frozen-lockfile --non-interactive
-
-      - name: Build
-        run: yarn run build
 
       - name: Publish
         run: yarn publish
