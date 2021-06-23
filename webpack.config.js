@@ -19,6 +19,7 @@ module.exports = {
   },
   resolve: {
     fallback: {
+      // Fallback modules for node internals when building with webpack5
       'stream': require.resolve('stream-browserify'),
       'buffer': require.resolve('buffer/'),
       'util': require.resolve('util/'),
@@ -41,9 +42,11 @@ module.exports = {
   },
   devtool: 'source-map',
   performance: {
-    maxEntrypointSize: 307200,
-    maxAssetSize: 307200,
     assetFilter: assetFilename =>
       !assetFilename.match(/\.map(\.(gz|br))?$/),
+
+    // Prevent warnings about entrypoint and asset size
+    maxEntrypointSize: 307200, // 300KiB
+    maxAssetSize: 307200, // 300KiB
   },
 };
