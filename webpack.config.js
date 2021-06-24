@@ -1,7 +1,6 @@
 // webpack v4
 const path = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
-const BrotliPlugin = require('brotli-webpack-plugin');
 
 const shouldCompress = /\.(js|css|html|svg)(\.map)?$/
 
@@ -18,17 +17,24 @@ module.exports = {
   module: {
     rules: [ ]
   },
+  resolve: {
+    fallback: {
+      // Fallback modules for node internals when building with webpack5
+      'stream': require.resolve('stream-browserify'),
+      'buffer': require.resolve('buffer/'),
+      'util': require.resolve('util/'),
+    },
+  },
   plugins: [
     new CompressionPlugin({
-      cache: false,
+      filename: "[path][base].gz",
+      algorithm: "gzip",
       test: shouldCompress,
     }),
-    new BrotliPlugin({
-      asset: '[path].br[query]',
+    new CompressionPlugin({
+      filename: "[path][base].br",
+      algorithm: 'brotliCompress',
       test: shouldCompress,
-      threshold: 10240,
-      minRatio: 0.8,
-      deleteOriginalAssets: false,
     }),
   ],
   optimization: {
@@ -38,5 +44,9 @@ module.exports = {
   performance: {
     assetFilter: assetFilename =>
       !assetFilename.match(/\.map(\.(gz|br))?$/),
+
+    // Prevent warnings about entrypoint and asset size
+    maxEntrypointSize: 307200, // 300KiB
+    maxAssetSize: 307200, // 300KiB
   },
 };
