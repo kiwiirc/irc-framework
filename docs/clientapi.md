@@ -82,11 +82,11 @@ Ping the IRC server to show you're still alive.
 ##### `.changeNick(nick)`
 Attempt to change the clients nick on the network
 
-##### `.say(target, message)`
-Send a message to the target.
+##### `.say(target, message [, tags])`
+Send a message to the target, optionally with tags.
 
-##### `.notice(target, message)`
-Send a notice to the target.
+##### `.notice(target, message [, tags])`
+Send a notice to the target, optionally with tags.
 
 ##### `.tagmsg(target, tags)`
 Send a tagged message without content to the target
