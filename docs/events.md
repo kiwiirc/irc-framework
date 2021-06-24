@@ -427,6 +427,20 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
 ~~~
 
 
+**user info**
+
+May be sent upon connecting to a server or when a `MODE <nick>` was executed.
+Corresponds to 'RPL_UMODEIS'.
+~~~javascript
+  {
+      nick: 'prawnsalad',
+      raw_modes: '+Ri',
+      tags: {}
+  }
+~~~
+
+
+
 **away**
 
 `self` will be `true` if this is a response to your `away` command.

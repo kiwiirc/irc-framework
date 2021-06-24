@@ -359,8 +359,13 @@ const handlers = {
     },
 
     RPL_UMODEIS: function(command, handler) {
-        // handler.connection.umodes = the modes
-        // TODO: this
+        const nick = command.params[0];
+        const raw_modes = command.params[1];
+        handler.emit('user info', {
+            nick: nick,
+            raw_modes: raw_modes,
+            tags: command.tags
+        });
     },
 
     RPL_HOSTCLOAKING: function(command, handler) {
