@@ -13,28 +13,21 @@ chai.use(sinonChai);
 
 describe('src/commands/handlers/misc.js', function() {
     describe('PING handler', function() {
+        const mock = mocks.IrcCommandHandler([misc]);
+        const cmd = new IrcCommand('PING', {
+            params: ['example.com'],
+            tags: {
+                time: '2021-06-29T16:42:00Z',
+            }
+        });
+        mock.handlers.PING(cmd, mock.spies);
+
         it('should respond with the appropriate PONG message', function() {
-            const mock = mocks.IrcCommandHandler([misc]);
-            const cmd = new IrcCommand('PING', {
-                params: ['example.com'],
-                tags: {
-                    time: '2021-06-29T16:42:00Z',
-                }
-            });
-            mock.handlers.PING(cmd, mock.spies);
             expect(mock.spies.connection.write).to.have.been.calledOnce;
             expect(mock.spies.connection.write).to.have.been.calledWith('PONG example.com');
         });
 
         it('should emit the appropriate PING event', function() {
-            const mock = mocks.IrcCommandHandler([misc]);
-            const cmd = new IrcCommand('PING', {
-                params: ['one.example.com'],
-                tags: {
-                    time: '2021-06-29T16:42:00Z',
-                }
-            });
-            mock.handlers.PING(cmd, mock.spies);
             expect(mock.spies.emit).to.have.been.calledOnce;
             expect(mock.spies.emit).to.have.been.calledWith('ping', {
                 message: undefined,

@@ -22,7 +22,7 @@ const handlers = {
         // to an IRC server, not now(). Send a PING so that we can get a reliable time from PONG
         if (handler.network.cap.isEnabled('server-time')) {
             // Ping to try get a server-time in its response as soon as possible
-            handler.connection.write('PING ' + Date.now());
+            handler.connection.write('PING kiwitime-' + Date.now());
         }
 
         handler.emit('registered', {

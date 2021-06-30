@@ -311,54 +311,50 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     startPeriodicPing() {
-        const that = this;
+        const client = this;
         let ping_timer = null;
 
-        if (that.options.ping_interval <= 0) {
+        if (client.options.ping_interval <= 0) {
             return;
         }
 
         // Constantly ping the server for lag and time syncing functions
         function pingServer() {
-            that.ping();
+            client.ping();
         }
 
-        this.command_handler.on('pong', function(event) {
-            // Browsers have started throttling looped timeout callbacks
-            // using the pong event to set the next ping breaks this loop
-            if (that.options.ping_interval <= 0) {
-                return;
-            }
-            if (!event.message || event.message.indexOf('kiwitime-') !== 0) {
-                // We are only interested in PONG's that include kiwitime
-                return;
-            }
-            that.connection.clearTimeout(ping_timer);
-            ping_timer = that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
-        });
+        function resetPingTimer() {
+            client.connection.clearTimeout(ping_timer);
+            ping_timer = client.connection.setTimeout(pingServer, client.options.ping_interval * 1000);
+        }
 
-        pingServer();
+        // Browsers have started throttling looped timeout callbacks
+        // using the pong event to set the next ping breaks this loop
+        this.command_handler.on('pong', resetPingTimer);
+
+        // Start timer
+        resetPingTimer();
     }
 
     startPingTimeoutTimer() {
-        const that = this;
+        const client = this;
         let timeout_timer = null;
 
-        if (that.options.ping_timeout <= 0) {
+        if (client.options.ping_timeout <= 0) {
             return;
         }
 
         // Data from the server was detected so restart the timeout
         function resetPingTimeoutTimer() {
-            that.connection.clearTimeout(timeout_timer);
-            timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout * 1000);
+            client.connection.clearTimeout(timeout_timer);
+            timeout_timer = client.connection.setTimeout(pingTimeout, client.options.ping_timeout * 1000);
         }
 
         function pingTimeout() {
-            that.debugOut('Ping timeout (' + that.options.ping_timeout + ' seconds)');
-            that.emit('ping timeout');
-            const end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
-            that.connection.end(end_msg, true);
+            client.debugOut('Ping timeout (' + client.options.ping_timeout + ' seconds)');
+            client.emit('ping timeout');
+            const end_msg = client.rawString('QUIT', 'Ping timeout (' + client.options.ping_timeout + ' seconds)');
+            client.connection.end(end_msg, true);
         }
 
         this.resetPingTimeoutTimer = resetPingTimeoutTimer;
