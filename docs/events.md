@@ -107,6 +107,26 @@ A valid raw line sent or received from the IRC server.
 ~~~
 
 
+**unknown command**
+
+This event gets emitted whenever no handler is registered for an IRC commmand.
+The payload is an instance of an IrcCommand.
+~~~javascript
+IrcCommand {
+  command: '250',
+  params: [
+    'prawnsbot',
+    'Highest connection count: 2375 (2374 clients) (27822 connections received)'
+  ],
+  tags: {},
+  prefix: 'copper.libera.chat',
+  nick: '',
+  ident: '',
+  hostname: 'copper.libera.chat'
+}
+~~~
+
+
 **debug**
 
 Debugging messages.
