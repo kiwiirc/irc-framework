@@ -268,9 +268,12 @@ const handlers = {
         const b = Buffer.from(auth_str, 'utf8');
         let b64 = b.toString('base64');
 
-        while (b64.length >= 400) {
-            handler.connection.write('AUTHENTICATE ' + b64.slice(0, 399));
-            b64 = b64.slice(399);
+        // https://ircv3.net/specs/extensions/sasl-3.1#the-authenticate-command
+        const singleAuthCommandLength = 400;
+
+        while (b64.length >= singleAuthCommandLength) {
+            handler.connection.write('AUTHENTICATE ' + b64.slice(0, singleAuthCommandLength));
+            b64 = b64.slice(singleAuthCommandLength);
         }
         if (b64.length > 0) {
             handler.connection.write('AUTHENTICATE ' + b64);
