@@ -266,18 +266,17 @@ const handlers = {
             saslAuth.account + '\0' +
             saslAuth.password;
         const b = Buffer.from(auth_str, 'utf8');
-        let b64 = b.toString('base64');
+        const b64 = b.toString('base64');
 
         // https://ircv3.net/specs/extensions/sasl-3.1#the-authenticate-command
         const singleAuthCommandLength = 400;
+        let sliceOffset = 0;
 
-        while (b64.length >= singleAuthCommandLength) {
-            handler.connection.write('AUTHENTICATE ' + b64.slice(0, singleAuthCommandLength));
-            b64 = b64.slice(singleAuthCommandLength);
+        while (b64.length > sliceOffset) {
+            handler.connection.write('AUTHENTICATE ' + b64.substr(sliceOffset, singleAuthCommandLength));
+            sliceOffset += singleAuthCommandLength;
         }
-        if (b64.length > 0) {
-            handler.connection.write('AUTHENTICATE ' + b64);
-        } else {
+        if (b64.length === sliceOffset) {
             handler.connection.write('AUTHENTICATE +');
         }
     },
