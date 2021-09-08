@@ -7,6 +7,7 @@ Inherits [EventEmitter](https://nodejs.org/api/events.html). Read more on the Ev
 new Irc.Client({
     nick: 'ircbot',
     username: 'ircbot',
+    tls: false,
     gecos: 'ircbot',
     encoding: 'utf8',
     version: 'node.js irc-framework',
