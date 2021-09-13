@@ -404,7 +404,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     ping(message) {
-        this.raw('PING', message || Date.now());
+        this.raw('PING', message || Date.now().toString());
     }
 
     changeNick(nick) {
