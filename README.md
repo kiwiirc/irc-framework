@@ -13,6 +13,7 @@ A better IRC framework for node.js. For bots and full clients. Read the [documen
 
 #### A simple and low-boilerplate framework to build IRC bots.
 ~~~javascript
+const IRC = require('irc-framework')
 var bot = new IRC.Client();
 bot.connect({
 	host: 'irc.freenode.net',
@@ -41,6 +42,7 @@ bot.matchMessage(/^hi/, function(event) {
 
 #### Channel/buffer objects. Great for building clients
 ~~~javascript
+const IRC = require('irc-framework')
 var bot = new IRC.Client();
 bot.connect({
 	host: 'irc.freenode.net',
