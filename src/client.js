@@ -102,7 +102,7 @@ module.exports = class IrcClient extends EventEmitter {
         client.connection.on('socket connected', function() {
             client.emit('socket connected');
             client.registerToNetwork();
-            client.startPeriodicPing();
+            client.startPingTimeoutTimer();
         });
 
         client.connection.on('connecting', function() {
@@ -124,6 +124,11 @@ module.exports = class IrcClient extends EventEmitter {
 
                 client.command_handler.dispatch(message);
             });
+        });
+
+        client.on('registered', function(event) {
+            // PING is not a valid command until after registration
+            client.startPeriodicPing();
         });
 
         client.on('away', function(event) {
@@ -306,34 +311,54 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     startPeriodicPing() {
-        const that = this;
-        let timeout_timer = null;
+        const client = this;
+        let ping_timer = null;
 
-        if (that.options.ping_interval <= 0 || that.options.ping_timeout <= 0) {
+        if (client.options.ping_interval <= 0) {
             return;
         }
 
         // Constantly ping the server for lag and time syncing functions
         function pingServer() {
-            that.ping();
-            that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
+            client.ping();
+        }
+
+        function resetPingTimer() {
+            client.connection.clearTimeout(ping_timer);
+            ping_timer = client.connection.setTimeout(pingServer, client.options.ping_interval * 1000);
+        }
+
+        // Browsers have started throttling looped timeout callbacks
+        // using the pong event to set the next ping breaks this loop
+        this.command_handler.on('pong', resetPingTimer);
+
+        // Start timer
+        resetPingTimer();
+    }
+
+    startPingTimeoutTimer() {
+        const client = this;
+        let timeout_timer = null;
+
+        if (client.options.ping_timeout <= 0) {
+            return;
         }
 
         // Data from the server was detected so restart the timeout
         function resetPingTimeoutTimer() {
-            that.connection.clearTimeout(timeout_timer);
-            timeout_timer = that.connection.setTimeout(pingTimeout, that.options.ping_timeout * 1000);
+            client.connection.clearTimeout(timeout_timer);
+            timeout_timer = client.connection.setTimeout(pingTimeout, client.options.ping_timeout * 1000);
         }
 
         function pingTimeout() {
-            that.debugOut('Ping timeout (' + that.options.ping_timeout + ' seconds)');
-            that.emit('ping timeout');
-            const end_msg = that.rawString('QUIT', 'Ping timeout (' + that.options.ping_timeout + ' seconds)');
-            that.connection.end(end_msg, true);
+            client.debugOut('Ping timeout (' + client.options.ping_timeout + ' seconds)');
+            client.emit('ping timeout');
+            const end_msg = client.rawString('QUIT', 'Ping timeout (' + client.options.ping_timeout + ' seconds)');
+            client.connection.end(end_msg, true);
         }
 
         this.resetPingTimeoutTimer = resetPingTimeoutTimer;
-        that.connection.setTimeout(pingServer, that.options.ping_interval * 1000);
+        this.resetPingTimeoutTimer();
     }
 
     // Gets overridden with a function in startPeriodicPing(). Only set here for completeness.
@@ -379,7 +404,7 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     ping(message) {
-        this.raw('PING', message || 'kiwitime-' + Date.now());
+        this.raw('PING', message || Date.now().toString());
     }
 
     changeNick(nick) {
