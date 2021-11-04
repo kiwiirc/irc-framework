@@ -53,6 +53,14 @@ const handlers = {
             option = Helpers.splitOnce(options[i], '=');
             option[0] = option[0].toUpperCase();
 
+            // https://datatracker.ietf.org/doc/html/draft-brocklesby-irc-isupport-03
+            // 2. Protocol outline [page 4]
+            if (option[1]) {
+                option[1] = option[1].replace(/\\x([0-9A-Fa-f]{2})/g, (match, hex) => {
+                    return String.fromCharCode(parseInt(hex, 16));
+                });
+            }
+
             handler.network.options[option[0]] = (typeof option[1] !== 'undefined') ? option[1] : true;
 
             if (option[0] === 'PREFIX') {
