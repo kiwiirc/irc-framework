@@ -28,8 +28,12 @@ module.exports = class Connection extends EventEmitter {
         this.debugOut('writeLine() socket=' + (this.socket ? 'yes' : 'no') + ' connected=' + this.connected);
 
         if (this.socket && this.connected) {
-            this.socket.send(line, cb);
-        } else if (cb) {
+            this.socket.send(line);
+        }
+
+        // Websocket.send() does not support callbacks
+        // call the callback in the next tick instead
+        if (cb) {
             setTimeout(cb, 0);
         }
     }
