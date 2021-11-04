@@ -18,6 +18,9 @@ module.exports = class Connection extends EventEmitter {
 
         this.encoding = 'utf8';
         this.incoming_buffer = '';
+
+        this.protocol_fallback = false;
+        this.protocol = options.websocket_protocol;
     }
 
     isConnected() {
@@ -55,13 +58,13 @@ module.exports = class Connection extends EventEmitter {
         ws_addr += options.port ? ':' + options.port : '';
         ws_addr += options.path ? options.path : '';
 
-        socket = this.socket = new WebSocket(ws_addr);
+        socket = this.socket = new WebSocket(ws_addr, this.protocol);
 
         socket.onopen = function() {
             that.onSocketFullyConnected();
         };
-        socket.onclose = function() {
-            that.onSocketClose();
+        socket.onclose = function(event) {
+            that.onSocketClose(event);
         };
         socket.onmessage = function(event) {
             that.onSocketMessage(event.data);
@@ -80,13 +83,33 @@ module.exports = class Connection extends EventEmitter {
         this.emit('open');
     }
 
-    onSocketClose() {
+    onSocketClose(event) {
+        const possible_protocol_error = !this.connected && event.code === 1006;
+        if (possible_protocol_error && !this.protocol_fallback && this.protocol !== undefined) {
+            // First connection attempt failed possibly due to mismatched protocol,
+            //  retry the connection with undefined protocol
+            // After this attempt, normal reconnect functions apply which will
+            //  reconstruct this websocket, resetting these variables
+            this.debugOut('socketClose() possible protocol error, retrying with no protocol');
+            this.protocol_fallback = true;
+            this.protocol = undefined;
+            this.connect();
+            return;
+        }
+
         this.debugOut('socketClose()');
         this.connected = false;
         this.emit('close', this.last_socket_error ? this.last_socket_error : false);
     }
 
     onSocketMessage(data) {
+        if (typeof data !== 'string') {
+            this.last_socket_error = new Error('Websocket received unexpected binary data, closing the connection');
+            this.debugOut('socketData() ' + this.last_socket_error.message);
+            this.close();
+            return;
+        }
+
         this.debugOut('socketData() ' + JSON.stringify(data));
 
         const that = this;
