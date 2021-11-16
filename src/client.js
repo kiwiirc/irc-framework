@@ -270,7 +270,7 @@ module.exports = class IrcClient extends EventEmitter {
 
         commands.on('displayed host', function(event) {
             if (client.user.nick === event.nick) {
-                client.user.host = event.host;
+                client.user.host = event.hostname;
             }
         });
 
