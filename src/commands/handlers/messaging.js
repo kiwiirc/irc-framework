@@ -10,12 +10,15 @@ const handlers = {
     NOTICE: function(command, handler) {
         const time = command.getServerTime();
         const message = command.params[command.params.length - 1];
+        const is_echo = handler.network.cap.isEnabled('echo-message') && command.nick === handler.user.nick;
+
         let target = command.params[0];
         let target_group;
 
         if ((message.charAt(0) === '\x01') && (message.charAt(message.length - 1) === '\x01')) {
             // It's a CTCP response
             handler.emit('ctcp response', {
+                is_echo: is_echo,
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -34,6 +37,7 @@ const handlers = {
 
             handler.emit('notice', {
                 from_server: !command.nick,
+                is_echo: is_echo,
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -51,6 +55,8 @@ const handlers = {
     PRIVMSG: function(command, handler) {
         const time = command.getServerTime();
         const message = command.params[command.params.length - 1];
+        const is_echo = handler.network.cap.isEnabled('echo-message') && command.nick === handler.user.nick;
+
         let target = command.params[0];
         let target_group;
 
@@ -66,6 +72,7 @@ const handlers = {
             if (ctcp_command === 'ACTION') {
                 handler.emit('action', {
                     from_server: !command.nick,
+                    is_echo: is_echo,
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -77,7 +84,7 @@ const handlers = {
                     account: command.getTag('account'),
                     batch: command.batch
                 });
-            } else if (ctcp_command === 'VERSION' && handler.connection.options.version) {
+            } else if (ctcp_command === 'VERSION' && !is_echo && handler.connection.options.version) {
                 handler.connection.write(util.format(
                     'NOTICE %s :\x01VERSION %s\x01',
                     command.nick,
@@ -86,6 +93,7 @@ const handlers = {
             } else {
                 handler.emit('ctcp request', {
                     from_server: !command.nick,
+                    is_echo: is_echo,
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
@@ -101,6 +109,7 @@ const handlers = {
         } else {
             handler.emit('privmsg', {
                 from_server: !command.nick,
+                is_echo: is_echo,
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
@@ -117,8 +126,11 @@ const handlers = {
     TAGMSG: function(command, handler) {
         const time = command.getServerTime();
         const target = command.params[0];
+        const is_echo = handler.network.cap.isEnabled('echo-message') && command.nick === handler.user.nick;
+
         handler.emit('tagmsg', {
             from_server: !command.nick,
+            is_echo: is_echo,
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,

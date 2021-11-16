@@ -79,7 +79,7 @@ module.exports = class IrcClient extends EventEmitter {
         client.network = new NetworkInfo();
         client.user = new User();
 
-        client.command_handler = new IrcCommandHandler(client.connection, client.network);
+        client.command_handler = new IrcCommandHandler(client.connection, client.network, client.user);
 
         client.addCommandHandlerListeners();
 
