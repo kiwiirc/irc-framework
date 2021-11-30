@@ -83,6 +83,12 @@ const handlers = {
                     command.nick,
                     handler.connection.options.version
                 ));
+            } else if (ctcp_command === 'UA' && handler.connection.options.ua) {
+                handler.connection.write(util.format(
+                    'NOTICE %s :\x01UA %s\x01',
+                    command.nick,
+                    handler.connection.options.ua
+                ));
             } else {
                 handler.emit('ctcp request', {
                     from_server: !command.nick,

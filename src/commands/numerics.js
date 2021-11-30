@@ -100,6 +100,8 @@ module.exports = {
     '344': 'RPL_WHOISCOUNTRY',
     '346': 'RPL_INVITELIST',
     '347': 'RPL_ENDOFINVITELIST',
+    '348': 'RPL_EXCEPTLIST',
+    '349': 'RPL_ENDOFEXCEPTLIST',
     '352': 'RPL_WHOREPLY',
     '353': 'RPL_NAMEREPLY',
     '354': 'RPL_WHOSPCRPL',
@@ -147,6 +149,7 @@ module.exports = {
     '484': 'ERR_ISCHANSERVICE',
     '485': 'ERR_ISREALSERVICE',
     '491': 'ERR_NOOPERHOST',
+    '531': 'ERR_CANTSENDTOUSER',
     /* InspIRCD specific https://github.com/inspircd/inspircd-contrib/blob/master/3.0/m_asn.cpp */
     '569': 'RPL_WHOISASN',
     '670': 'RPL_STARTTLS',
