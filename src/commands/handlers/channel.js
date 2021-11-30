@@ -174,6 +174,31 @@ const handlers = {
             tags: command.tags
         });
     },
+    
+    RPL_EXCEPTLIST: function(command, handler) {
+        const cache = handler.cache('exceptlist.' + command.params[1]);
+        if (!cache.excepts) {
+            cache.excepts = [];
+        }
+
+        cache.excepts.push({
+            channel: command.params[1],
+            banned: command.params[2],
+            banned_by: command.params[3],
+            banned_at: command.params[4]
+        });
+    },
+
+
+    RPL_ENDOFEXCEPTLIST: function(command, handler) {
+        const cache = handler.cache('exceptlist.' + command.params[1]);
+        handler.emit('exceptlist', {
+            channel: command.params[1],
+            excepts: cache.excepts || []
+        });
+
+        cache.destroy();
+    },
 
     JOIN: function(command, handler) {
         let channel;

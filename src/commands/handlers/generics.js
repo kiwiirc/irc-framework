@@ -113,10 +113,24 @@ const generics = {
         reason: -1
     },
 
+    ERR_ERRONEOUSNICKNAME: {
+        event: 'irc error',
+        error: 'nickname_is_banned',
+        channel: 1,
+        reason: -1
+    },
+    
     ERR_YOUREBANNEDCREEP: {
         event: 'irc error',
         error: 'banned_from_network',
         reason: -1,
+    },
+
+    ERR_CANTSENDTOUSER: {
+        event: '531',
+        error: '531',
+        nick: 1,
+        reason: -1
     },
 
     ERR_MONLISTFULL: {
