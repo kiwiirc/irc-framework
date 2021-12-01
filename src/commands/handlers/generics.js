@@ -6,7 +6,7 @@ Generic IRC events. Simply passing selected IRC params into javascript objects
 
 Example
     ERROR: {              IRC Command to match
-        event: 'error',   Event name to trigger on the cleint instance
+        event: 'error',   Event name to trigger on the client instance
         reason: -1        Property on the triggered event, and which IRC param to should contain
     },
 */
@@ -113,24 +113,10 @@ const generics = {
         reason: -1
     },
 
-    ERR_ERRONEOUSNICKNAME: {
-        event: 'irc error',
-        error: 'nickname_is_banned',
-        channel: 1,
-        reason: -1
-    },
-    
     ERR_YOUREBANNEDCREEP: {
         event: 'irc error',
         error: 'banned_from_network',
         reason: -1,
-    },
-
-    ERR_CANTSENDTOUSER: {
-        event: '531',
-        error: '531',
-        nick: 1,
-        reason: -1
     },
 
     ERR_MONLISTFULL: {

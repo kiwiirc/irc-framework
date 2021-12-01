@@ -86,7 +86,8 @@ const handlers = {
         const cache = handler.cache('names.' + normalized_channel);
         handler.emit('userlist', {
             channel: command.params[1],
-            users: cache.members || []
+            users: cache.members || [],
+            tags: command.tags
         });
         cache.destroy();
     },
@@ -112,7 +113,8 @@ const handlers = {
         const cache = handler.cache('inviteList.' + normalized_channel);
         handler.emit('inviteList', {
             channel: command.params[1],
-            invites: cache.invites || []
+            invites: cache.invites || [],
+            tags: command.tags
         });
 
         cache.destroy();
@@ -139,7 +141,34 @@ const handlers = {
         const cache = handler.cache('banlist.' + normalized_channel);
         handler.emit('banlist', {
             channel: command.params[1],
-            bans: cache.bans || []
+            bans: cache.bans || [],
+            tags: command.tags
+        });
+
+        cache.destroy();
+    },
+
+    RPL_EXCEPTLIST: function(command, handler) {
+        const cache = handler.cache('exceptlist.' + command.params[1]);
+        if (!cache.excepts) {
+            cache.excepts = [];
+        }
+
+        cache.excepts.push({
+            channel: command.params[1],
+            except: command.params[2],
+            except_by: command.params[3],
+            except_at: command.params[4],
+            tags: command.tags
+        });
+    },
+
+    RPL_ENDOFEXCEPTLIST: function(command, handler) {
+        const cache = handler.cache('exceptlist.' + command.params[1]);
+        handler.emit('exceptlist', {
+            channel: command.params[1],
+            excepts: cache.excepts || [],
+            tags: command.tags
         });
 
         cache.destroy();
@@ -173,31 +202,6 @@ const handlers = {
             when: command.params[3],
             tags: command.tags
         });
-    },
-    
-    RPL_EXCEPTLIST: function(command, handler) {
-        const cache = handler.cache('exceptlist.' + command.params[1]);
-        if (!cache.excepts) {
-            cache.excepts = [];
-        }
-
-        cache.excepts.push({
-            channel: command.params[1],
-            banned: command.params[2],
-            banned_by: command.params[3],
-            banned_at: command.params[4]
-        });
-    },
-
-
-    RPL_ENDOFEXCEPTLIST: function(command, handler) {
-        const cache = handler.cache('exceptlist.' + command.params[1]);
-        handler.emit('exceptlist', {
-            channel: command.params[1],
-            excepts: cache.excepts || []
-        });
-
-        cache.destroy();
     },
 
     JOIN: function(command, handler) {
