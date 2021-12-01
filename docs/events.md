@@ -139,7 +139,10 @@ Debugging messages.
 ~~~javascript
 {
     channel: '#channel',
-    modes: [ ... ]
+    modes: [ ... ],
+    raw_modes: '+o',
+    raw_params: 'prawnsalad',
+    tags: { ... }
 }
 ~~~
 
@@ -180,7 +183,8 @@ Debugging messages.
 ~~~javascript
 {
     channel: '#channel',
-    created_at: 000000000
+    created_at: 000000000,
+    tags: { ... }
 }
 ~~~
 
@@ -189,16 +193,8 @@ Debugging messages.
 ~~~javascript
 {
     channel: '#channel',
-    url: 'http://channel-website.com/'
-}
-~~~
-
-
-**userlist**
-~~~javascript
-{
-    channel: '#channel',
-    users: [ ... ]
+    url: 'http://channel-website.com/',
+    tags: { ... }
 }
 ~~~
 
@@ -207,7 +203,28 @@ Debugging messages.
 ~~~javascript
 {
     target: '#channel',
-    users: [ ... ]
+    users: [ ... ],
+    tags: { ... }
+}
+~~~
+
+
+**userlist**
+~~~javascript
+{
+    channel: '#channel',
+    users: [ ... ],
+    tags: { ... }
+}
+~~~
+
+
+**invitelist**
+~~~javascript
+{
+    channel: '#channel',
+    invites: [ ... ],
+    tags: { ... }
 }
 ~~~
 
@@ -216,7 +233,18 @@ Debugging messages.
 ~~~javascript
 {
     channel: '#channel',
-    bans: [ ... ]
+    bans: [ ... ],
+    tags: { ... }
+}
+~~~
+
+
+**exceptlist**
+~~~javascript
+{
+    channel: '#channel',
+    excepts: [ ... ],
+    tags: { ... }
 }
 ~~~
 
