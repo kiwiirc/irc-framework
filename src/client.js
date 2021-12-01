@@ -26,6 +26,7 @@ module.exports = class IrcClient extends EventEmitter {
 
         this.request_extra_caps = [];
         this.options = options || null;
+        this.ping_timer = null;
 
         this.createStructure();
     }
@@ -313,7 +314,6 @@ module.exports = class IrcClient extends EventEmitter {
 
     startPeriodicPing() {
         const client = this;
-        let ping_timer = null;
 
         if (client.options.ping_interval <= 0) {
             return;
@@ -325,8 +325,8 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         function resetPingTimer() {
-            client.connection.clearTimeout(ping_timer);
-            ping_timer = client.connection.setTimeout(pingServer, client.options.ping_interval * 1000);
+            client.connection.clearTimeout(client.ping_timer);
+            client.ping_timer = client.connection.setTimeout(pingServer, client.options.ping_interval * 1000);
         }
 
         // Browsers have started throttling looped timeout callbacks
