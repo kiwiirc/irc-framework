@@ -331,7 +331,12 @@ module.exports = class IrcClient extends EventEmitter {
 
         // Browsers have started throttling looped timeout callbacks
         // using the pong event to set the next ping breaks this loop
-        this.command_handler.on('pong', resetPingTimer);
+        client.command_handler.on('pong', resetPingTimer);
+
+        // Socket has disconnected, remove 'pong' listener until next 'registered' event
+        client.connection.once('socket close', () => {
+            client.command_handler.off('pong', resetPingTimer);
+        });
 
         // Start timer
         resetPingTimer();
