@@ -291,7 +291,7 @@ const handlers = {
     RPL_WHOISCOUNTRY: function(command, handler) {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
-        cache.country = command.params[command.params.length - 2]; //compatible for UnrealIRCd 6.0.0 which returns for example "FR" instead of "is connecting from France"
+        cache.country = command.params[2]; //compatible for UnrealIRCd 6.0.0 which returns for example "FR" instead of "is connecting from France"
     },
 
     RPL_WHOISASN: function(command, handler) {
