@@ -7,7 +7,7 @@ const NetworkInfo = require('../src/networkinfo');
 const IrcCommandHandler = require('../src/commands/handler');
 
 function newMockClient() {
-    const handler = new IrcCommandHandler(undefined, new NetworkInfo());
+    const handler = new IrcCommandHandler({ network: new NetworkInfo() });
     return handler;
 }
 

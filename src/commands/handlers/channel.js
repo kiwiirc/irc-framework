@@ -43,7 +43,8 @@ const handlers = {
 
     RPL_NAMEREPLY: function(command, handler) {
         const members = command.params[command.params.length - 1].split(' ');
-        const cache = handler.cache('names.' + command.params[2]);
+        const normalized_channel = handler.client.caseLower(command.params[2]);
+        const cache = handler.cache('names.' + normalized_channel);
 
         if (!cache.members) {
             cache.members = [];
@@ -81,7 +82,8 @@ const handlers = {
     },
 
     RPL_ENDOFNAMES: function(command, handler) {
-        const cache = handler.cache('names.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('names.' + normalized_channel);
         handler.emit('userlist', {
             channel: command.params[1],
             users: cache.members || []
@@ -90,7 +92,8 @@ const handlers = {
     },
 
     RPL_INVITELIST: function(command, handler) {
-        const cache = handler.cache('inviteList.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('inviteList.' + normalized_channel);
         if (!cache.invites) {
             cache.invites = [];
         }
@@ -105,7 +108,8 @@ const handlers = {
     },
 
     RPL_ENDOFINVITELIST: function(command, handler) {
-        const cache = handler.cache('inviteList.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('inviteList.' + normalized_channel);
         handler.emit('inviteList', {
             channel: command.params[1],
             invites: cache.invites || []
@@ -115,7 +119,8 @@ const handlers = {
     },
 
     RPL_BANLIST: function(command, handler) {
-        const cache = handler.cache('banlist.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('banlist.' + normalized_channel);
         if (!cache.bans) {
             cache.bans = [];
         }
@@ -130,7 +135,8 @@ const handlers = {
     },
 
     RPL_ENDOFBANLIST: function(command, handler) {
-        const cache = handler.cache('banlist.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('banlist.' + normalized_channel);
         handler.emit('banlist', {
             channel: command.params[1],
             bans: cache.bans || []
