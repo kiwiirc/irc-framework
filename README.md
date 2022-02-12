@@ -26,7 +26,7 @@ bot.on('message', function(event) {
   	}
   	
   	if (event.message.match(/^!join /)) {
-  	    var to_join = event.message.split(' ');
+  		var to_join = event.message.split(' ')[1];
   		event.reply('Joining ' + to_join + '..');
   		bot.join(to_join);
   	}
