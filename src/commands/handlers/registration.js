@@ -197,13 +197,19 @@ const handlers = {
                 );
             }
             if (handler.network.cap.negotiating) {
+                let authenticating = false;
                 if (handler.network.cap.isEnabled('sasl')) {
-                    if (typeof handler.connection.options.sasl_mechanism === 'string') {
-                        handler.connection.write('AUTHENTICATE ' + handler.connection.options.sasl_mechanism);
-                    } else {
-                        handler.connection.write('AUTHENTICATE PLAIN');
+                    const mechanism = (typeof handler.connection.options.sasl_mechanism === 'string') ? handler.connection.options.sasl_mechanism : 'PLAIN';
+                    const mechanisms = handler.network.cap.available.get('sasl');
+                    if (
+                        !mechanisms || // SASL v3.1
+                        mechanisms.toUpperCase().split(',').includes(mechanism.toUpperCase()) // SASL v3.2
+                    ) {
+                        handler.connection.write('AUTHENTICATE ' + mechanism);
+                        authenticating = true;
                     }
-                } else if (handler.network.cap.requested.length === 0) {
+                }
+                if (!authenticating && handler.network.cap.requested.length === 0) {
                     // If all of our requested CAPs have been handled, end CAP negotiation
                     handler.connection.write('CAP END');
                     handler.network.cap.negotiating = false;
