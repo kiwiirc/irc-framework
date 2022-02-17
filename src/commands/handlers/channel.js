@@ -149,7 +149,8 @@ const handlers = {
     },
 
     RPL_EXCEPTLIST: function(command, handler) {
-        const cache = handler.cache('exceptlist.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('exceptlist.' + normalized_channel);
         if (!cache.excepts) {
             cache.excepts = [];
         }
@@ -164,7 +165,8 @@ const handlers = {
     },
 
     RPL_ENDOFEXCEPTLIST: function(command, handler) {
-        const cache = handler.cache('exceptlist.' + command.params[1]);
+        const normalized_channel = handler.client.caseLower(command.params[1]);
+        const cache = handler.cache('exceptlist.' + normalized_channel);
         handler.emit('exceptlist', {
             channel: command.params[1],
             excepts: cache.excepts || [],
