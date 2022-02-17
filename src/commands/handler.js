@@ -10,14 +10,15 @@ const irc_numerics = require('./numerics');
 const IrcCommand = require('./command');
 
 module.exports = class IrcCommandHandler extends EventEmitter {
-    constructor(connection, network_info) {
+    constructor(client) {
         super();
 
         // Adds an 'all' event to .emit()
         this.addAllEventName();
 
-        this.connection = connection;
-        this.network = network_info;
+        this.client = client;
+        this.connection = client.connection;
+        this.network = client.network;
         this.handlers = [];
 
         this.request_extra_caps = [];
