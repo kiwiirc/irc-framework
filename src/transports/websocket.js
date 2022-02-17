@@ -20,7 +20,12 @@ module.exports = class Connection extends EventEmitter {
         this.incoming_buffer = '';
 
         this.protocol_fallback = false;
-        this.protocol = options.websocket_protocol;
+
+        // JSON does not allow undefined and websocket protocol does not allow falsy
+        // if the protocol is falsy then the user intends no protocol, so set to undefined
+        this.protocol = options.websocket_protocol ?
+            options.websocket_protocol :
+            undefined;
     }
 
     isConnected() {
