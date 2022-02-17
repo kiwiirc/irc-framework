@@ -148,7 +148,8 @@ const handlers = {
         const cache = handler.cache('who');
         handler.emit('wholist', {
             target: command.params[1],
-            users: cache.members || []
+            users: cache.members || [],
+            tags: command.tags
         });
         cache.destroy();
     },
