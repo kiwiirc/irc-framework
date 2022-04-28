@@ -90,6 +90,13 @@ const handlers = {
                 // Tell the server to send us all user modes in NAMES reply, not just
                 // the highest one
                 handler.connection.write('PROTOCTL NAMESX');
+            } else if (option[0] === 'MONITOR') {
+                const maxMonitors = parseInt(option[1]);
+                if (maxMonitors > 0) {
+                    handler.network.options.MONITOR = maxMonitors;
+                } else {
+                    handler.network.options.MONITOR = Infinity;
+                }
             }
         }
 
