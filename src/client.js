@@ -147,6 +147,29 @@ module.exports = class IrcClient extends EventEmitter {
         // Proxy the command handler events onto the client object, with some added sugar
         client.proxyIrcEvents();
 
+        const whox_token = {
+            value: 0,
+            requests: [],
+            next: () => {
+                if (whox_token.value >= 999) {
+                    // whox token is limited to 3 characters
+                    whox_token.value = 0;
+                }
+                const token = ++whox_token.value;
+                whox_token.requests.push(token);
+                return token;
+            },
+            validate: (token) => {
+                const idx = whox_token.requests.indexOf(token);
+                if (idx !== -1) {
+                    whox_token.requests.splice(idx, 1);
+                    return true;
+                }
+                return false;
+            },
+        };
+        client.whox_token = whox_token;
+
         Object.defineProperty(client, 'connected', {
             enumerable: true,
             get: function() {
@@ -783,7 +806,8 @@ module.exports = class IrcClient extends EventEmitter {
         });
 
         if (client.network.supports('whox')) {
-            client.raw('WHO', target, '%cuhsnfdaor');
+            const token = client.whox_token.next();
+            client.raw('WHO', target, `%tcuhsnfdaor,${token}`);
         } else {
             client.raw('WHO', target);
         }
