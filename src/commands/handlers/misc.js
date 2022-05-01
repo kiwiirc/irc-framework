@@ -5,6 +5,7 @@ const _ = {
     clone: require('lodash/clone'),
     map: require('lodash/map'),
 };
+const Helpers = require('../../helpers');
 
 const handlers = {
     RPL_LISTSTART: function(command, handler) {
@@ -74,15 +75,7 @@ const handlers = {
         }
 
         const params = command.params;
-        // G = Gone, H = Here
-        const is_away = params[6][0].toUpperCase() === 'G';
-
-        // get user channel modes
-        const net_prefixes = handler.network.options.PREFIX;
-        // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
-        const chan_prefixes = net_prefixes.filter(f => params[6].indexOf(f.symbol) > -1);
-        // use _.map to return an array of mode strings from matched PREFIX objects
-        const chan_modes = _.map(chan_prefixes, 'mode');
+        const flags = Helpers.parseWhoFlags(params[6], handler.network.options);
 
         let hops_away = 0;
         let realname = params[7];
@@ -100,11 +93,12 @@ const handlers = {
             hostname: params[3],
             server: params[4],
             real_name: realname,
-            away: is_away,
+            away: flags.away,
             num_hops_away: hops_away,
             channel: params[1],
-            channel_modes: chan_modes,
-            tags: command.tags
+            channel_modes: flags.channel_modes,
+            tags: command.tags,
+            who_flags: flags,
         });
     },
 
@@ -136,15 +130,7 @@ const handlers = {
             }
         }
 
-        // G = Gone, H = Here
-        const is_away = params[7][0].toUpperCase() === 'G';
-
-        // get user channel modes
-        const net_prefixes = handler.network.options.PREFIX;
-        // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
-        const chan_prefixes = net_prefixes.filter(f => params[7].indexOf(f.symbol) > -1);
-        // use _.map to return an array of mode strings from matched PREFIX objects
-        const chan_modes = _.map(chan_prefixes, 'mode');
+        const flags = Helpers.parseWhoFlags(params[7], handler.network.options);
 
         // Some ircd's use n/a for no level, unify them all to 0 for no level
         const op_level = !/^[0-9]+$/.test(params[10]) ? 0 : parseInt(params[10], 10);
@@ -157,11 +143,12 @@ const handlers = {
             op_level: op_level,
             real_name: params[11],
             account: params[9] === '0' ? '' : params[9],
-            away: is_away,
+            away: flags.away,
             num_hops_away: parseInt(params[8], 10),
             channel: params[2],
-            channel_modes: chan_modes,
-            tags: command.tags
+            channel_modes: flags.channel_modes,
+            tags: command.tags,
+            who_flags: flags,
         });
     },
 
