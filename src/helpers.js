@@ -72,7 +72,10 @@ function parseWhoFlags(flagsParam, networkOptions) {
     parsedFlags.away = unparsedFlags.shift().toUpperCase() === 'G';
 
     // operator flag is optional but would always be the second character
-    parsedFlags.operator = unparsedFlags[0] === '*' && !!unparsedFlags.shift();
+    if (unparsedFlags[0] === '*') {
+        unparsedFlags.shift();
+        parsedFlags.operator = true;
+    }
 
     // add bot mode if its flag is supported by the ircd
     const bot_mode_token = networkOptions.BOT;
