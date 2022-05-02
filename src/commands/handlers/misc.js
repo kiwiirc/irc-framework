@@ -75,7 +75,7 @@ const handlers = {
         }
 
         const params = command.params;
-        const flags = Helpers.parseWhoFlags(params[6], handler.network.options);
+        const { parsedFlags, unparsedFlags } = Helpers.parseWhoFlags(params[6], handler.network.options);
 
         let hops_away = 0;
         let realname = params[7];
@@ -93,12 +93,11 @@ const handlers = {
             hostname: params[3],
             server: params[4],
             real_name: realname,
-            away: flags.away,
             num_hops_away: hops_away,
             channel: params[1],
-            channel_modes: flags.channel_modes,
             tags: command.tags,
-            who_flags: flags,
+            unparsed_flags: unparsedFlags,
+            ...parsedFlags,
         });
     },
 
@@ -130,7 +129,7 @@ const handlers = {
             }
         }
 
-        const flags = Helpers.parseWhoFlags(params[7], handler.network.options);
+        const { parsedFlags, unparsedFlags } = Helpers.parseWhoFlags(params[7], handler.network.options);
 
         // Some ircd's use n/a for no level, unify them all to 0 for no level
         const op_level = !/^[0-9]+$/.test(params[10]) ? 0 : parseInt(params[10], 10);
@@ -143,12 +142,11 @@ const handlers = {
             op_level: op_level,
             real_name: params[11],
             account: params[9] === '0' ? '' : params[9],
-            away: flags.away,
             num_hops_away: parseInt(params[8], 10),
             channel: params[2],
-            channel_modes: flags.channel_modes,
             tags: command.tags,
-            who_flags: flags,
+            unparsed_flags: unparsedFlags,
+            ...parsedFlags,
         });
     },
 

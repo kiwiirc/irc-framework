@@ -55,47 +55,46 @@ function parseWhoFlags(flagsParam, networkOptions) {
 
     const unparsedFlags = flagsParam.split('');
 
-    // Add function to check for flags existence and remove it if existing
-    Object.defineProperty(unparsedFlags, 'hasThenRemove', {
-        value: (flag) => {
-            const flagIdx = unparsedFlags.indexOf(flag);
-            if (flagIdx > -1) {
-                unparsedFlags.splice(flagIdx, 1);
-                return true;
-            }
-            return false;
-        }
-    });
-
-    // away is always the first character, G = Gone, H = Here
-    const is_away = unparsedFlags.shift().toUpperCase() === 'G';
-
-    // operator flag is option but would always be the second character
-    const is_operator = unparsedFlags[0] === '*' && !!unparsedFlags.shift();
-
     // the flags object to be returned
-    const flags = {
-        away: is_away,
-        operator: is_operator,
-        registered: unparsedFlags.hasThenRemove('r'),
-        secure: unparsedFlags.hasThenRemove('s'),
+    const parsedFlags = {
+        // away maybe replaced by the bot flag, add it here to ensure it exists for consistency
+        away: false,
+    };
+
+    // function to check for flags existence and remove it if existing
+    const hasThenRemove = (flag) => {
+        const flagIdx = unparsedFlags.indexOf(flag);
+        if (flagIdx > -1) {
+            unparsedFlags.splice(flagIdx, 1);
+            return true;
+        }
+        return false;
     };
 
     // add bot mode if its flag is supported by the ircd
     const bot_mode_token = networkOptions.BOT;
     if (bot_mode_token) {
-        flags.bot = unparsedFlags.hasThenRemove(bot_mode_token);
+        parsedFlags.bot = hasThenRemove(bot_mode_token);
     }
 
+    // away is always the first character but may have been replaced by the bot flag, H = Here, G = Gone
+    if (['H', 'G'].includes(unparsedFlags[0].toUpperCase())) {
+        parsedFlags.away = unparsedFlags.shift().toUpperCase() === 'G';
+    }
+
+    // operator flag is optional but would always be the second character
+    parsedFlags.operator = unparsedFlags[0] === '*' && !!unparsedFlags.shift();
+
+    // common extended flags
+    parsedFlags.registered = hasThenRemove('r');
+    parsedFlags.secure = hasThenRemove('s');
+
     // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
-    const chan_prefixes = networkOptions.PREFIX.filter(f => unparsedFlags.hasThenRemove(f.symbol));
+    const chan_prefixes = networkOptions.PREFIX.filter(f => hasThenRemove(f.symbol));
     // use _.map to return an array of mode strings from matched PREFIX objects
-    flags.channel_modes = _.map(chan_prefixes, 'mode');
+    parsedFlags.channel_modes = _.map(chan_prefixes, 'mode');
 
-    // store any remaining flags in case they are useful
-    flags.unparsed = unparsedFlags;
-
-    return flags;
+    return { parsedFlags, unparsedFlags };
 }
 
 function splitOnce(input, separator) {
