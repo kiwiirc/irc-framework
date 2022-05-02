@@ -36,6 +36,13 @@ const generics = {
         reason: -1
     },
 
+    ERR_NOSUCHSERVER: {
+        event: 'irc error',
+        error: 'no_such_server',
+        server: 1,
+        reason: -1
+    },
+
     ERR_CANNOTSENDTOCHAN: {
         event: 'irc error',
         error: 'cannot_send_to_channel',
