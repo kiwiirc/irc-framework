@@ -108,6 +108,7 @@ const handlers = {
             cache.type = 'whox';
         }
 
+        const client = handler.client;
         const params = command.params;
 
         if (cache.token === 0) {
@@ -118,7 +119,7 @@ const handlers = {
 
         if (!cache.token) {
             const token = parseInt(params[1], 10) || 0;
-            if (token && handler.client.whox_token.validate(token)) {
+            if (token && params.length === 12 && client.whox_token.validate(token)) {
                 // Token is valid, store it in the cache
                 cache.token = token;
             } else {
@@ -131,8 +132,8 @@ const handlers = {
 
         const { parsedFlags, unparsedFlags } = Helpers.parseWhoFlags(params[7], handler.network.options);
 
-        // Some ircd's use n/a for no level, unify them all to 0 for no level
-        const op_level = !/^[0-9]+$/.test(params[10]) ? 0 : parseInt(params[10], 10);
+        // Some ircd's use n/a for no level, use undefined to represent no level
+        const op_level = /^[0-9]+$/.test(params[10]) ? parseInt(params[10], 10) : undefined;
 
         cache.members.push({
             nick: params[6],

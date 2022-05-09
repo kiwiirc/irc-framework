@@ -68,14 +68,9 @@ function parseWhoFlags(flagsParam, networkOptions) {
         return false;
     };
 
-    // away is always the first character, H = Here, G = Gone
-    parsedFlags.away = unparsedFlags.shift().toUpperCase() === 'G';
-
-    // operator flag is optional but would always be the second character
-    if (unparsedFlags[0] === '*') {
-        unparsedFlags.shift();
-        parsedFlags.operator = true;
-    }
+    // away is represented by H = Here, G = Gone
+    parsedFlags.away = !hasThenRemove('H');
+    parsedFlags.away = hasThenRemove('G');
 
     // add bot mode if its flag is supported by the ircd
     const bot_mode_token = networkOptions.BOT;
@@ -85,6 +80,7 @@ function parseWhoFlags(flagsParam, networkOptions) {
 
     // common extended flags
     parsedFlags.registered = hasThenRemove('r');
+    parsedFlags.operator = hasThenRemove('*');
     parsedFlags.secure = hasThenRemove('s');
 
     // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
