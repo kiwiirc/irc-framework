@@ -30,8 +30,8 @@ module.exports = {
             }
         });
         return {
-            handlers: handlers,
-            stubs: stubs,
+            handlers,
+            stubs,
             spies: handler
         };
     }

@@ -1,8 +1,8 @@
 'use strict';
 
 const Helper = {
-    parseMask: parseMask,
-    splitOnce: splitOnce,
+    parseMask,
+    splitOnce,
 };
 
 module.exports = Helper;
@@ -38,9 +38,9 @@ function parseMask(mask) {
     }
 
     return {
-        nick: nick,
-        user: user,
-        host: host,
+        nick,
+        user,
+        host,
     };
 }
 

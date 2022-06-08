@@ -19,10 +19,10 @@ const handlers = {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
-                target: target,
+                target,
                 type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
                 message: message.substring(1, message.length - 1),
-                time: time,
+                time,
                 tags: command.tags
             });
         } else {
@@ -37,11 +37,11 @@ const handlers = {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
-                target: target,
+                target,
                 group: target_group,
-                message: message,
+                message,
                 tags: command.tags,
-                time: time,
+                time,
                 account: command.getTag('account'),
                 batch: command.batch
             });
@@ -69,11 +69,11 @@ const handlers = {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
-                    target: target,
+                    target,
                     group: target_group,
                     message: message.substring(8, message.length - 1),
                     tags: command.tags,
-                    time: time,
+                    time,
                     account: command.getTag('account'),
                     batch: command.batch
                 });
@@ -89,11 +89,11 @@ const handlers = {
                     nick: command.nick,
                     ident: command.ident,
                     hostname: command.hostname,
-                    target: target,
+                    target,
                     group: target_group,
                     type: ctcp_command || null,
                     message: message.substring(1, message.length - 1),
-                    time: time,
+                    time,
                     account: command.getTag('account'),
                     tags: command.tags
                 });
@@ -104,11 +104,11 @@ const handlers = {
                 nick: command.nick,
                 ident: command.ident,
                 hostname: command.hostname,
-                target: target,
+                target,
                 group: target_group,
-                message: message,
+                message,
                 tags: command.tags,
-                time: time,
+                time,
                 account: command.getTag('account'),
                 batch: command.batch
             });
@@ -122,9 +122,9 @@ const handlers = {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            target: target,
+            target,
             tags: command.tags,
-            time: time,
+            time,
             batch: command.batch
         });
     },

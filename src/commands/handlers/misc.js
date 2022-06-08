@@ -133,7 +133,7 @@ const handlers = {
             ident: params[2],
             hostname: params[3],
             server: params[4],
-            op_level: op_level,
+            op_level,
             real_name: params[10],
             account: params[8] === '0' ? '' : params[8],
             away: is_away,
@@ -160,7 +160,7 @@ const handlers = {
         const time = command.getServerTime();
         handler.emit('ping', {
             message: command.params[1],
-            time: time,
+            time,
             tags: command.tags
         });
     },
@@ -174,7 +174,7 @@ const handlers = {
 
         handler.emit('pong', {
             message: command.params[1],
-            time: time,
+            time,
             tags: command.tags
         });
     },
@@ -191,10 +191,10 @@ const handlers = {
         handler.emit('mode', {
             target: command.params[0],
             nick: command.nick || command.prefix || '',
-            modes: modes,
-            time: time,
-            raw_modes: raw_modes,
-            raw_params: raw_params,
+            modes,
+            time,
+            raw_modes,
+            raw_params,
             tags: command.tags,
             batch: command.batch
         });

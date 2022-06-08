@@ -98,8 +98,8 @@ function NetworkInfo() {
         }
 
         return {
-            target: target,
-            target_group: target_group,
+            target,
+            target_group,
         };
     };
 

@@ -16,7 +16,7 @@ const handlers = {
             ident: command.ident,
             hostname: command.hostname,
             new_nick: command.params[0],
-            time: time,
+            time,
             tags: command.tags,
             batch: command.batch
         });
@@ -34,8 +34,8 @@ const handlers = {
             nick: command.nick,
             ident: command.ident,
             hostname: command.hostname,
-            account: account,
-            time: time,
+            account,
+            time,
             tags: command.tags
         });
     },
@@ -51,7 +51,7 @@ const handlers = {
             hostname: command.hostname,
             new_ident: command.params[0],
             new_hostname: command.params[1],
-            time: time,
+            time,
             tags: command.tags,
             batch: command.batch
         });
@@ -66,7 +66,7 @@ const handlers = {
             ident: command.ident,
             hostname: command.hostname,
             new_gecos: command.params[0],
-            time: time,
+            time,
             tags: command.tags,
             batch: command.batch
         });
@@ -81,15 +81,15 @@ const handlers = {
                 self: false,
                 nick: command.nick,
                 message: '',
-                time: time,
+                time,
                 tags: command.tags
             });
         } else {
             handler.emit('away', {
                 self: false,
                 nick: command.nick,
-                message: message,
-                time: time,
+                message,
+                time,
                 tags: command.tags
             });
         }
@@ -103,7 +103,7 @@ const handlers = {
             self: true,
             nick: command.params[0],
             message: command.params[1] || '',
-            time: time,
+            time,
             tags: command.tags
         });
     },
@@ -116,7 +116,7 @@ const handlers = {
             self: true,
             nick: command.params[0],
             message: command.params[1] || '', // example: "<nick> is now back."
-            time: time,
+            time,
             tags: command.tags
         });
     },
@@ -170,8 +170,8 @@ const handlers = {
             handler.emit('away', {
                 self: false,
                 nick: command.params[1],
-                message: message,
-                time: time,
+                message,
+                time,
                 tags: command.tags
             });
 
@@ -362,8 +362,8 @@ const handlers = {
         const nick = command.params[0];
         const raw_modes = command.params[1];
         handler.emit('user info', {
-            nick: nick,
-            raw_modes: raw_modes,
+            nick,
+            raw_modes,
             tags: command.tags
         });
     },

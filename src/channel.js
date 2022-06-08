@@ -191,7 +191,7 @@ module.exports = class IrcChannel {
         const updateUserList = (event) => {
             if (this.irc_client.caseCompare(event.channel, this.name)) {
                 this.irc_client.removeListener('userlist', updateUserList);
-                if (typeof cb === 'function') { cb(this); }
+                if (typeof cb === 'function') { const channel = this; cb(channel); }
             }
         };
 

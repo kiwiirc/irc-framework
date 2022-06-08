@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [
+    "./.eslintrc.cjs",
+    "./babel.config.cjs",
+    "./webpack.config.ts"
+  ],
+  "references": [
+    { "path": "./examples" },
+    { "path": "./src" },
+    { "path": "./test" }
+  ]
+}

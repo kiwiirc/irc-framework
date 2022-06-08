@@ -26,7 +26,7 @@ const handlers = {
         }
 
         handler.emit('registered', {
-            nick: nick,
+            nick,
             tags: command.tags
         });
     },
@@ -305,7 +305,7 @@ const handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: command.params[2],
-            time: time,
+            time,
             tags: command.tags
         });
 
@@ -314,7 +314,7 @@ const handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: command.params[2],
-            time: time,
+            time,
             tags: command.tags
         });
     },
@@ -330,7 +330,7 @@ const handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: false,
-            time: time,
+            time,
             tags: command.tags
         });
 
@@ -339,7 +339,7 @@ const handlers = {
             ident: mask.user,
             hostname: mask.host,
             account: false,
-            time: time,
+            time,
             tags: command.tags
         });
     },

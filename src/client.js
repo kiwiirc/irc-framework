@@ -755,7 +755,7 @@ module.exports = class IrcClient extends EventEmitter {
         if (!target || typeof target !== 'string') {
             if (typeof cb === 'function') {
                 _.defer(cb, {
-                    target: target,
+                    target,
                     users: []
                 });
             }
@@ -775,10 +775,11 @@ module.exports = class IrcClient extends EventEmitter {
             _.defer(_.bind(client.processNextWhoQueue, client));
 
             if (typeof cb === 'function') {
-                cb({
-                    target: target,
+                const cbArgs = {
+                    target,
                     users: event.users
-                });
+                };
+                cb(cbArgs);
             }
         });
 

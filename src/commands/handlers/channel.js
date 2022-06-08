@@ -13,10 +13,10 @@ const handlers = {
         const modes = handler.parseModeList(raw_modes, raw_params);
 
         handler.emit('channel info', {
-            channel: channel,
-            modes: modes,
-            raw_modes: raw_modes,
-            raw_params: raw_params,
+            channel,
+            modes,
+            raw_modes,
+            raw_params,
             tags: command.tags
         });
     },
@@ -25,7 +25,7 @@ const handlers = {
         const channel = command.params[1];
 
         handler.emit('channel info', {
-            channel: channel,
+            channel,
             created_at: parseInt(command.params[2], 10),
             tags: command.tags
         });
@@ -35,7 +35,7 @@ const handlers = {
         const channel = command.params[1];
 
         handler.emit('channel info', {
-            channel: channel,
+            channel,
             url: command.params[command.params.length - 1],
             tags: command.tags
         });
@@ -75,7 +75,7 @@ const handlers = {
                 nick: user.nick,
                 ident: user.user,
                 hostname: user.host,
-                modes: modes,
+                modes,
                 tags: command.tags
             });
         });
@@ -240,7 +240,7 @@ const handlers = {
             hostname: command.hostname,
             channel: command.params[0],
             message: command.params[command.params.length - 1] || '',
-            time: time,
+            time,
             tags: command.tags,
             batch: command.batch
         });
@@ -256,7 +256,7 @@ const handlers = {
             hostname: command.hostname,
             channel: command.params[0],
             message: command.params[command.params.length - 1] || '',
-            time: time,
+            time,
             tags: command.tags,
             batch: command.batch
         });
@@ -270,7 +270,7 @@ const handlers = {
             ident: command.ident,
             hostname: command.hostname,
             message: command.params[command.params.length - 1] || '',
-            time: time,
+            time,
             tags: command.tags,
             batch: command.batch
         });
@@ -290,9 +290,9 @@ const handlers = {
 
         handler.emit('topic', {
             nick: command.nick,
-            channel: channel,
-            topic: topic,
-            time: time,
+            channel,
+            topic,
+            time,
             tags: command.tags
         });
     },
@@ -306,7 +306,7 @@ const handlers = {
             hostname: command.hostname,
             invited: command.params[0],
             channel: command.params[1],
-            time: time,
+            time,
             tags: command.tags
         });
     },
@@ -317,7 +317,7 @@ const handlers = {
         handler.emit('invited', {
             nick: command.params[1],
             channel: command.params[2],
-            time: time,
+            time,
             tags: command.tags
         });
     }

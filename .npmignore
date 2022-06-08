@@ -6,6 +6,6 @@
 /*.sublime-project
 /*.sublime-workspace
 /irc-framework-*.tgz
-/babel.config.js
-/webpack.config.js
+/babel.config.cjs
+/webpack.config.ts
 /.*

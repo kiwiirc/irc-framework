@@ -157,7 +157,7 @@ module.exports = class Connection extends EventEmitter {
             return;
         }
 
-        this.emit('raw', { line: line, from_server: true });
+        this.emit('raw', { line, from_server: true });
 
         const message = ircLineParser(line);
         if (!message) {
