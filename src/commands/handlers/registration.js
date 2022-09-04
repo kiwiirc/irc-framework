@@ -114,7 +114,7 @@ const handlers = {
                 const sep = cap.indexOf('=');
                 if (sep === -1) {
                     capability_values[cap] = '';
-                    if (command.params[1] === 'LS') {
+                    if (command.params[1] === 'LS' || command.params[1] === 'NEW') {
                         handler.network.cap.available.set(cap, '');
                     }
                     return cap;
@@ -124,7 +124,7 @@ const handlers = {
                 const cap_value = cap.substr(sep + 1);
 
                 capability_values[cap_name] = cap_value;
-                if (command.params[1] === 'LS') {
+                if (command.params[1] === 'LS' || command.params[1] === 'NEW') {
                     handler.network.cap.available.set(cap_name, cap_value);
                 }
                 return cap_name;
@@ -256,6 +256,9 @@ const handlers = {
                 handler.network.cap.enabled,
                 capabilities
             );
+            for (const cap_name of capabilities) {
+                handler.network.cap.available.delete(cap_name);
+            }
             break;
         }
 
