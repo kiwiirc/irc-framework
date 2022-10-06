@@ -35,19 +35,19 @@ module.exports = class IrcChannel {
             }
         });
         irc_client.on('join', (event) => {
-            if (event.channel === this.name) {
+            if (irc_client.caseCompare(event.channel, this.name)) {
                 this.users.push(event);
             }
         });
         irc_client.on('part', (event) => {
-            if (event.channel === this.name) {
+            if (irc_client.caseCompare(event.channel, this.name)) {
                 this.users = _.filter(this.users, function(o) {
                     return !irc_client.caseCompare(event.nick, o.nick);
                 });
             }
         });
         irc_client.on('kick', (event) => {
-            if (event.channel === this.name) {
+            if (irc_client.caseCompare(event.channel, this.name)) {
                 this.users = _.filter(this.users, function(o) {
                     return !irc_client.caseCompare(event.kicked, o.nick);
                 });
