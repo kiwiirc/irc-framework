@@ -1,7 +1,12 @@
 'use strict';
 
+const _ = {
+    map: require('lodash/map'),
+};
+
 const Helper = {
     parseMask: parseMask,
+    parseWhoFlags: parseWhoFlags,
     splitOnce: splitOnce,
 };
 
@@ -42,6 +47,48 @@ function parseMask(mask) {
         user: user,
         host: host,
     };
+}
+
+function parseWhoFlags(flagsParam, networkOptions) {
+    // https://modern.ircdocs.horse/#rplwhoreply-352
+    // unrealircd https://github.com/unrealircd/unrealircd/blob/8536778/doc/conf/help/help.conf#L429
+
+    const unparsedFlags = flagsParam.split('');
+
+    // the flags object to be returned
+    const parsedFlags = {};
+
+    // function to check for flags existence and remove it if existing
+    const hasThenRemove = (flag) => {
+        const flagIdx = unparsedFlags.indexOf(flag);
+        if (flagIdx > -1) {
+            unparsedFlags.splice(flagIdx, 1);
+            return true;
+        }
+        return false;
+    };
+
+    // away is represented by H = Here, G = Gone
+    parsedFlags.away = !hasThenRemove('H');
+    parsedFlags.away = hasThenRemove('G');
+
+    // add bot mode if its flag is supported by the ircd
+    const bot_mode_token = networkOptions.BOT;
+    if (bot_mode_token) {
+        parsedFlags.bot = hasThenRemove(bot_mode_token);
+    }
+
+    // common extended flags
+    parsedFlags.registered = hasThenRemove('r');
+    parsedFlags.operator = hasThenRemove('*');
+    parsedFlags.secure = hasThenRemove('s');
+
+    // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
+    const chan_prefixes = networkOptions.PREFIX.filter(f => hasThenRemove(f.symbol));
+    // use _.map to return an array of mode strings from matched PREFIX objects
+    parsedFlags.channel_modes = _.map(chan_prefixes, 'mode');
+
+    return { parsedFlags, unparsedFlags };
 }
 
 function splitOnce(input, separator) {

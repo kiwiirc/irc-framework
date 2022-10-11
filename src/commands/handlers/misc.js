@@ -5,6 +5,7 @@ const _ = {
     clone: require('lodash/clone'),
     map: require('lodash/map'),
 };
+const Helpers = require('../../helpers');
 
 const handlers = {
     RPL_LISTSTART: function(command, handler) {
@@ -74,15 +75,7 @@ const handlers = {
         }
 
         const params = command.params;
-        // G = Gone, H = Here
-        const is_away = params[6][0].toUpperCase() === 'G';
-
-        // get user channel modes
-        const net_prefixes = handler.network.options.PREFIX;
-        // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
-        const chan_prefixes = net_prefixes.filter(f => params[6].indexOf(f.symbol) > -1);
-        // use _.map to return an array of mode strings from matched PREFIX objects
-        const chan_modes = _.map(chan_prefixes, 'mode');
+        const { parsedFlags, unparsedFlags } = Helpers.parseWhoFlags(params[6], handler.network.options);
 
         let hops_away = 0;
         let realname = params[7];
@@ -100,11 +93,11 @@ const handlers = {
             hostname: params[3],
             server: params[4],
             real_name: realname,
-            away: is_away,
             num_hops_away: hops_away,
             channel: params[1],
-            channel_modes: chan_modes,
-            tags: command.tags
+            tags: command.tags,
+            unparsed_flags: unparsedFlags,
+            ...parsedFlags,
         });
     },
 
@@ -112,40 +105,62 @@ const handlers = {
         const cache = handler.cache('who');
         if (!cache.members) {
             cache.members = [];
+            cache.type = 'whox';
         }
+
+        const client = handler.client;
         const params = command.params;
 
-        // G = Gone, H = Here
-        const is_away = params[6][0].toUpperCase() === 'G';
+        if (cache.token === 0) {
+            // Token validation has already been attempted but failed,
+            // ignore this event as it will not be emitted
+            return;
+        }
 
-        // get user channel modes
-        const net_prefixes = handler.network.options.PREFIX;
-        // filter PREFIX array against the prefix's in who reply returning matched PREFIX objects
-        const chan_prefixes = net_prefixes.filter(f => params[6].indexOf(f.symbol) > -1);
-        // use _.map to return an array of mode strings from matched PREFIX objects
-        const chan_modes = _.map(chan_prefixes, 'mode');
+        if (!cache.token) {
+            const token = parseInt(params[1], 10) || 0;
+            if (token && params.length === 12 && client.whox_token.validate(token)) {
+                // Token is valid, store it in the cache
+                cache.token = token;
+            } else {
+                // This event does not have a valid token so did not come from irc-fw,
+                // ignore it as the response order may differ
+                cache.token = 0;
+                return;
+            }
+        }
 
-        // Some ircd's use n/a for no level, unify them all to 0 for no level
-        const op_level = !/^[0-9]+$/.test(params[9]) ? 0 : parseInt(params[9], 10);
+        const { parsedFlags, unparsedFlags } = Helpers.parseWhoFlags(params[7], handler.network.options);
+
+        // Some ircd's use n/a for no level, use undefined to represent no level
+        const op_level = /^[0-9]+$/.test(params[10]) ? parseInt(params[10], 10) : undefined;
 
         cache.members.push({
-            nick: params[5],
-            ident: params[2],
-            hostname: params[3],
-            server: params[4],
+            nick: params[6],
+            ident: params[3],
+            hostname: params[4],
+            server: params[5],
             op_level: op_level,
-            real_name: params[10],
-            account: params[8] === '0' ? '' : params[8],
-            away: is_away,
-            num_hops_away: parseInt(params[7], 10),
-            channel: params[1],
-            channel_modes: chan_modes,
-            tags: command.tags
+            real_name: params[11],
+            account: params[9] === '0' ? '' : params[9],
+            num_hops_away: parseInt(params[8], 10),
+            channel: params[2],
+            tags: command.tags,
+            unparsed_flags: unparsedFlags,
+            ...parsedFlags,
         });
     },
 
     RPL_ENDOFWHO: function(command, handler) {
         const cache = handler.cache('who');
+
+        if (cache.type === 'whox' && !cache.token) {
+            // Dont emit wholist for whox requests without a token
+            // they did not come from irc-fw
+            cache.destroy();
+            return;
+        }
+
         handler.emit('wholist', {
             target: command.params[1],
             users: cache.members || [],
