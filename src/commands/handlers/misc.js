@@ -68,6 +68,34 @@ const handlers = {
         });
     },
 
+    RPL_OMOTD: function(command, handler) {
+        const cache = handler.cache('oper motd');
+        cache.motd += command.params[command.params.length - 1] + '\n';
+    },
+
+    RPL_OMOTDSTART: function(command, handler) {
+        const cache = handler.cache('oper motd');
+        cache.motd = '';
+    },
+
+    RPL_ENDOFOMOTD: function(command, handler) {
+        const cache = handler.cache('oper motd');
+        handler.emit('motd', {
+            motd: cache.motd,
+            tags: command.tags
+        });
+        cache.destroy();
+    },
+
+    ERR_NOOPERMOTD: function(command, handler) {
+        const params = _.clone(command.params);
+        params.shift();
+        handler.emit('motd', {
+            error: command.params[command.params.length - 1],
+            tags: command.tags
+        });
+    },
+
     RPL_WHOREPLY: function(command, handler) {
         const cache = handler.cache('who');
         if (!cache.members) {
