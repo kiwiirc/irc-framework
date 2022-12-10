@@ -292,6 +292,9 @@ const handlers = {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
         cache.country = command.params[command.params.length - 1];
+        if (command.params.length === 4) {
+            cache.country_code = command.params[2];
+        }
     },
 
     RPL_WHOISASN: function(command, handler) {
