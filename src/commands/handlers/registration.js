@@ -109,6 +109,7 @@ const handlers = {
         const capabilities = command.params[command.params.length - 1]
             .replace(/(?:^| )[-~=]/, '')
             .split(' ')
+            .filter((cap) => !!cap)
             .map(function(cap) {
                 // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
                 const sep = cap.indexOf('=');
@@ -199,13 +200,18 @@ const handlers = {
             if (handler.network.cap.negotiating) {
                 let authenticating = false;
                 if (handler.network.cap.isEnabled('sasl')) {
-                    const mechanism = (typeof handler.connection.options.sasl_mechanism === 'string') ? handler.connection.options.sasl_mechanism : 'PLAIN';
+                    const options_mechanism = handler.connection.options.sasl_mechanism;
+                    const wanted_mechanism = (typeof options_mechanism === 'string') ?
+                        options_mechanism.toUpperCase() :
+                        'PLAIN';
+
                     const mechanisms = handler.network.cap.available.get('sasl');
+                    const valid_mechanisms = mechanisms.toUpperCase().split(',');
                     if (
                         !mechanisms || // SASL v3.1
-                        mechanisms.toUpperCase().split(',').includes(mechanism.toUpperCase()) // SASL v3.2
+                        valid_mechanisms.includes(wanted_mechanism) // SASL v3.2
                     ) {
-                        handler.connection.write('AUTHENTICATE ' + mechanism);
+                        handler.connection.write('AUTHENTICATE ' + wanted_mechanism);
                         authenticating = true;
                     }
                 }
