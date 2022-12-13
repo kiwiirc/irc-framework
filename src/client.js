@@ -112,6 +112,7 @@ module.exports = class IrcClient extends EventEmitter {
             client.network.cap.negotiating = false;
             client.network.cap.requested = [];
             client.network.cap.enabled = [];
+            client.network.cap.available.clear();
 
             client.command_handler.resetCache();
         });

@@ -109,11 +109,15 @@ const handlers = {
         const capabilities = command.params[command.params.length - 1]
             .replace(/(?:^| )[-~=]/, '')
             .split(' ')
+            .filter((cap) => !!cap)
             .map(function(cap) {
                 // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
                 const sep = cap.indexOf('=');
                 if (sep === -1) {
                     capability_values[cap] = '';
+                    if (command.params[1] === 'LS' || command.params[1] === 'NEW') {
+                        handler.network.cap.available.set(cap, '');
+                    }
                     return cap;
                 }
 
@@ -121,6 +125,9 @@ const handlers = {
                 const cap_value = cap.substr(sep + 1);
 
                 capability_values[cap_name] = cap_value;
+                if (command.params[1] === 'LS' || command.params[1] === 'NEW') {
+                    handler.network.cap.available.set(cap_name, cap_value);
+                }
                 return cap_name;
             });
 
@@ -191,13 +198,24 @@ const handlers = {
                 );
             }
             if (handler.network.cap.negotiating) {
+                let authenticating = false;
                 if (handler.network.cap.isEnabled('sasl')) {
-                    if (typeof handler.connection.options.sasl_mechanism === 'string') {
-                        handler.connection.write('AUTHENTICATE ' + handler.connection.options.sasl_mechanism);
-                    } else {
-                        handler.connection.write('AUTHENTICATE PLAIN');
+                    const options_mechanism = handler.connection.options.sasl_mechanism;
+                    const wanted_mechanism = (typeof options_mechanism === 'string') ?
+                        options_mechanism.toUpperCase() :
+                        'PLAIN';
+
+                    const mechanisms = handler.network.cap.available.get('sasl');
+                    const valid_mechanisms = mechanisms.toUpperCase().split(',');
+                    if (
+                        !mechanisms || // SASL v3.1
+                        valid_mechanisms.includes(wanted_mechanism) // SASL v3.2
+                    ) {
+                        handler.connection.write('AUTHENTICATE ' + wanted_mechanism);
+                        authenticating = true;
                     }
-                } else if (handler.network.cap.requested.length === 0) {
+                }
+                if (!authenticating && handler.network.cap.requested.length === 0) {
                     // If all of our requested CAPs have been handled, end CAP negotiation
                     handler.connection.write('CAP END');
                     handler.network.cap.negotiating = false;
@@ -244,12 +262,15 @@ const handlers = {
                 handler.network.cap.enabled,
                 capabilities
             );
+            for (const cap_name of capabilities) {
+                handler.network.cap.available.delete(cap_name);
+            }
             break;
         }
 
         handler.emit('cap ' + command.params[1].toLowerCase(), {
             command: command.params[1],
-            capabilities: capability_values,
+            capabilities: capability_values, // for backward-compatibility
         });
     },
 
