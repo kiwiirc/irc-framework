@@ -213,7 +213,11 @@ const handlers = {
                     ) {
                         handler.connection.write('AUTHENTICATE ' + wanted_mechanism);
                         authenticating = true;
+                    } else {
+                        handleSaslFail(handler, 'unsupported_mechanism');
                     }
+                } else if (handler.connection.options.account) {
+                    handleSaslFail(handler, 'capability_missing');
                 }
                 if (!authenticating && handler.network.cap.requested.length === 0) {
                     // If all of our requested CAPs have been handled, end CAP negotiation
@@ -366,17 +370,27 @@ const handlers = {
     },
 
     RPL_SASLLOGGEDIN: function(command, handler) {
-        if (handler.network.cap.negotiating === true) {
+        if (handler.network.cap.negotiating) {
             handler.connection.write('CAP END');
             handler.network.cap.negotiating = false;
         }
     },
 
-    ERR_SASLNOTAUTHORISED: function(command, handler) {
+    ERR_NICKLOCKED: function(command, handler) {
+        handleSaslFail(handler, 'nick_locked', command);
+    },
+
+    ERR_SASLFAIL: function(command, handler) {
+        handleSaslFail(handler, 'fail', command);
+
         if (handler.network.cap.negotiating) {
             handler.connection.write('CAP END');
             handler.network.cap.negotiating = false;
         }
+    },
+
+    ERR_SASLTOOLONG: function(command, handler) {
+        handleSaslFail(handler, 'too_long', command);
     },
 
     ERR_SASLABORTED: function(command, handler) {
@@ -416,6 +430,29 @@ function getSaslAuth(handler) {
     }
 
     return null;
+}
+
+function handleSaslFail(handler, reason, command) {
+    const event = {
+        reason,
+    };
+
+    if (command) {
+        // Check if we have a server-time
+        const time = command.getServerTime();
+
+        event.message = command.params[command.params.length - 1];
+        event.nick = command.params[0];
+        event.time = time;
+        event.tags = command.tags;
+    }
+
+    handler.emit('sasl failed', event);
+
+    const sasl_disconnect_on_fail = handler.connection.options.sasl_disconnect_on_fail;
+    if (sasl_disconnect_on_fail && handler.network.cap.negotiating) {
+        handler.connection.end();
+    }
 }
 
 module.exports = function AddCommandHandlers(command_controller) {

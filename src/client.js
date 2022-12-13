@@ -54,6 +54,7 @@ module.exports = class IrcClient extends EventEmitter {
             ping_interval: 30,
             ping_timeout: 120,
             message_max_length: 350,
+            sasl_disconnect_on_fail: false,
             transport: default_transport,
             websocket_protocol: 'text.ircv3.net'
         };
