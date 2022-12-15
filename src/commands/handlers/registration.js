@@ -385,6 +385,11 @@ const handlers = {
         // SASL Authentication responded that the nick is locked
         // emit 'sasl failed' with reason 'nick_locked' and disconnect if requested
         handleSaslFail(handler, 'nick_locked', command);
+
+        if (handler.network.cap.negotiating) {
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
+        }
     },
 
     ERR_SASLFAIL: function(command, handler) {
@@ -403,6 +408,11 @@ const handlers = {
         // this should never happen as the library handles splitting
         // emit 'sasl failed' with reason 'too_long' and disconnect if requested
         handleSaslFail(handler, 'too_long', command);
+
+        if (handler.network.cap.negotiating) {
+            handler.connection.write('CAP END');
+            handler.network.cap.negotiating = false;
+        }
     },
 
     ERR_SASLABORTED: function(command, handler) {
