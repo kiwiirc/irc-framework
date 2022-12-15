@@ -110,7 +110,7 @@ const handlers = {
             .replace(/(?:^| )[-~=]/, '')
             .split(' ')
             .filter((cap) => !!cap)
-            .map(function(cap) {
+            .map((cap) => {
                 // CAPs in 3.2 may be in the form of CAP=VAL. So seperate those out
                 const sep = cap.indexOf('=');
                 if (sep === -1) {
@@ -214,11 +214,16 @@ const handlers = {
                         handler.connection.write('AUTHENTICATE ' + wanted_mechanism);
                         authenticating = true;
                     } else {
+                        // The client requested an SASL mechanism that is not supported by SASL v3.2
+                        // emit 'sasl failed' with reason 'unsupported_mechanism' and disconnect if requested
                         handleSaslFail(handler, 'unsupported_mechanism');
                     }
                 } else if (handler.connection.options.account) {
+                    // The client provided an account for SASL auth but the server did not offer the SASL cap
+                    // emit 'sasl failed' with reason 'capability_missing' and disconnect if requested
                     handleSaslFail(handler, 'capability_missing');
                 }
+
                 if (!authenticating && handler.network.cap.requested.length === 0) {
                     // If all of our requested CAPs have been handled, end CAP negotiation
                     handler.connection.write('CAP END');
@@ -377,10 +382,14 @@ const handlers = {
     },
 
     ERR_NICKLOCKED: function(command, handler) {
+        // SASL Authentication responded that the nick is locked
+        // emit 'sasl failed' with reason 'nick_locked' and disconnect if requested
         handleSaslFail(handler, 'nick_locked', command);
     },
 
     ERR_SASLFAIL: function(command, handler) {
+        // SASL Authentication responded with failure
+        // emit 'sasl failed' with reason 'fail' and disconnect if requested
         handleSaslFail(handler, 'fail', command);
 
         if (handler.network.cap.negotiating) {
@@ -390,6 +399,9 @@ const handlers = {
     },
 
     ERR_SASLTOOLONG: function(command, handler) {
+        // SASL Authentication responded that the AUTHENTICATE command was too long
+        // this should never happen as the library handles splitting
+        // emit 'sasl failed' with reason 'too_long' and disconnect if requested
         handleSaslFail(handler, 'too_long', command);
     },
 
@@ -438,7 +450,6 @@ function handleSaslFail(handler, reason, command) {
     };
 
     if (command) {
-        // Check if we have a server-time
         const time = command.getServerTime();
 
         event.message = command.params[command.params.length - 1];
