@@ -50,6 +50,13 @@ const generics = {
         reason: -1
     },
 
+    ERR_CANNOTSENDTOUSER: {
+        event: 'irc error',
+        error: 'cannot_send_to_user',
+        nick: 1,
+        reason: -1
+    },
+
     ERR_TOOMANYCHANNELS: {
         event: 'irc error',
         error: 'too_many_channels',
