@@ -691,3 +691,44 @@ Triggered for each `CAP` command, lists the sent capabilities list.
     }
 }
 ~~~
+
+### SASL
+
+**loggedin** / **loggedout**
+
+Trigged when the user logs in or out, can be triggered by either SASL or NickServ auth
+
+~~~javascript
+{
+    nick: 'prawnsalad'
+    ident: 'prawnsalad',
+    hostname: 'manchester.isp.net',
+    account: 'prawnsalad',
+    time: 000000000,
+    tags: { ... }
+};
+~~~
+
+
+**sasl failed**
+
+Triggered when an SASL auth fails
+
+"reason" can be one of the following:
+* `fail` - ERR_SASLFAIL (904)
+* `too_long` - ERR_SASLTOOLONG (905)
+* `nick_locked` - ERR_NICKLOCKED (902)
+* `unsupported_mechanism` - A mechanism was requested that the server does not support
+* `capability_missing` - An account was provided with the connection, but the server does not offer the SASL capability
+
+~~~javascript
+{
+    reason: 'fail',
+
+    // The following properties are only included when the event was triggered from an IRC event
+    message: 'SASL authentication failed',
+    nick: 'prawnsalad',
+    time: 000000000,
+    tags: { ... },
+}
+~~~
