@@ -22,6 +22,7 @@ module.exports = {
         'semi': ['error', 'always'],
         'space-before-function-paren': ['error', 'never'],
         'standard/no-callback-literal': 0,
-        'node/no-callback-literal': 0,
+        'n/no-callback-literal': 0,
+        "object-shorthand": 0,
     }
 };
