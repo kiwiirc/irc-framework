@@ -46,7 +46,7 @@ module.exports = {
       !assetFilename.match(/\.map(\.(gz|br))?$/),
 
     // Prevent warnings about entrypoint and asset size
-    maxEntrypointSize: 307200, // 300KiB
-    maxAssetSize: 307200, // 300KiB
+    maxEntrypointSize: 332800, // 325KiB
+    maxAssetSize: 332800, // 325KiB
   },
 };
