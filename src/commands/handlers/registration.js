@@ -199,8 +199,9 @@ const handlers = {
             }
             if (handler.network.cap.negotiating) {
                 let authenticating = false;
+                const conOpts = handler.connection.options;
                 if (handler.network.cap.isEnabled('sasl')) {
-                    const options_mechanism = handler.connection.options.sasl_mechanism;
+                    const options_mechanism = conOpts.sasl_mechanism;
                     const wanted_mechanism = (typeof options_mechanism === 'string') ?
                         options_mechanism.toUpperCase() :
                         'PLAIN';
@@ -218,7 +219,7 @@ const handlers = {
                         // emit 'sasl failed' with reason 'unsupported_mechanism' and disconnect if requested
                         handleSaslFail(handler, 'unsupported_mechanism');
                     }
-                } else if (handler.connection.options.account?.account || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
+                } else if ((conOpts.account && conOpts.account.account) || conOpts.sasl_mechanism === 'EXTERNAL') {
                     // The client provided an account for SASL auth but the server did not offer the SASL cap
                     // emit 'sasl failed' with reason 'capability_missing' and disconnect if requested
                     handleSaslFail(handler, 'capability_missing');
