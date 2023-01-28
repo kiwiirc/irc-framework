@@ -199,9 +199,8 @@ const handlers = {
             }
             if (handler.network.cap.negotiating) {
                 let authenticating = false;
-                const conOpts = handler.connection.options;
                 if (handler.network.cap.isEnabled('sasl')) {
-                    const options_mechanism = conOpts.sasl_mechanism;
+                    const options_mechanism = handler.connection.options.sasl_mechanism;
                     const wanted_mechanism = (typeof options_mechanism === 'string') ?
                         options_mechanism.toUpperCase() :
                         'PLAIN';
@@ -219,7 +218,7 @@ const handlers = {
                         // emit 'sasl failed' with reason 'unsupported_mechanism' and disconnect if requested
                         handleSaslFail(handler, 'unsupported_mechanism');
                     }
-                } else if ((conOpts.account && conOpts.account.account) || conOpts.sasl_mechanism === 'EXTERNAL') {
+                } else if (saslAuth || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
                     // The client provided an account for SASL auth but the server did not offer the SASL cap
                     // emit 'sasl failed' with reason 'capability_missing' and disconnect if requested
                     handleSaslFail(handler, 'capability_missing');
@@ -428,10 +427,6 @@ const handlers = {
     }
 };
 
-/**
- * Only use the nick+password combo if an account has not been specifically given.
- * If an account:{account,password} has been given, use it for SASL auth.
- */
 function getSaslAuth(handler) {
     const options = handler.connection.options;
     if (options.account && options.account.account) {
@@ -439,16 +434,6 @@ function getSaslAuth(handler) {
         return {
             account: options.account.account,
             password: options.account.password || '',
-        };
-    } else if (options.account) {
-        // An account object existed but without auth credentials
-        return null;
-    } else if (options.password) {
-        // No account credentials found but we have a server password. Also use it for SASL
-        // for ease of use
-        return {
-            account: options.nick,
-            password: options.password,
         };
     }
 
