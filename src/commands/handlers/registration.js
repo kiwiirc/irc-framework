@@ -218,7 +218,7 @@ const handlers = {
                         // emit 'sasl failed' with reason 'unsupported_mechanism' and disconnect if requested
                         handleSaslFail(handler, 'unsupported_mechanism');
                     }
-                } else if (handler.connection.options.account) {
+                } else if (saslAuth || handler.connection.options.sasl_mechanism === 'EXTERNAL') {
                     // The client provided an account for SASL auth but the server did not offer the SASL cap
                     // emit 'sasl failed' with reason 'capability_missing' and disconnect if requested
                     handleSaslFail(handler, 'capability_missing');
