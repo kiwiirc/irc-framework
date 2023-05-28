@@ -302,7 +302,7 @@ const handlers = {
         const saslAuth = getSaslAuth(handler);
         const auth_str = saslAuth.account + '\0' +
             saslAuth.account + '\0' +
-            saslAuth.password;
+            saslAuth.secret;
         const b = Buffer.from(auth_str, 'utf8');
         const b64 = b.toString('base64');
 
@@ -437,7 +437,9 @@ function getSaslAuth(handler) {
         // An account username has been given, use it for SASL auth
         return {
             account: options.account.account,
-            password: options.account.password || '',
+            secret: (options.sasl_mechanism.toUpperCase() === 'AUTHCOOKIE' ?
+                options.account.authcookie :
+                options.account.password) || '',
         };
     } else if (options.account) {
         // An account object existed but without auth credentials
@@ -447,7 +449,7 @@ function getSaslAuth(handler) {
         // for ease of use
         return {
             account: options.nick,
-            password: options.password,
+            secret: options.password,
         };
     }
 
