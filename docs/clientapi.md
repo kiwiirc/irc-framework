@@ -18,6 +18,7 @@ new Irc.Client({
     ping_interval: 30,
     ping_timeout: 120,
     sasl_disconnect_on_fail: false,
+    sasl_mechanism: "PLAIN",
     account: {
         account: 'username',
         password: 'account_password',
@@ -40,6 +41,11 @@ new Irc.Client({
 });
 ~~~
 
+##### SASL support
+The `sasl_mechanism`, `sasl_function`, and `account` fields are used for SASL
+authentication. The above example represents `PLAIN` authentication; for
+`EXTERNAL` authentication, no `account` should be specified. See
+[ircv3.md](ircv3.md#sasl) for more details on advanced SASL functionality.
 
 #### Properties
 ##### `.connected`

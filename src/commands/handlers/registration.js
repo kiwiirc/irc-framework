@@ -284,25 +284,32 @@ const handlers = {
     },
 
     AUTHENTICATE: function(command, handler) {
-        if (command.params[0] !== '+') {
-            if (handler.network.cap.negotiating) {
-                handler.connection.write('CAP END');
-                handler.network.cap.negotiating = false;
+        let options = handler.connection.options;
+        let auth_str = "";
+        if (options.sasl_function && typeof options.sasl_function === "function")
+        {
+            auth_str = options.sasl_function(comand, handler);
+        } else {
+            if (command.params[0] !== '+') {
+                if (handler.network.cap.negotiating) {
+                    handler.connection.write('CAP END');
+                    handler.network.cap.negotiating = false;
+                }
+
+                return;
             }
 
-            return;
-        }
+            // Send blank authenticate for EXTERNAL mechanism
+            if (options.sasl_mechanism === 'EXTERNAL') {
+                handler.connection.write('AUTHENTICATE +');
+                return;
+            }
 
-        // Send blank authenticate for EXTERNAL mechanism
-        if (handler.connection.options.sasl_mechanism === 'EXTERNAL') {
-            handler.connection.write('AUTHENTICATE +');
-            return;
+            const saslAuth = getSaslAuth(handler);
+            auth_str = saslAuth.authzid + '\0' +
+                saslAuth.authcid + '\0' +
+                saslAuth.secret;
         }
-
-        const saslAuth = getSaslAuth(handler);
-        const auth_str = saslAuth.account + '\0' +
-            saslAuth.account + '\0' +
-            saslAuth.secret;
         const b = Buffer.from(auth_str, 'utf8');
         const b64 = b.toString('base64');
 
@@ -429,26 +436,39 @@ const handlers = {
 
 /**
  * Only use the nick+password combo if an account has not been specifically given.
- * If an account:{account,password} has been given, use it for SASL auth.
+ * If account information has been given, use it for SASL auth.
  */
 function getSaslAuth(handler) {
     const options = handler.connection.options;
-    if (options.account && options.account.account) {
-        // An account username has been given, use it for SASL auth
-        return {
-            account: options.account.account,
-            secret: (options.sasl_mechanism.toUpperCase() === 'AUTHCOOKIE' ?
-                options.account.authcookie :
-                options.account.password) || '',
-        };
-    } else if (options.account) {
-        // An account object existed but without auth credentials
-        return null;
+    if (options.account) {
+        // Prefer the more general 'secret' over 'password' if present
+        const secret = options.account.secret ?
+                options.account.secret :
+                options.account.password;
+        if (options.account.authcid && options.account.authzid) {
+            // authzid and authcid used to log in as one user and act as another, see ircv3.md
+            return {
+                authcid: options.account.authcid,
+                authzid: options.account.authzid,
+                secret: secret || '',
+            };
+        } else if (options.account.account) {
+            // An account username has been given, use it for SASL auth
+            return {
+                authcid: options.account.account,
+                authzid: options.account.account,
+                secret: secret || '',
+            };
+        } else {
+            // An account object existed but without auth credentials
+            return null;
+        }
     } else if (options.password) {
         // No account credentials found but we have a server password. Also use it for SASL
         // for ease of use
         return {
-            account: options.nick,
+            authcid: options.nick,
+            authzid: options.nick,
             secret: options.password,
         };
     }
