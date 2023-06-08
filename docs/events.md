@@ -355,7 +355,8 @@ sent from the server or a user.
     group: '@',
     message: 'A message to all channel ops',
     tags: [],
-    time: 000000000
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -371,7 +372,8 @@ Also triggers a **message** event with .type = 'action'
     target: '#channel',
     message: 'slaps someuser around a bit with a large trout',
     tags: [],
-    time: 000000000
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -387,7 +389,8 @@ Also triggers a **message** event with .type = 'privmsg'
     target: '#channel',
     message: 'Hello everybody',
     tags: [],
-    time: 000000000
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -402,7 +405,8 @@ Also triggers a **message** event with .type = 'privmsg'
     tags: {
         example: 'hello'
     },
-    time: 000000000
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -414,7 +418,8 @@ Also triggers a **message** event with .type = 'privmsg'
     hostname: 'manchester.isp.net',
     target: 'someuser',
     message: 'VERSION kiwiirc',
-    time: 000000000
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -431,7 +436,8 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
     target: 'someuser',
     type: 'VERSION',
     message: 'VERSION and remaining text',
-    time: 000000000
+    time: 000000000,
+    account: 'account_name'
 }
 ~~~
 
@@ -443,7 +449,8 @@ The `VERSION` CTCP is handled internally and will not trigger this event, unless
     nick: 'prawnsalad',
     ident: 'prawn',
     hostname: 'manchester.isp.net',
-    message: 'This is a server-wide message'
+    message: 'This is a server-wide message',
+    account: 'account_name'
 }
 ~~~
 
