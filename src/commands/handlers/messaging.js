@@ -23,6 +23,7 @@ const handlers = {
                 type: (message.substring(1, message.length - 1).split(' ') || [null])[0],
                 message: message.substring(1, message.length - 1),
                 time: time,
+                account: command.getTag('account'),
                 tags: command.tags
             });
         } else {
@@ -125,6 +126,7 @@ const handlers = {
             target: target,
             tags: command.tags,
             time: time,
+            account: command.getTag('account'),
             batch: command.batch
         });
     },
