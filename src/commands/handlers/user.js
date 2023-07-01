@@ -307,15 +307,18 @@ const handlers = {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
 
-        // <source> 338 <target> <nick> <user>@<host> <ip> :Actual user@host, Actual IP
+        // <source> 338 <target> <nick> [<user>@]<host> <ip> :Actual user@host, Actual IP
         const user_host = command.params[command.params.length - 3] || '';
-        const host = user_host.substring(user_host.indexOf('@') + 1);
+        const mask_sep = user_host.indexOf('@');
+        const user = user_host.substring(0, mask_sep) || undefined;
+        const host = user_host.substring(mask_sep + 1);
         const ip = command.params[command.params.length - 2];
 
         // UnrealIRCd uses this numeric for something else resulting in ip+host
         // to be empty, so ignore this is that's the case
         if (ip && host) {
             cache.actual_ip = ip;
+            cache.actual_username = user;
             cache.actual_hostname = host;
         }
     },
@@ -338,7 +341,7 @@ const handlers = {
         // This exposes some fields (that may or may not be set).
         // Valid keys that should always be set: nick, ident, hostname, real_name
         // Valid optional keys: actual_ip, actual_hostname, account, server,
-        //   server_info
+        //   server_info, actual_username
         // More optional fields MAY exist, depending on the type of ircd.
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
