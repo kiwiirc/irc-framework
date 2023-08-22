@@ -611,7 +611,14 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     setTopic(channel, newTopic) {
-        this.raw('TOPIC', channel, newTopic);
+        if (newTopic && newTopic.trim()) {
+            this.raw('TOPIC', channel, newTopic);
+            return;
+        }
+
+        // If newTopic is undefined or empty, remove the existing topic
+        // this is needed because without the : then it would be requesting the current topic
+        this.raw(`TOPIC ${channel} :`);
     }
 
     ctcpRequest(target, type /*, paramN */) {
