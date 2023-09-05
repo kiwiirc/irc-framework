@@ -8,49 +8,6 @@ const assert = chai.assert;
 chai.use(require('chai-subset'));
 
 describe('src/messagetags.js', function() {
-    describe('CLIENTTAGDENY= parsing', function() {
-        it('should parse CLIENTTAGDENY=', function() {
-            assert.deepEqual(MessageTags.parseDenylist(''), {
-                allBlockedByDefault: false,
-                explicitlyDenied: [],
-                explicitlyAccepted: []
-            });
-        });
-
-        it('should parse CLIENTTAGDENY=*,-a', function() {
-            assert.deepEqual(MessageTags.parseDenylist('*,-a'), {
-                allBlockedByDefault: true,
-                explicitlyAccepted: ['a'],
-                explicitlyDenied: []
-            });
-        });
-
-        it('should parse CLIENTTAGDENY=a,b', function() {
-            assert.deepEqual(MessageTags.parseDenylist('a,b'), {
-                allBlockedByDefault: false,
-                explicitlyAccepted: [],
-                explicitlyDenied: ['a', 'b']
-            });
-        });
-    });
-
-    describe('CLIENTTAGDENY= logic', function() {
-        it('should block all tags (`b`) with * and no exception', function() {
-            assert.isTrue(MessageTags.isBlocked(MessageTags.parseDenylist('*'), 'b'));
-        });
-
-        it('should not block all tags with * and exceptions (`c`, `a`)', function() {
-            assert.isFalse(MessageTags.isBlocked(MessageTags.parseDenylist('*,-c,-a'), 'a'));
-            assert.isFalse(MessageTags.isBlocked(MessageTags.parseDenylist('*,-c,-a'), 'c'));
-            assert.isTrue(MessageTags.isBlocked(MessageTags.parseDenylist('*,-c,-a'), 'b'));
-        });
-
-        it('should block a specific tag if no * is present', function() {
-            assert.isTrue(MessageTags.isBlocked(MessageTags.parseDenylist('a'), 'a'));
-            assert.isFalse(MessageTags.isBlocked(MessageTags.parseDenylist('a'), 'b'));
-        });
-    });
-
     describe('value encoding', function() {
         it('should decode characters to correct strings', function() {
             const plain = "Some people use IRC; others don't \\o/ Note: Use IRC\r\n";

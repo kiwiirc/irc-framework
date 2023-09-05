@@ -53,15 +53,17 @@ describe('src/networkinfo.js', function() {
             const results = names.map(name => client.network.isChannelName(name));
             assert.deepEqual(results, [false, false, false, false, false, false]);
         });
+    });
 
-        it('should parse CLIENTTAGDENY= as a list', function() {
+    describe('CLIENTTAGDENY Support', function() {
+        it('should parse CLIENTTAGDENY=a,b,c as a list', function() {
             const client = newMockClient();
             client.dispatch({
                 command: '005',
-                params: ['nick', 'CLIENTTAGDENY='],
+                params: ['nick', 'CLIENTTAGDENY=a,b,c'],
                 tags: []
             });
-            assert.isEmpty(client.network.options.CLIENTTAGDENY);
+            assert.deepEqual(client.network.options.CLIENTTAGDENY, ['a', 'b', 'c']);
         });
 
         it('should parse CLIENTTAGDENY=*,-a,-b as a list', function() {
@@ -71,17 +73,87 @@ describe('src/networkinfo.js', function() {
                 params: ['nick', 'CLIENTTAGDENY=*,-a,-b'],
                 tags: []
             });
-            assert.equal(client.network.options.CLIENTTAGDENY, ['*', '-a', '-b']);
+            assert.deepEqual(client.network.options.CLIENTTAGDENY, ['*', '-a', '-b']);
         });
-    });
 
-    it('should parse CLIENTTAGDENY=a,b,c as a list', function() {
-        const client = newMockClient();
-        client.dispatch({
-            command: '005',
-            params: ['nick', 'CLIENTTAGDENY=a,b,c'],
-            tags: []
+        it('should parse CLIENTTAGDENY= as a list', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY='],
+                tags: []
+            });
+            assert.isArray(client.network.options.CLIENTTAGDENY);
+            assert.isEmpty(client.network.options.CLIENTTAGDENY);
         });
-        assert.equal(client.network.options.CLIENTTAGDENY, ['a', 'b', 'c']);
+
+        it('should be undefined when no CLIENTTAGDENY', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', ''],
+                tags: []
+            });
+            assert.isUndefined(client.network.options.CLIENTTAGDENY);
+        });
+
+        it('should deny all when no message-tags CAP', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY=*,-a,-b'],
+                tags: []
+            });
+            assert.isFalse(client.network.supportsTag('a'));
+            assert.isFalse(client.network.supportsTag('b'));
+        });
+
+        it('should allow all when CLIENTTAGDENY=', function() {
+            const client = newMockClient();
+            client.network.cap.enabled.push('message-tags');
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY='],
+                tags: []
+            });
+            assert.isTrue(client.network.supportsTag('a'));
+            assert.isTrue(client.network.supportsTag('b'));
+        });
+
+        it('should deny all when CLIENTTAGDENY=*', function() {
+            const client = newMockClient();
+            client.network.cap.enabled.push('message-tags');
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY=*'],
+                tags: []
+            });
+            assert.isFalse(client.network.supportsTag('a'));
+            assert.isFalse(client.network.supportsTag('b'));
+        });
+
+        it('should allow a & deny b, c when CLIENTTAGDENY=*,-a', function() {
+            const client = newMockClient();
+            client.network.cap.enabled.push('message-tags');
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY=*,-a'],
+                tags: []
+            });
+            assert.isTrue(client.network.supportsTag('a'));
+            assert.isFalse(client.network.supportsTag('b'));
+        });
+
+        it('should allow a & deny b when CLIENTTAGDENY=b', function() {
+            const client = newMockClient();
+            client.network.cap.enabled.push('message-tags');
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY=b'],
+                tags: []
+            });
+            assert.isTrue(client.network.supportsTag('a'));
+            assert.isFalse(client.network.supportsTag('b'));
+        });
     });
 });
