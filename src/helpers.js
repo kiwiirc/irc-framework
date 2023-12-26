@@ -17,8 +17,10 @@ function parseMask(mask) {
     let user = '';
     let host = '';
 
-    const sep1 = mask.indexOf('!');
-    const sep2 = mask.indexOf('@');
+    //const sep1 = mask.indexOf('!');
+    const sep1 = (mask || '').indexOf('!');
+    //const sep2 = mask.indexOf('@');
+    const sep2 = (mask || '').indexOf('@');
 
     if (sep1 === -1 && sep2 === -1) {
         // something
