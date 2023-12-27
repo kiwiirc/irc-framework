@@ -161,7 +161,6 @@ module.exports = class Connection extends EventEmitter {
 
         const message = ircLineParser(line);
         if (!message) {
-            // A malformed IRC line
             return;
         }
 
