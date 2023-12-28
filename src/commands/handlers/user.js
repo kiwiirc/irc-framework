@@ -3,6 +3,7 @@
 const _ = {
     each: require('lodash/each'),
     map: require('lodash/map'),
+    cloneDeep: require('lodash/cloneDeep'),
 };
 const Helpers = require('../../helpers');
 
@@ -325,12 +326,26 @@ const handlers = {
 
     RPL_WHOWASUSER: function(command, handler) {
         const cache_key = command.params[1].toLowerCase();
-        const cache = handler.cache('whois.' + cache_key);
+        const whois_cache = handler.cache('whois.' + cache_key);
 
-        cache.nick = command.params[1];
-        cache.ident = command.params[2];
-        cache.hostname = command.params[3];
-        cache.real_name = command.params[command.params.length - 1];
+        // multiple RPL_WHOWASUSER replies are received prior to the RPL_ENDOFWHOWAS command
+        // one for each timestamp the server is aware of, from newest to oldest.
+        // They are optionally interleaved with various other numerics such as RPL_WHOISACTUALLY etc.
+        // Hence if we already find something we are receiving older data and need to make sure that we
+        // store anything already in the cache into its own entry
+        const whowas_cache = handler.cache('whowas.' + cache_key);
+        if (!whowas_cache.historical) {
+            // this will get populated by the next RPL_WHOWASUSER or RPL_ENDOFWHOWAS
+            whowas_cache.historical = [];
+        } else {
+            // push the previous event prior to modifying anything
+            whowas_cache.historical.push(_.cloneDeep(whois_cache));
+        }
+
+        whois_cache.nick = command.params[1];
+        whois_cache.ident = command.params[2];
+        whois_cache.hostname = command.params[3];
+        whois_cache.real_name = command.params[command.params.length - 1];
     },
 
     RPL_ENDOFWHOWAS: function(command, handler) {
@@ -344,16 +359,29 @@ const handlers = {
         //   server_info, actual_username
         // More optional fields MAY exist, depending on the type of ircd.
         const cache_key = command.params[1].toLowerCase();
-        const cache = handler.cache('whois.' + cache_key);
+        const whois_cache = handler.cache('whois.' + cache_key);
+        const whowas_cache = handler.cache('whowas.' + cache_key);
+
+        // after all prior RPL_WHOWASUSER pushed newer events onto the history stack
+        // push the last one to complete the set (server returns from newest to oldest)
+        if (!whowas_cache.historical) {
+            whowas_cache.historical = [];
+        }
+        whowas_cache.historical.push(_.cloneDeep(whois_cache));
+
+        // now pull the newest response to the top level and add the rest as an array
+        const event = whowas_cache.historical[0];
+        event.historical = whowas_cache.historical.slice(1);
 
         // Should, in theory, never happen.
-        if (!cache.nick) {
-            cache.nick = command.params[1];
-            cache.error = 'no_such_nick';
+        if (!event.nick) {
+            event.nick = command.params[1];
+            event.error = 'no_such_nick';
         }
 
-        handler.emit('whowas', cache);
-        cache.destroy();
+        handler.emit('whowas', event);
+        whois_cache.destroy();
+        whowas_cache.destroy();
     },
 
     ERR_WASNOSUCHNICK: function(command, handler) {

@@ -596,6 +596,10 @@ Not all of these options will be available. Some will be missing depending on th
 
 **whowas**
 
+The response includes the latest known data.
+If more than one RPL_WHOWASUSER is returned by the server, older ones
+are stored in the same format in the 'historical' array from newest to oldest.
+
 If the requested user was not found, error will contain 'no_such_nick'.
 ~~~javascript
 {
@@ -609,6 +613,10 @@ If the requested user was not found, error will contain 'no_such_nick'.
     server_info: 'Thu Jun 14 09:15:51 2018',
     account: 'logged on account',
     error: ''
+    historical: [
+        { ... },
+        { ... },
+    ]
 }
 ~~~
 
