@@ -124,7 +124,7 @@ order.
 Request that the IRC server sends a list of available channels. Extra parameters
 will be sent.
 
-##### `.channel(channel_name)`
+##### `.channel(channel_name, key)`
 Create a channel object with the following methods:
 * `say(message)`
 * `notice(message)`
