@@ -826,8 +826,8 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw(args);
     }
 
-    channel(channel_name) {
-        return new Channel(this, channel_name);
+    channel(channel_name, key) {
+        return new Channel(this, channel_name, key);
     }
 
     match(match_regex, cb, message_type) {
