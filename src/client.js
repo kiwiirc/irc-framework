@@ -611,13 +611,20 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     setTopic(channel, newTopic) {
-        if (newTopic && newTopic.trim()) {
-            this.raw('TOPIC', channel, newTopic);
+        if (!newTopic || !newTopic.trim()) {
+            // If newTopic is undefined or empty, remove the existing topic
+            // this check is to prevent unexpectedly requesting the current topic
+            // when trying to clear the topic
+            this.clearTopic(channel);
             return;
         }
 
-        // If newTopic is undefined or empty, remove the existing topic
-        // this is needed because without the : then it would be requesting the current topic
+        this.raw('TOPIC', channel, newTopic);
+    }
+
+    clearTopic(channel) {
+        // The trailing `:` is required otherwise it would be requesting the topic
+        // and not clearing it
         this.raw(`TOPIC ${channel} :`);
     }
 

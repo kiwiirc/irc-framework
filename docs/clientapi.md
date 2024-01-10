@@ -101,6 +101,9 @@ Part/leave a channel with an optional parting message.
 ##### `.setTopic(channel, newTopic)`
 Set the topic of a channel
 
+##### `.clearTopic(channel)`
+Remove the topic of a channel
+
 ##### `.ctcpRequest(target, type [, paramN])`
 Send a CTCP request to target with any number of parameters.
 
