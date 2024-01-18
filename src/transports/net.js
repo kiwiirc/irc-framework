@@ -26,18 +26,31 @@ module.exports = class Connection extends EventEmitter {
         this.socket_events = [];
 
         this.encoding = 'utf8';
+
+        this.write_queue = null;
+        this.write_queue_servicer = () => {};
     }
 
     isConnected() {
         return this.state === SOCK_CONNECTED;
     }
 
+    _writeLineConnected(line, cb) {
+        if (this.encoding !== 'utf8') {
+            this.socket.write(iconv.encode(line + '\r\n', this.encoding), cb);
+        } else {
+            this.socket.write(line + '\r\n', cb);
+        }
+    }
+
     writeLine(line, cb) {
         if (this.socket && this.isConnected()) {
-            if (this.encoding !== 'utf8') {
-                this.socket.write(iconv.encode(line + '\r\n', this.encoding), cb);
+            if (this.options.serialize_writes && this.write_queue) {
+                if (this.write_queue.push({ line, cb }) === 1) {
+                    this.write_queue_servicer();
+                }
             } else {
-                this.socket.write(line + '\r\n', cb);
+                this._writeLineConnected(line, cb);
             }
         } else {
             this.debugOut('writeLine() called when not connected');
@@ -76,6 +89,22 @@ module.exports = class Connection extends EventEmitter {
         this.disposeSocket();
         this.requested_disconnect = false;
         this.incoming_buffer = Buffer.from('');
+
+        if (options.serialize_writes) {
+            this.write_queue = [];
+            this.write_queue_servicer = () => {
+                if (this.write_queue.length) {
+                    this._writeLineConnected(this.write_queue[0].line, () => {
+                        if (this.write_queue[0].cb) {
+                            this.write_queue[0].cb();
+                        }
+
+                        this.write_queue = this.write_queue.slice(1);
+                        process.nextTick(this.write_queue_servicer);
+                    });
+                }
+            };
+        }
 
         // Include server name (SNI) if provided host is not an IP address
         if (!this.getAddressFamily(ircd_host)) {
