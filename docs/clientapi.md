@@ -40,6 +40,9 @@ new Irc.Client({
 });
 ~~~
 
+##### Configuration
+Small clarification regarding SASL: to disable it completely, do not remove the entire `account { account: '', password: '' }` section, as it is still checked if the PASS exists even if it should not be used for SASL. To disable SASL, simply leave `account { }` and remove the 'account' and 'password' inside.
+
 
 #### Properties
 ##### `.connected`
