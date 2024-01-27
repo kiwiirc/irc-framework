@@ -25,7 +25,8 @@ function NetworkInfo() {
             { symbol: '@', mode: 'o' },
             { symbol: '%', mode: 'h' },
             { symbol: '+', mode: 'v' }
-        ]
+        ],
+        CLIENTTAGDENY: []
     };
 
     this.time_offsets = [];

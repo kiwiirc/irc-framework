@@ -53,5 +53,35 @@ describe('src/networkinfo.js', function() {
             const results = names.map(name => client.network.isChannelName(name));
             assert.deepEqual(results, [false, false, false, false, false, false]);
         });
+
+        it('should parse CLIENTTAGDENY= as a list', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY='],
+                tags: []
+            });
+            assert.isEmpty(client.network.options.CLIENTTAGDENY);
+        });
+
+        it('should parse CLIENTTAGDENY=*,-a,-b as a list', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'CLIENTTAGDENY=*,-a,-b'],
+                tags: []
+            });
+            assert.equal(client.network.options.CLIENTTAGDENY, ['*', '-a', '-b']);
+        });
+    });
+
+    it('should parse CLIENTTAGDENY=a,b,c as a list', function() {
+        const client = newMockClient();
+        client.dispatch({
+            command: '005',
+            params: ['nick', 'CLIENTTAGDENY=a,b,c'],
+            tags: []
+        });
+        assert.equal(client.network.options.CLIENTTAGDENY, ['a', 'b', 'c']);
     });
 });

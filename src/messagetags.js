@@ -6,6 +6,8 @@ module.exports.decodeValue = decodeValue;
 module.exports.encodeValue = encodeValue;
 module.exports.decode = decode;
 module.exports.encode = encode;
+module.exports.parseDenylist = parseDenylist;
+module.exports.isBlocked = isBlocked;
 
 const tokens_map = {
     '\\\\': '\\',
@@ -67,4 +69,46 @@ function encode(tags, separator = ';') {
     });
 
     return parts.join(separator);
+}
+
+// Parses a raw CLIENTTAGDENY= denylist
+// into a { allBlockedByDefault: boolean, explicitlyAccepted: string[], explicitlyDenied: string[] }
+// structure.
+function parseDenylist(raw) {
+    const denylist = {
+        allBlockedByDefault: false,
+        explicitlyAccepted: [],
+        explicitlyDenied: []
+    };
+    const parts = raw.split(',');
+
+    for (let idx = 0; idx < parts.length; idx++) {
+        const tag = parts[idx];
+        if (tag === '') {
+            continue;
+        }
+
+        if (tag === '*') {
+            denylist.allBlockedByDefault = true;
+            continue;
+        }
+
+        if (tag[0] === '-') {
+            denylist.explicitlyAccepted.push(tag.slice(1));
+        } else {
+            denylist.explicitlyDenied.push(tag);
+        }
+    }
+
+    return denylist;
+}
+
+// Takes a parsed denylist and returns whether tag is allowed
+// according to current denial policies.
+function isBlocked(denylist, tag) {
+    if (denylist.allBlockedByDefault) {
+        return !denylist.explicitlyAccepted.includes(tag);
+    } else {
+        return denylist.explicitlyDenied.includes(tag);
+    }
 }
