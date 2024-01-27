@@ -25,7 +25,18 @@ function NetworkInfo() {
             { symbol: '@', mode: 'o' },
             { symbol: '%', mode: 'h' },
             { symbol: '+', mode: 'v' }
-        ]
+        ],
+    };
+
+    // Network capabilities
+    this.cap = {
+        negotiating: false,
+        requested: [],
+        enabled: [],
+        available: new Map(),
+        isEnabled: function(cap_name) {
+            return this.enabled.indexOf(cap_name) > -1;
+        }
     };
 
     this.time_offsets = [];
@@ -69,6 +80,23 @@ function NetworkInfo() {
         return this.options[support_name.toUpperCase()];
     };
 
+    this.supportsTag = function supportsTag(tag_name) {
+        if (!this.cap.isEnabled('message-tags')) {
+            return false;
+        }
+
+        if (!this.options.CLIENTTAGDENY || this.options.CLIENTTAGDENY.length === 0) {
+            return true;
+        }
+
+        const allowAll = this.options.CLIENTTAGDENY[0] !== '*';
+        if (allowAll) {
+            return !this.options.CLIENTTAGDENY.some((tag) => tag === tag_name);
+        }
+
+        return this.options.CLIENTTAGDENY.some((tag) => tag === `-${tag_name}`);
+    };
+
     this.isChannelName = function isChannelName(channel_name) {
         if (typeof channel_name !== 'string' || channel_name === '') {
             return false;
@@ -101,16 +129,5 @@ function NetworkInfo() {
             target: target,
             target_group: target_group,
         };
-    };
-
-    // Network capabilities
-    this.cap = {
-        negotiating: false,
-        requested: [],
-        enabled: [],
-        available: new Map(),
-        isEnabled: function(cap_name) {
-            return this.enabled.indexOf(cap_name) > -1;
-        }
     };
 }
