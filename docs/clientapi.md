@@ -40,6 +40,16 @@ new Irc.Client({
 });
 ~~~
 
+#### Configuration
+##### `account`
+To accommodate backwards compatibility support, the `account` configuration can behave in different ways depending what data types its provided.
+
+When the `account` property is falsy, `options.nick` and `options.password` will be used for SASL Auth.
+
+If the `account` property is an object, `account.account` and `account.password` will be used for SASL Auth.
+
+To Completely disable SASL Auth, set `account` to an empty object, eg: `account: {}`.
+
 
 #### Properties
 ##### `.connected`
