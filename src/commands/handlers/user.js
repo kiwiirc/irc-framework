@@ -272,8 +272,10 @@ const handlers = {
     RPL_WHOISCERTFP: function(command, handler) {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
-        cache.certfp = cache.certfp || [];
-        cache.certfp.push(command.params[command.params.length - 1]);
+        const certfp = command.params[command.params.length - 1];
+        cache.certfp = cache.certfp || certfp;
+        cache.certfps = cache.certfps || [];
+        cache.certfps.push(certfp);
     },
 
     RPL_WHOISACCOUNT: function(command, handler) {
