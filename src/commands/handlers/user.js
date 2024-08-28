@@ -362,8 +362,8 @@ const handlers = {
         const host = user_host.substring(mask_sep + 1);
 
         if (host) {
-            cache.actual_user = user;
-            cache.actual_host = host;
+            cache.actual_username = user;
+            cache.actual_username = host;
         }
     },
 
@@ -391,12 +391,6 @@ const handlers = {
         // now pull the newest response to the top level and add the rest as an array
         const event = _.cloneDeep(whowas_cache.historical[0]);
         event.historical = whowas_cache.historical;
-
-        // Should, in theory, never happen.
-        if (!event.nick) {
-            event.nick = command.params[1];
-            event.error = 'no_such_nick';
-        }
 
         handler.emit('whowas', event);
         whois_cache.destroy();

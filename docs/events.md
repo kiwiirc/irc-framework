@@ -596,11 +596,13 @@ Not all of these options will be available. Some will be missing depending on th
 
 **whowas**
 
-The response includes the latest known data.
-If more than one RPL_WHOWASUSER is returned by the server, older ones
-are stored in the same format in the 'historical' array from newest to oldest.
+The response root includes the latest data `historical[0]` to maintain backwards compatibility.
+The `historical` array contains all RPL_WHOWASUSER responses with the newest being first.
 
-If the requested user was not found, error will contain 'no_such_nick'.
+If the requested user was not found, `error` will contain 'no_such_nick'.
+
+> Note: The available data can vary depending on the network.
+
 ~~~javascript
 {
     nick: 'prawnsalad',
@@ -608,6 +610,7 @@ If the requested user was not found, error will contain 'no_such_nick'.
     hostname: 'manchester.isp.net',
     actual_ip: 'sometimes set when using webirc, could be the same as actual_hostname',
     actual_hostname: 'sometimes set when using webirc',
+    actual_username: 'prawn',
     real_name: 'A real prawn',
     server: 'irc.server.net',
     server_info: 'Thu Jun 14 09:15:51 2018',
