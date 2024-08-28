@@ -326,7 +326,7 @@ const handlers = {
 
     RPL_WHOWASUSER: function(command, handler) {
         const cache_key = command.params[1].toLowerCase();
-        const whois_cache = handler.cache('whois.' + cache_key);
+        let whois_cache = handler.cache('whois.' + cache_key);
 
         // multiple RPL_WHOWASUSER replies are received prior to the RPL_ENDOFWHOWAS command
         // one for each timestamp the server is aware of, from newest to oldest.
@@ -340,12 +340,31 @@ const handlers = {
         } else {
             // push the previous event prior to modifying anything
             whowas_cache.historical.push(_.cloneDeep(whois_cache));
+            // ensure we are starting with a clean cache for the next data
+            whois_cache.destroy();
+            whois_cache = handler.cache('whois.' + cache_key);
         }
 
         whois_cache.nick = command.params[1];
         whois_cache.ident = command.params[2];
         whois_cache.hostname = command.params[3];
         whois_cache.real_name = command.params[command.params.length - 1];
+    },
+
+    RPL_WHOWASIP: function(command, handler) {
+        const cache_key = command.params[1].toLowerCase();
+        const cache = handler.cache('whois.' + cache_key);
+
+        const param_tokens = (command.params[command.params.length - 1] || '').split(' ');
+        const user_host = param_tokens[param_tokens.length - 1];
+        const mask_sep = user_host.indexOf('@');
+        const user = user_host.substring(0, mask_sep) || undefined;
+        const host = user_host.substring(mask_sep + 1);
+
+        if (host) {
+            cache.actual_user = user;
+            cache.actual_host = host;
+        }
     },
 
     RPL_ENDOFWHOWAS: function(command, handler) {
@@ -370,8 +389,8 @@ const handlers = {
         whowas_cache.historical.push(_.cloneDeep(whois_cache));
 
         // now pull the newest response to the top level and add the rest as an array
-        const event = whowas_cache.historical[0];
-        event.historical = whowas_cache.historical.slice(1);
+        const event = _.cloneDeep(whowas_cache.historical[0]);
+        event.historical = whowas_cache.historical;
 
         // Should, in theory, never happen.
         if (!event.nick) {

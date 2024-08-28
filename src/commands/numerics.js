@@ -153,6 +153,7 @@ module.exports = {
     '531': 'ERR_CANNOTSENDTOUSER',
     /* InspIRCD specific https://github.com/inspircd/inspircd-contrib/blob/master/3.0/m_asn.cpp */
     '569': 'RPL_WHOISASN',
+    '652': 'RPL_WHOWASIP',
     '670': 'RPL_STARTTLS',
     '671': 'RPL_WHOISSECURE',
     '704': 'RPL_HELPSTART',
