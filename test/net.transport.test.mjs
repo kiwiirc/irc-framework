@@ -1,19 +1,13 @@
-'use strict';
+import net from 'net';
+import tls from 'tls';
+import { EventEmitter } from 'events';
+import { assert, expect, use as chaiUse } from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 
-/* globals describe, it, beforeEach, afterEach */
-/* eslint-disable no-unused-expressions */
-const net = require('net');
-const tls = require('tls');
-const EventEmitter = require('events').EventEmitter;
-const chai = require('chai');
-const sinon = require('sinon');
-const sinonChai = require('sinon-chai');
-const assert = chai.assert;
-const expect = chai.expect;
+import Connection from '../src/transports/net.js';
 
-chai.use(sinonChai);
-
-const Connection = require('../src/transports/net');
+chaiUse(sinonChai);
 
 function createMockSocket() {
     const socket = new EventEmitter();

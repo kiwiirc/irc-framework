@@ -1,11 +1,11 @@
 'use strict';
 
-/* globals describe, it */
-const chai = require('chai');
-const parseIrcLine = require('../src/irclineparser');
-const expect = chai.expect;
+import { expect, use } from 'chai';
+import chaiSubset from 'chai-subset';
 
-chai.use(require('chai-subset'));
+import parseIrcLine from '../src/irclineparser.js';
+
+use(chaiSubset);
 
 describe('src/irclineparser.js', function() {
     describe('message parsing', function() {
@@ -22,7 +22,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo']
+                params: ['foo'],
             });
         });
 
@@ -31,7 +31,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo']
+                params: ['foo'],
             });
         });
 
@@ -40,7 +40,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -49,7 +49,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo:bar']
+                params: ['foo:bar'],
             });
         });
 
@@ -58,7 +58,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo:bar']
+                params: ['foo:bar'],
             });
         });
 
@@ -67,7 +67,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo :bar']
+                params: ['foo :bar'],
             });
         });
 
@@ -76,7 +76,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -85,7 +85,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -94,7 +94,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 command: 'TEST',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -128,7 +128,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 nick: 'nick',
                 hostname: 'irc.example.org',
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -139,7 +139,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'irc.example.org',
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -148,7 +148,7 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -214,7 +214,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -225,7 +225,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 hostname: 'example.org',
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -237,7 +237,7 @@ describe('src/irclineparser.js', function() {
                 ident: 'ident',
                 hostname: 'example.org',
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -247,7 +247,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -258,7 +258,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 hostname: 'example.org',
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -270,7 +270,7 @@ describe('src/irclineparser.js', function() {
                 ident: 'ident',
                 hostname: 'example.org',
                 command: 'TEST',
-                params: ['foo', 'bar']
+                params: ['foo', 'bar'],
             });
         });
 
@@ -280,7 +280,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
                 command: 'TEST',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -291,7 +291,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 hostname: 'example.org',
                 command: 'TEST',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -303,7 +303,7 @@ describe('src/irclineparser.js', function() {
                 ident: 'ident',
                 hostname: 'example.org',
                 command: 'TEST',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -324,7 +324,7 @@ describe('src/irclineparser.js', function() {
                 tags: {
                     foo: '',
                 },
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -333,9 +333,9 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'bar'
+                    foo: 'bar',
                 },
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -344,9 +344,9 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: ''
+                    foo: '',
                 },
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -355,9 +355,9 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: ''
+                    foo: '',
                 },
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -369,7 +369,7 @@ describe('src/irclineparser.js', function() {
                     foo: '',
                     bar: '',
                 },
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -381,7 +381,7 @@ describe('src/irclineparser.js', function() {
                     foo: 'bar',
                     baz: '',
                 },
-                command: 'TEST'
+                command: 'TEST',
             });
         });
 
@@ -393,7 +393,7 @@ describe('src/irclineparser.js', function() {
                     foo: '',
                 },
                 command: '',
-                prefix: 'irc.example.org'
+                prefix: 'irc.example.org',
             });
         });
 
@@ -405,7 +405,7 @@ describe('src/irclineparser.js', function() {
                     foo: '',
                 },
                 command: 'TEST',
-                prefix: 'irc.example.org'
+                prefix: 'irc.example.org',
             });
         });
 
@@ -418,7 +418,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 nick: 'nick',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -432,7 +432,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -441,10 +441,10 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'bar'
+                    foo: 'bar',
                 },
                 command: 'TEST',
-                prefix: 'irc.example.org'
+                prefix: 'irc.example.org',
             });
         });
 
@@ -453,11 +453,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'bar'
+                    foo: 'bar',
                 },
                 command: 'TEST',
                 nick: 'nick',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -466,11 +466,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'bar'
+                    foo: 'bar',
                 },
                 command: 'TEST',
                 nick: 'nick',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -483,7 +483,7 @@ describe('src/irclineparser.js', function() {
                     bar: '',
                 },
                 command: 'TEST',
-                prefix: 'irc.example.org'
+                prefix: 'irc.example.org',
             });
         });
 
@@ -497,7 +497,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 nick: 'nick',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -512,7 +512,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -525,7 +525,7 @@ describe('src/irclineparser.js', function() {
                     baz: '',
                 },
                 command: 'TEST',
-                prefix: 'irc.example.org'
+                prefix: 'irc.example.org',
             });
         });
 
@@ -539,7 +539,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 nick: 'nick',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -554,7 +554,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
-                hostname: 'example.org'
+                hostname: 'example.org',
             });
         });
 
@@ -567,7 +567,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -580,7 +580,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -593,7 +593,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -606,7 +606,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -619,7 +619,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -632,7 +632,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -645,7 +645,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -659,7 +659,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -673,7 +673,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -687,7 +687,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -701,7 +701,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -715,7 +715,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -729,7 +729,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -743,7 +743,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -758,7 +758,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -773,7 +773,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -788,7 +788,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -803,7 +803,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -818,7 +818,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -833,7 +833,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -848,7 +848,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -857,11 +857,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -870,11 +870,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -883,11 +883,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -896,11 +896,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -909,11 +909,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -922,11 +922,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -935,11 +935,11 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -948,12 +948,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -962,12 +962,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -976,12 +976,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -990,12 +990,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1004,12 +1004,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1018,12 +1018,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
         it('should parse a message that has a tag with a value, a "trailing" parameter that has spaces and a nick@hostname prefix', function() {
@@ -1031,12 +1031,12 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1045,13 +1045,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1060,13 +1060,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1075,13 +1075,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1090,13 +1090,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1105,13 +1105,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1120,13 +1120,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1135,13 +1135,13 @@ describe('src/irclineparser.js', function() {
 
             expect(msgObj).to.containSubset({
                 tags: {
-                    foo: 'testvalue'
+                    foo: 'testvalue',
                 },
                 command: 'TEST',
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1155,7 +1155,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1169,7 +1169,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1183,7 +1183,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1197,7 +1197,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1211,7 +1211,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1225,7 +1225,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1239,7 +1239,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1254,7 +1254,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1269,7 +1269,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1284,7 +1284,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1299,7 +1299,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1314,7 +1314,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1329,7 +1329,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
         it('should parse a message that has multiple tags with no values, a "trailing" parameter that has spaces and a nick@hostname prefix', function() {
@@ -1343,7 +1343,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1359,7 +1359,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1375,7 +1375,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1391,7 +1391,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1407,7 +1407,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1423,7 +1423,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1439,7 +1439,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1455,7 +1455,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1469,7 +1469,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1483,7 +1483,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1497,7 +1497,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1511,7 +1511,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1525,7 +1525,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1539,7 +1539,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1553,7 +1553,7 @@ describe('src/irclineparser.js', function() {
                 },
                 command: 'TEST',
                 prefix: 'irc.example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1568,7 +1568,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1583,7 +1583,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1598,7 +1598,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1613,7 +1613,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1628,7 +1628,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1643,7 +1643,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1658,7 +1658,7 @@ describe('src/irclineparser.js', function() {
                 command: 'TEST',
                 nick: 'nick',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1674,7 +1674,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1690,7 +1690,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1706,7 +1706,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar']
+                params: ['bar'],
             });
         });
 
@@ -1722,7 +1722,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['']
+                params: [''],
             });
         });
 
@@ -1738,7 +1738,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1754,7 +1754,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['bar', 'baz']
+                params: ['bar', 'baz'],
             });
         });
 
@@ -1770,7 +1770,7 @@ describe('src/irclineparser.js', function() {
                 nick: 'nick',
                 ident: 'ident',
                 hostname: 'example.org',
-                params: ['hello world']
+                params: ['hello world'],
             });
         });
 
@@ -1780,7 +1780,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 command: '005',
                 hostname: 'irc.example.org',
-                params: ['nick', 'SECURELIST', 'SILENCE=32', 'SSL=[::]:6697', 'STATUSMSG=!@%+', 'TOPICLEN=1000', 'UHNAMES', 'USERIP', 'VBANLIST', 'WALLCHOPS', 'WALLVOICES', 'WATCH=64', 'are supported by this server']
+                params: ['nick', 'SECURELIST', 'SILENCE=32', 'SSL=[::]:6697', 'STATUSMSG=!@%+', 'TOPICLEN=1000', 'UHNAMES', 'USERIP', 'VBANLIST', 'WALLCHOPS', 'WALLVOICES', 'WATCH=64', 'are supported by this server'],
             });
         });
 
@@ -1790,7 +1790,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
                 command: 'TEST',
-                params: ['foo', 'bar  ']
+                params: ['foo', 'bar  '],
             });
         });
 
@@ -1800,7 +1800,7 @@ describe('src/irclineparser.js', function() {
             expect(msgObj).to.containSubset({
                 prefix: 'irc.example.org',
                 command: 'TEST',
-                params: ['foo', 'bar  ']
+                params: ['foo', 'bar  '],
             });
         });
     });

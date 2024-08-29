@@ -1,11 +1,11 @@
 'use strict';
 
-/* globals describe, it */
-const Connection = require('../src/transports/net');
-const chai = require('chai');
-const assert = chai.assert;
+import { assert, use } from 'chai';
+import chaiSubset from 'chai-subset';
 
-chai.use(require('chai-subset'));
+import Connection from '../src/transports/net.js';
+
+use(chaiSubset);
 
 describe('src/transports/net.js', function() {
     describe('setEncoding', function() {

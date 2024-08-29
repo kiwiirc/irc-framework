@@ -1,11 +1,11 @@
 'use strict';
-/* globals describe, it */
-const chai = require('chai');
-const MessageTags = require('../src/messagetags');
-const expect = chai.expect;
-const assert = chai.assert;
 
-chai.use(require('chai-subset'));
+import { assert, expect, use } from 'chai';
+import chaiSubset from 'chai-subset';
+
+import MessageTags from '../src/messagetags.js';
+
+use(chaiSubset);
 
 describe('src/messagetags.js', function() {
     describe('value encoding', function() {

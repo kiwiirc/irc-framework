@@ -1,15 +1,17 @@
 'use strict';
 /* globals describe, it */
-const chai = require('chai');
-const {
+
+import { expect, use } from 'chai';
+import chaiSubset from 'chai-subset';
+
+import {
     lineBreak,
     WordTooLargeForLineError,
     GraphemeTooLargeForLineError,
-    CodepointTooLargeForLineError,
-} = require('../src/linebreak');
-const expect = chai.expect;
+    CodepointTooLargeForLineError
+} from '../src/linebreak.js';
 
-chai.use(require('chai-subset'));
+use(chaiSubset);
 
 describe('src/client.js', function() {
     describe('lineBreak', function() {
@@ -29,7 +31,7 @@ describe('src/client.js', function() {
                 family,
                 family,
                 'test string',
-                family
+                family,
             ];
 
             expect(
@@ -64,7 +66,7 @@ describe('src/client.js', function() {
                 'just a normal',
                 'string, testing',
                 'word splitting',
-                ':)'
+                ':)',
             ];
 
             expect(
@@ -137,7 +139,7 @@ describe('src/client.js', function() {
                 '\u200d\u200d',
                 '\u200d\u200d',
                 '\u200d\u200d',
-                '\u200d\u200d'
+                '\u200d\u200d',
             ];
 
             expect([...lineBreak(plain, {
