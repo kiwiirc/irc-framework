@@ -334,12 +334,12 @@ const handlers = {
         // Hence if we already find something we are receiving older data and need to make sure that we
         // store anything already in the cache into its own entry
         const whowas_cache = handler.cache('whowas.' + cache_key);
-        if (!whowas_cache.historical) {
+        if (!whowas_cache.whowas) {
             // this will get populated by the next RPL_WHOWASUSER or RPL_ENDOFWHOWAS
-            whowas_cache.historical = [];
+            whowas_cache.whowas = [];
         } else {
             // push the previous event prior to modifying anything
-            whowas_cache.historical.push(_.cloneDeep(whois_cache));
+            whowas_cache.whowas.push(_.cloneDeep(whois_cache));
             // ensure we are starting with a clean cache for the next data
             whois_cache.destroy();
             whois_cache = handler.cache('whois.' + cache_key);
@@ -349,22 +349,6 @@ const handlers = {
         whois_cache.ident = command.params[2];
         whois_cache.hostname = command.params[3];
         whois_cache.real_name = command.params[command.params.length - 1];
-    },
-
-    RPL_WHOWASIP: function(command, handler) {
-        const cache_key = command.params[1].toLowerCase();
-        const cache = handler.cache('whois.' + cache_key);
-
-        const param_tokens = (command.params[command.params.length - 1] || '').split(' ');
-        const user_host = param_tokens[param_tokens.length - 1];
-        const mask_sep = user_host.indexOf('@');
-        const user = user_host.substring(0, mask_sep) || undefined;
-        const host = user_host.substring(mask_sep + 1);
-
-        if (host) {
-            cache.actual_username = user;
-            cache.actual_username = host;
-        }
     },
 
     RPL_ENDOFWHOWAS: function(command, handler) {
@@ -383,16 +367,15 @@ const handlers = {
 
         // after all prior RPL_WHOWASUSER pushed newer events onto the history stack
         // push the last one to complete the set (server returns from newest to oldest)
-        if (!whowas_cache.historical) {
-            whowas_cache.historical = [];
+        if (!whois_cache.error) {
+            whowas_cache.whowas = whowas_cache.whowas || [];
+            whowas_cache.whowas.push(_.cloneDeep(whois_cache));
+            Object.assign(whowas_cache, _.cloneDeep(whowas_cache.whowas[0]));
+        } else {
+            Object.assign(whowas_cache, _.cloneDeep(whois_cache));
         }
-        whowas_cache.historical.push(_.cloneDeep(whois_cache));
 
-        // now pull the newest response to the top level and add the rest as an array
-        const event = _.cloneDeep(whowas_cache.historical[0]);
-        event.historical = whowas_cache.historical;
-
-        handler.emit('whowas', event);
+        handler.emit('whowas', whowas_cache);
         whois_cache.destroy();
         whowas_cache.destroy();
     },
