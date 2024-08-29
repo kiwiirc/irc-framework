@@ -1,11 +1,11 @@
 'use strict';
 
-/* globals describe, it */
-const chai = require('chai');
-const Helper = require('../src/helpers');
-const expect = chai.expect;
+import { expect, use } from 'chai';
+import chaiSubset from 'chai-subset';
 
-chai.use(require('chai-subset'));
+import Helper from '../src/helpers.js';
+
+use(chaiSubset);
 
 describe('src/irclineparser.js', function() {
     describe('mask parsing', function() {
