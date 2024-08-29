@@ -367,8 +367,8 @@ const handlers = {
 
         // after all prior RPL_WHOWASUSER pushed newer events onto the history stack
         // push the last one to complete the set (server returns from newest to oldest)
+        whowas_cache.whowas = whowas_cache.whowas || [];
         if (!whois_cache.error) {
-            whowas_cache.whowas = whowas_cache.whowas || [];
             whowas_cache.whowas.push(_.cloneDeep(whois_cache));
             Object.assign(whowas_cache, _.cloneDeep(whowas_cache.whowas[0]));
         } else {

@@ -596,8 +596,8 @@ Not all of these options will be available. Some will be missing depending on th
 
 **whowas**
 
-The response root includes the latest data `historical[0]` to maintain backwards compatibility.
-The `historical` array contains all RPL_WHOWASUSER responses with the newest being first.
+The response root includes the latest data from `whowas[0]` to maintain backwards compatibility.
+The `whowas` array contains all RPL_WHOWASUSER responses with the newest being first.
 
 If the requested user was not found, `error` will contain 'no_such_nick'.
 
@@ -616,7 +616,7 @@ If the requested user was not found, `error` will contain 'no_such_nick'.
     server_info: 'Thu Jun 14 09:15:51 2018',
     account: 'logged on account',
     error: ''
-    historical: [
+    whowas: [
         { ... },
         { ... },
     ]
