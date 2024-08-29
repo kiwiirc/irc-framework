@@ -3,7 +3,6 @@
 const _ = {
     each: require('lodash/each'),
     map: require('lodash/map'),
-    cloneDeep: require('lodash/cloneDeep'),
 };
 const Helpers = require('../../helpers');
 
@@ -339,7 +338,7 @@ const handlers = {
             whowas_cache.whowas = [];
         } else {
             // push the previous event prior to modifying anything
-            whowas_cache.whowas.push(_.cloneDeep(whois_cache));
+            whowas_cache.whowas.push(whois_cache);
             // ensure we are starting with a clean cache for the next data
             whois_cache.destroy();
             whois_cache = handler.cache('whois.' + cache_key);
@@ -369,10 +368,10 @@ const handlers = {
         // push the last one to complete the set (server returns from newest to oldest)
         whowas_cache.whowas = whowas_cache.whowas || [];
         if (!whois_cache.error) {
-            whowas_cache.whowas.push(_.cloneDeep(whois_cache));
-            Object.assign(whowas_cache, _.cloneDeep(whowas_cache.whowas[0]));
+            whowas_cache.whowas.push(whois_cache);
+            Object.assign(whowas_cache, whowas_cache.whowas[0]);
         } else {
-            Object.assign(whowas_cache, _.cloneDeep(whois_cache));
+            Object.assign(whowas_cache, whois_cache);
         }
 
         handler.emit('whowas', whowas_cache);
