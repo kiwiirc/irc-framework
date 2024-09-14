@@ -38,7 +38,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
         // Batched commands will be collected and executed as a transaction
         const batch_id = irc_command.getTag('batch');
-        if (batch_id) {
+        if (batch_id && !(irc_command.command === 'BATCH' && irc_command.params[0].charAt(0) === '+')) {
             const cache_key = 'batch.' + batch_id;
             if (this.hasCache(cache_key)) {
                 const cache = this.cache(cache_key);
