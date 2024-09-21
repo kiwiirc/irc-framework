@@ -38,15 +38,23 @@ module.exports = class IrcCommandHandler extends EventEmitter {
 
         // Batched commands will be collected and executed as a transaction
         const batch_id = irc_command.getTag('batch');
-        if (batch_id && !(irc_command.command === 'BATCH' && irc_command.params[0].charAt(0) === '+')) {
+        if (batch_id) {
             const cache_key = 'batch.' + batch_id;
             if (this.hasCache(cache_key)) {
-                const cache = this.cache(cache_key);
+                let cache = this.cache(cache_key);
                 cache.commands.push(irc_command);
+                while (cache?.tags?.batch) {
+                    cache = this.cache('batch.' + cache.tags.batch);
+                    cache.commands.push(irc_command);
+                }
             } else {
                 // If we don't have this batch ID in cache, it either means that the
                 // server hasn't sent the starting batch command or that the server
                 // has already sent the end batch command.
+            }
+            // start interleaving batches anyway
+            if (irc_command.command === 'BATCH' && irc_command.params[0].charAt(0) === '+') {
+                this.executeCommand(irc_command);
             }
         } else {
             this.executeCommand(irc_command);
