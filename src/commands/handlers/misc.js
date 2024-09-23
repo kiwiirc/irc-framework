@@ -6,14 +6,12 @@ const _ = {
     map: require('lodash/map'),
 };
 const Helpers = require('../../helpers');
-
 const handlers = {
     RPL_LISTSTART: function(command, handler) {
         const cache = getChanListCache(handler);
         cache.channels = [];
         handler.emit('channel list start');
     },
-
     RPL_LISTEND: function(command, handler) {
         const cache = getChanListCache(handler);
         if (cache.channels.length) {
@@ -300,6 +298,12 @@ const handlers = {
         cache.destroy();
     },
 
+    FAIL: standardReply,
+
+    WARN: standardReply,
+
+    NOTE: standardReply,
+
     BATCH: function(command, handler) {
         const batch_start = command.params[0].substr(0, 1) === '+';
         const batch_id = command.params[0].substr(1);
@@ -351,7 +355,26 @@ const handlers = {
         handler.emit('batch end ' + emit_obj.type, emit_obj);
     }
 };
-
+/**
+ * 
+ * @param {import('../command')} irccommand 
+ * @param {import('../handler')} handler 
+ */
+function standardReply(irccommand, handler) {
+    const [command, code, ...context] = irccommand.params;
+    const description = context[context.length-1]
+        .indexOf(' ') !== -1 ?
+            context.pop() :
+            null;
+    handler.emit('standard reply', {
+        reply_type: irccommand.command,
+        command,
+        code,
+        context,
+        description,
+        tags: irccommand.tags
+    });
+}
 module.exports = function AddCommandHandlers(command_controller) {
     _.each(handlers, function(handler, handler_command) {
         command_controller.addHandler(handler_command, handler);
