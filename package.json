@@ -1,6 +1,6 @@
 {
   "name": "irc-framework",
-  "version": "4.13.1",
+  "version": "4.14.0",
   "description": "A better IRC framework for node.js",
   "main": "src/",
   "browser": "dist/browser/src/",
