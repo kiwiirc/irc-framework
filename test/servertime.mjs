@@ -1,8 +1,8 @@
 'use strict';
-/* globals describe, it */
-const chai = require('chai');
-const IrcCommand = require('../src/commands/command');
-const expect = chai.expect;
+
+import { expect } from 'chai';
+
+import IrcCommand from '../src/commands/command.js';
 
 describe('src/commands/command.js', function() {
     describe('getServerTime parsing', function() {
@@ -10,7 +10,7 @@ describe('src/commands/command.js', function() {
             const cmd = new IrcCommand('', {
                 tags: {
                     time: '2011-10-10T14:48:00Z',
-                }
+                },
             });
 
             expect(cmd.getServerTime()).to.equal(1318258080000);
@@ -20,7 +20,7 @@ describe('src/commands/command.js', function() {
             const cmd = new IrcCommand('', {
                 tags: {
                     time: '1318258080',
-                }
+                },
             });
 
             expect(cmd.getServerTime()).to.equal(1318258080000);
@@ -30,7 +30,7 @@ describe('src/commands/command.js', function() {
             const cmd = new IrcCommand('', {
                 tags: {
                     time: '1318258080.1234',
-                }
+                },
             });
 
             expect(cmd.getServerTime()).to.equal(1318258080123);
@@ -38,7 +38,7 @@ describe('src/commands/command.js', function() {
 
         it('should return undefined for missing time', function() {
             const cmd = new IrcCommand('', {
-                tags: {}
+                tags: {},
             });
 
             expect(cmd.getServerTime()).to.equal(undefined);
@@ -48,7 +48,7 @@ describe('src/commands/command.js', function() {
             const cmd = new IrcCommand('', {
                 tags: {
                     time: '',
-                }
+                },
             });
 
             expect(cmd.getServerTime()).to.equal(undefined);
@@ -58,7 +58,7 @@ describe('src/commands/command.js', function() {
             const cmd = new IrcCommand('', {
                 tags: {
                     time: 'definetelyNotAtimestamp',
-                }
+                },
             });
 
             expect(cmd.getServerTime()).to.equal(undefined);

@@ -1,15 +1,14 @@
 'use strict';
 
-/* globals describe, it */
-/* eslint-disable no-unused-expressions */
-const chai = require('chai');
-const expect = chai.expect;
-const mocks = require('../../mocks');
-const sinonChai = require('sinon-chai');
-const misc = require('../../../src/commands/handlers/misc');
-const IrcCommand = require('../../../src/commands/command');
+import { expect, use } from 'chai';
+import sinonChai from 'sinon-chai';
 
-chai.use(sinonChai);
+import * as mocks from '../../mocks.mjs';
+
+import misc from '../../../src/commands/handlers/misc.js';
+import IrcCommand from '../../../src/commands/command.js';
+
+use(sinonChai);
 
 describe('src/commands/handlers/misc.js', function() {
     describe('PING handler', function() {
@@ -18,7 +17,7 @@ describe('src/commands/handlers/misc.js', function() {
             params: ['example.com'],
             tags: {
                 time: '2021-06-29T16:42:00Z',
-            }
+            },
         });
         mock.handlers.PING(cmd, mock.spies);
 
@@ -33,8 +32,8 @@ describe('src/commands/handlers/misc.js', function() {
                 message: undefined,
                 time: 1624984920000,
                 tags: {
-                    time: '2021-06-29T16:42:00Z'
-                }
+                    time: '2021-06-29T16:42:00Z',
+                },
             });
         });
     });
@@ -46,7 +45,7 @@ describe('src/commands/handlers/misc.js', function() {
                 params: ['one.example.com', 'two.example.com'],
                 tags: {
                     time: '2011-10-10T14:48:00Z',
-                }
+                },
             });
             mock.handlers.PONG(cmd, mock.spies);
             expect(mock.spies.network.addServerTimeOffset).to.have.been.calledOnce;
@@ -55,8 +54,8 @@ describe('src/commands/handlers/misc.js', function() {
                 message: 'two.example.com',
                 time: 1318258080000,
                 tags: {
-                    time: '2011-10-10T14:48:00Z'
-                }
+                    time: '2011-10-10T14:48:00Z',
+                },
             });
         });
     });

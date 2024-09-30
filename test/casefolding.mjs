@@ -1,10 +1,11 @@
 'use strict';
-/* globals describe, it */
-const chai = require('chai');
-const IrcClient = require('../src/client');
-const expect = chai.expect;
 
-chai.use(require('chai-subset'));
+import { expect, use } from 'chai';
+import chaiSubset from 'chai-subset';
+
+import IrcClient from '../src/client.js';
+
+use(chaiSubset);
 
 describe('src/client.js', function() {
     describe('caseLower', function() {
@@ -69,7 +70,6 @@ describe('src/client.js', function() {
         });
     });
 
-    /* eslint-disable no-unused-expressions */
     describe('caseCompare', function() {
         it('CASEMAPPING=rfc1459', function() {
             const client = new IrcClient();
