@@ -1,0 +1,10 @@
+# Testing IRC registration without CAP support
+
+# wait until we get the USER command
+READWAIT USER $ $ $ $
+
+# register the client with the nick "testbot"
+SEND :src 001 testbot something :Welcome home
+
+# the client should now trigger a "registered" event
+EVENT registered nick=testbot
