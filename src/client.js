@@ -612,7 +612,21 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     setTopic(channel, newTopic) {
+        if (!newTopic || !newTopic.trim()) {
+            // If newTopic is undefined or empty, remove the existing topic
+            // this check is to prevent unexpectedly requesting the current topic
+            // when trying to clear the topic
+            this.clearTopic(channel);
+            return;
+        }
+
         this.raw('TOPIC', channel, newTopic);
+    }
+
+    clearTopic(channel) {
+        // The trailing `:` is required otherwise it would be requesting the topic
+        // and not clearing it
+        this.raw(`TOPIC ${channel} :`);
     }
 
     ctcpRequest(target, type /*, paramN */) {
@@ -827,8 +841,8 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw(args);
     }
 
-    channel(channel_name) {
-        return new Channel(this, channel_name);
+    channel(channel_name, key) {
+        return new Channel(this, channel_name, key);
     }
 
     match(match_regex, cb, message_type) {

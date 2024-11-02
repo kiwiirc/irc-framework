@@ -596,7 +596,13 @@ Not all of these options will be available. Some will be missing depending on th
 
 **whowas**
 
-If the requested user was not found, error will contain 'no_such_nick'.
+The response root includes the latest data from `whowas[0]` to maintain backwards compatibility.
+The `whowas` array contains all RPL_WHOWASUSER responses with the newest being first.
+
+If the requested user was not found, `error` will contain 'no_such_nick'.
+
+> Note: The available data can vary depending on the network.
+
 ~~~javascript
 {
     nick: 'prawnsalad',
@@ -604,11 +610,16 @@ If the requested user was not found, error will contain 'no_such_nick'.
     hostname: 'manchester.isp.net',
     actual_ip: 'sometimes set when using webirc, could be the same as actual_hostname',
     actual_hostname: 'sometimes set when using webirc',
+    actual_username: 'prawn',
     real_name: 'A real prawn',
     server: 'irc.server.net',
     server_info: 'Thu Jun 14 09:15:51 2018',
     account: 'logged on account',
     error: ''
+    whowas: [
+        { ... },
+        { ... },
+    ]
 }
 ~~~
 

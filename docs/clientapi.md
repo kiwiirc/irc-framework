@@ -40,6 +40,16 @@ new Irc.Client({
 });
 ~~~
 
+#### Configuration
+##### `account`
+To accommodate backwards compatibility support, the `account` configuration can behave in different ways depending what data types its provided.
+
+When the `account` property is falsy, `options.nick` and `options.password` will be used for SASL Auth.
+
+If the `account` property is an object, `account.account` and `account.password` will be used for SASL Auth.
+
+To Completely disable SASL Auth, set `account` to an empty object, eg: `account: {}`.
+
 
 #### Properties
 ##### `.connected`
@@ -99,7 +109,10 @@ Join a channel, optionally with a key/password.
 Part/leave a channel with an optional parting message.
 
 ##### `.setTopic(channel, newTopic)`
-Set the topic of a channel
+Set the topic of a channel, if newTopic is falsy or only whitespace then `.clearTopic()` will be called.
+
+##### `.clearTopic(channel)`
+Remove the topic of a channel.
 
 ##### `.ctcpRequest(target, type [, paramN])`
 Send a CTCP request to target with any number of parameters.
@@ -124,7 +137,7 @@ order.
 Request that the IRC server sends a list of available channels. Extra parameters
 will be sent.
 
-##### `.channel(channel_name)`
+##### `.channel(channel_name, [key])`
 Create a channel object with the following methods:
 * `say(message)`
 * `notice(message)`
