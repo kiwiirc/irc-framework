@@ -56,7 +56,8 @@ module.exports = class IrcClient extends EventEmitter {
             message_max_length: 350,
             sasl_disconnect_on_fail: false,
             transport: default_transport,
-            websocket_protocol: 'text.ircv3.net'
+            websocket_protocol: 'text.ircv3.net',
+            serialize_writes: false
         };
 
         const props = Object.keys(defaults);
