@@ -323,11 +323,6 @@ const handlers = {
     },
 
     RPL_LOGGEDIN: function(command, handler) {
-        if (handler.network.cap.negotiating === true) {
-            handler.connection.write('CAP END');
-            handler.network.cap.negotiating = false;
-        }
-
         const mask = Helpers.parseMask(command.params[1]);
 
         // Check if we have a server-time
