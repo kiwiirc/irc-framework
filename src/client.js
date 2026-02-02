@@ -82,6 +82,11 @@ module.exports = class IrcClient extends EventEmitter {
 
         client.command_handler = new IrcCommandHandler(client);
 
+        client.timers = {
+            ping: 0,
+            timeout: 0,
+        };
+
         client.addCommandHandlerListeners();
 
         // Proxy some connection events onto this client
@@ -339,9 +344,8 @@ module.exports = class IrcClient extends EventEmitter {
 
     startPeriodicPing() {
         const client = this;
-        let ping_timer = null;
 
-        if (client.options.ping_interval <= 0) {
+        if (client.options.ping_interval <= 0 || client.timers.ping > 0) {
             return;
         }
 
@@ -351,8 +355,8 @@ module.exports = class IrcClient extends EventEmitter {
         }
 
         function resetPingTimer() {
-            client.connection.clearTimeout(ping_timer);
-            ping_timer = client.connection.setTimeout(pingServer, client.options.ping_interval * 1000);
+            client.connection.clearTimeout(client.timers.ping);
+            client.timers.ping = client.connection.setTimeout(pingServer, client.options.ping_interval * 1000);
         }
 
         // Browsers have started throttling looped timeout callbacks
@@ -362,6 +366,10 @@ module.exports = class IrcClient extends EventEmitter {
         // Socket has disconnected, remove 'pong' listener until next 'registered' event
         client.connection.once('socket close', () => {
             client.command_handler.off('pong', resetPingTimer);
+            client.connection.clearTimeout(client.timers.ping);
+            client.connection.clearTimeout(client.timers.timeout);
+            client.timers.ping = 0;
+            client.timers.timeout = 0;
         });
 
         // Start timer
@@ -370,7 +378,6 @@ module.exports = class IrcClient extends EventEmitter {
 
     startPingTimeoutTimer() {
         const client = this;
-        let timeout_timer = null;
 
         if (client.options.ping_timeout <= 0) {
             return;
@@ -378,8 +385,8 @@ module.exports = class IrcClient extends EventEmitter {
 
         // Data from the server was detected so restart the timeout
         function resetPingTimeoutTimer() {
-            client.connection.clearTimeout(timeout_timer);
-            timeout_timer = client.connection.setTimeout(pingTimeout, client.options.ping_timeout * 1000);
+            client.connection.clearTimeout(client.timers.timeout);
+            client.timers.timeout = client.connection.setTimeout(pingTimeout, client.options.ping_timeout * 1000);
         }
 
         function pingTimeout() {
