@@ -74,7 +74,9 @@ Add middleware to handle the events for the client instance
 
 ##### `.connect([connect_options])`
 Start connecting to the IRC network. If `connect_options` is provided it will
-override any options given to the constructor.
+override any options given to the constructor. Accepts a `path` option to connect
+via a Unix domain socket instead of `host`/`port`. Can be combined with `tls`/`ssl`
+for TLS over Unix socket.
 
 ##### `.raw(raw_data_line)`
 Send a raw line to the IRC server

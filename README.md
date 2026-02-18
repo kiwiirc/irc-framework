@@ -37,6 +37,20 @@ bot.on('message', function(event) {
 bot.matchMessage(/^hi/, function(event) {
 	event.reply('hello there!');
 });
+
+// Connect via Unix socket
+var bot = new IRC.Client();
+bot.connect({
+	path: '/tmp/irc.sock',
+	nick: 'prawnsbot'
+});
+
+// ... optionally with TLS
+bot.connect({
+	path: '/tmp/irc.sock',
+	tls: true,
+	nick: 'prawnsbot'
+});
 ~~~
 
 #### Channel/buffer objects. Great for building clients
