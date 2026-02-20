@@ -1,5 +1,3 @@
-'use strict';
-
 import { assert, use } from 'chai';
 import chaiSubset from 'chai-subset';
 

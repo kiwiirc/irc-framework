@@ -1,5 +1,3 @@
-'use strict';
-
 import { assert } from 'chai';
 
 import NetworkInfo from '../src/networkinfo.js';

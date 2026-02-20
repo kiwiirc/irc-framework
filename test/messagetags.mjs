@@ -1,5 +1,3 @@
-'use strict';
-
 import { assert, expect, use } from 'chai';
 import chaiSubset from 'chai-subset';
 
@@ -10,15 +8,15 @@ use(chaiSubset);
 describe('src/messagetags.js', function() {
     describe('value encoding', function() {
         it('should decode characters to correct strings', function() {
-            const plain = "Some people use IRC; others don't \\o/ Note: Use IRC\r\n";
-            const encoded = "Some\\speople\\suse\\sIRC\\:\\sothers\\sdon't\\s\\\\o/\\sNote:\\sUse\\sIRC\\r\\n";
+            const plain = 'Some people use IRC; others don\'t \\o/ Note: Use IRC\r\n';
+            const encoded = 'Some\\speople\\suse\\sIRC\\:\\sothers\\sdon\'t\\s\\\\o/\\sNote:\\sUse\\sIRC\\r\\n';
 
             assert.equal(MessageTags.decodeValue(encoded), plain);
         });
 
         it('should encode characters to correct strings', function() {
-            const plain = "Some people use IRC; others don't \\o/ Note: Use IRC\r\n";
-            const encoded = "Some\\speople\\suse\\sIRC\\:\\sothers\\sdon't\\s\\\\o/\\sNote:\\sUse\\sIRC\\r\\n";
+            const plain = 'Some people use IRC; others don\'t \\o/ Note: Use IRC\r\n';
+            const encoded = 'Some\\speople\\suse\\sIRC\\:\\sothers\\sdon\'t\\s\\\\o/\\sNote:\\sUse\\sIRC\\r\\n';
 
             assert.equal(MessageTags.encodeValue(plain), encoded);
         });

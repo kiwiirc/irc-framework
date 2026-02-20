@@ -1,3 +1,5 @@
+'use strict';
+
 const GraphemeSplitter = require('grapheme-splitter');
 const { encode: encodeUTF8 } = require('isomorphic-textencoder');
 

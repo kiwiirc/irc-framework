@@ -1,5 +1,3 @@
-'use strict';
-
 import { expect, use } from 'chai';
 import chaiSubset from 'chai-subset';
 

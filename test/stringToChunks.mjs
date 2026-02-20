@@ -1,6 +1,3 @@
-'use strict';
-/* globals describe, it */
-
 import { expect, use } from 'chai';
 import chaiSubset from 'chai-subset';
 
