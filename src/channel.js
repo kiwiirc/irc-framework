@@ -20,7 +20,7 @@ module.exports = class IrcChannel {
 
         this.say = _.partial(irc_client.say.bind(irc_client), channel_name);
         this.notice = _.partial(irc_client.notice.bind(irc_client), channel_name);
-        // this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
+        this.action = _.partial(irc_client.action.bind(irc_client), channel_name);
         this.part = _.partial(irc_client.part.bind(irc_client), channel_name);
         this.join = _.partial(irc_client.join.bind(irc_client), channel_name);
         this.mode = _.partial(irc_client.mode.bind(irc_client), channel_name);
