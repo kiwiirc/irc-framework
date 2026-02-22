@@ -48,6 +48,7 @@ module.exports = class IrcClient extends EventEmitter {
             enable_chghost: false,
             enable_setname: false,
             enable_echomessage: false,
+            enable_standardreplies: false,
             auto_reconnect: true,
             auto_reconnect_max_wait: 300000,
             auto_reconnect_max_retries: 3,

@@ -300,6 +300,12 @@ const handlers = {
         cache.destroy();
     },
 
+    FAIL: standardReply,
+
+    WARN: standardReply,
+
+    NOTE: standardReply,
+
     BATCH: function(command, handler) {
         const batch_start = command.params[0].substr(0, 1) === '+';
         const batch_id = command.params[0].substr(1);
@@ -351,6 +357,19 @@ const handlers = {
         handler.emit('batch end ' + emit_obj.type, emit_obj);
     }
 };
+
+function standardReply(command, handler) {
+    const [cmd, code, ...context] = command.params;
+    const description = context.pop();
+    handler.emit('standard reply', {
+        type: command.command,
+        command: cmd,
+        code,
+        context,
+        description,
+        tags: command.tags,
+    });
+}
 
 module.exports = function AddCommandHandlers(command_controller) {
     _.each(handlers, function(handler, handler_command) {
