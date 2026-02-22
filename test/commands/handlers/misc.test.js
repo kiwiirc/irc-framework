@@ -60,4 +60,77 @@ describe('src/commands/handlers/misc.js', function() {
             });
         });
     });
+
+    describe('FAIL handler', function() {
+        it('should emit the appropriate "standard reply" event', function() {
+            const mock = mocks.IrcCommandHandler([misc]);
+            const cmd = new IrcCommand('FAIL', {
+                command: 'FAIL',
+                params: ['STDRPL', 'EXAMPLE', '123', '456', 'FAIL with variable parameters'],
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                },
+            });
+            mock.handlers.FAIL(cmd, mock.spies);
+            expect(mock.spies.emit).to.have.been.calledOnce;
+            expect(mock.spies.emit).to.have.been.calledWith('standard reply', {
+                type: 'FAIL',
+                command: 'STDRPL',
+                code: 'EXAMPLE',
+                context: ['123', '456'],
+                description: 'FAIL with variable parameters',
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                },
+            });
+        });
+    });
+
+    describe('WARN handler', function() {
+        it('should emit the appropriate "standard reply" event', function() {
+            const mock = mocks.IrcCommandHandler([misc]);
+            const cmd = new IrcCommand('WARN', {
+                params: ['STDRPL', 'EXAMPLE', 'WARN with a command name'],
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                },
+            });
+            mock.handlers.WARN(cmd, mock.spies);
+            expect(mock.spies.emit).to.have.been.calledOnce;
+            expect(mock.spies.emit).to.have.been.calledWith('standard reply', {
+                type: 'WARN',
+                command: 'STDRPL',
+                code: 'EXAMPLE',
+                context: [],
+                description: 'WARN with a command name',
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                },
+            });
+        });
+    });
+
+    describe('NOTE handler', function() {
+        it('should emit the appropriate "standard reply" event', function() {
+            const mock = mocks.IrcCommandHandler([misc]);
+            const cmd = new IrcCommand('NOTE', {
+                params: ['*', 'EXAMPLE', 'NOTE with no command name'],
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                },
+            });
+            mock.handlers.NOTE(cmd, mock.spies);
+            expect(mock.spies.emit).to.have.been.calledOnce;
+            expect(mock.spies.emit).to.have.been.calledWith('standard reply', {
+                type: 'NOTE',
+                command: '*',
+                code: 'EXAMPLE',
+                context: [],
+                description: 'NOTE with no command name',
+                tags: {
+                    time: '2011-10-10T14:48:00Z',
+                },
+            });
+        });
+    });
 });

@@ -166,6 +166,9 @@ const handlers = {
         if (handler.connection.options.enable_echomessage) {
             want.push('echo-message');
         }
+        if (handler.connection.options.enable_standardreplies) {
+            want.push('standard-replies');
+        }
 
         want = _.uniq(want.concat(handler.request_extra_caps));
 
