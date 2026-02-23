@@ -127,7 +127,6 @@ module.exports = class Connection extends EventEmitter {
         } else {
             let socket = null;
             if ((options.tls || options.ssl) && options.path) {
-                this.debugOut('Using TLS over Unix socket');
                 socket = this.socket = tls.connect({
                     path: options.path,
                     rejectUnauthorized: options.rejectUnauthorized,
@@ -146,8 +145,6 @@ module.exports = class Connection extends EventEmitter {
                     family: this.getAddressFamily(options.outgoing_addr)
                 });
             } else if (options.path) {
-                this.debugOut('Using path for socket');
-
                 socket = this.socket = net.connect({
                     path: options.path
                 });
