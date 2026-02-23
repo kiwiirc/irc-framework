@@ -126,7 +126,14 @@ module.exports = class Connection extends EventEmitter {
             }).catch(this.onSocketError.bind(this));
         } else {
             let socket = null;
-            if (options.tls || options.ssl) {
+            if ((options.tls || options.ssl) && options.path) {
+                socket = this.socket = tls.connect({
+                    path: options.path,
+                    rejectUnauthorized: options.rejectUnauthorized,
+                    key: options.client_certificate && options.client_certificate.private_key,
+                    cert: options.client_certificate && options.client_certificate.certificate,
+                });
+            } else if (options.tls || options.ssl) {
                 socket = this.socket = tls.connect({
                     servername: sni,
                     host: ircd_host,
@@ -136,6 +143,10 @@ module.exports = class Connection extends EventEmitter {
                     cert: options.client_certificate && options.client_certificate.certificate,
                     localAddress: options.outgoing_addr,
                     family: this.getAddressFamily(options.outgoing_addr)
+                });
+            } else if (options.path) {
+                socket = this.socket = net.connect({
+                    path: options.path
                 });
             } else {
                 socket = this.socket = net.connect({
