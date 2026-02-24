@@ -1,9 +1,9 @@
-import { expect, use } from 'chai';
+import { expect, use as chaiUse } from 'chai';
 import chaiSubset from 'chai-subset';
 
 import Helper from '../src/helpers.js';
 
-use(chaiSubset);
+chaiUse(chaiSubset);
 
 describe('src/irclineparser.js', function() {
     describe('mask parsing', function() {

@@ -1,4 +1,4 @@
-import { expect, use } from 'chai';
+import { expect, use as chaiUse } from 'chai';
 import sinonChai from 'sinon-chai';
 
 import * as mocks from '../../mocks.mjs';
@@ -6,7 +6,7 @@ import * as mocks from '../../mocks.mjs';
 import misc from '../../../src/commands/handlers/misc.js';
 import IrcCommand from '../../../src/commands/command.js';
 
-use(sinonChai);
+chaiUse(sinonChai);
 
 describe('src/commands/handlers/misc.js', function() {
     describe('PING handler', function() {

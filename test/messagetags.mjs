@@ -1,9 +1,9 @@
-import { assert, expect, use } from 'chai';
+import { assert, expect, use as chaiUse } from 'chai';
 import chaiSubset from 'chai-subset';
 
 import MessageTags from '../src/messagetags.js';
 
-use(chaiSubset);
+chaiUse(chaiSubset);
 
 describe('src/messagetags.js', function() {
     describe('value encoding', function() {

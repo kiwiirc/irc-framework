@@ -1,4 +1,4 @@
-import { expect, use } from 'chai';
+import { expect, use as chaiUse } from 'chai';
 import chaiSubset from 'chai-subset';
 
 import {
@@ -8,7 +8,7 @@ import {
     CodepointTooLargeForLineError
 } from '../src/linebreak.js';
 
-use(chaiSubset);
+chaiUse(chaiSubset);
 
 describe('src/client.js', function() {
     describe('lineBreak', function() {

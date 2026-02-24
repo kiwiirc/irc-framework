@@ -1,9 +1,9 @@
-import { assert, use } from 'chai';
+import { assert, use as chaiUse } from 'chai';
 import chaiSubset from 'chai-subset';
 
 import Connection from '../src/transports/net.js';
 
-use(chaiSubset);
+chaiUse(chaiSubset);
 
 describe('src/transports/net.js', function() {
     describe('setEncoding', function() {

@@ -3,13 +3,72 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-test-matrix:
+    name: Build test matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          node <<'EOF' >> $GITHUB_OUTPUT
+          const https = require('https');
 
+          function compareSemver(a, b) {
+            const pa = a.split('.').map(Number);
+            const pb = b.split('.').map(Number);
+            for (let i = 0; i < 3; i++) {
+              if (pa[i] !== pb[i]) return pb[i] - pa[i];
+            }
+            return 0;
+          }
+
+          https.get('https://nodejs.org/dist/index.json', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+              const releases = JSON.parse(data);
+
+              // Filter LTS only
+              const lts = releases
+                .filter(r => r.lts)
+                .map(r => r.version.replace(/^v/, ''));
+
+              // Group by major
+              const byMajor = {};
+              for (const v of lts) {
+                const major = v.split('.')[0];
+                if (!byMajor[major]) byMajor[major] = [];
+                byMajor[major].push(v);
+              }
+
+              // For each major, pick highest semver
+              const latestPerMajor = Object.entries(byMajor)
+                .map(([major, versions]) => {
+                  versions.sort(compareSemver);
+                  return versions[0]; // highest patch/minor
+                });
+
+              // Sort majors descending
+              latestPerMajor.sort(compareSemver);
+
+              // Take latest 4 majors
+              const final = latestPerMajor.slice(0, 4);
+
+              const matrix = { "node-version": final };
+              console.log(`matrix=${JSON.stringify(matrix)}`);
+            });
+          });
+          EOF
+
+  test:
+    needs: build-test-matrix
     runs-on: ubuntu-latest
 
     strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x, 24.x]
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build-test-matrix.outputs.matrix) }}
+    name: Node ${{ matrix.node-version }}
 
     steps:
       - uses: actions/checkout@v4
@@ -18,13 +77,49 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Detect Yarn version
+        id: yarn-version
+        run: |
+          YARN_VERSION=$(node -p "
+            try {
+              const pm = require('./package.json').packageManager ?? '';
+              const match = pm.match(/^yarn@(\d+)/);
+              match ? match[1] : '';
+            } catch { '' }
+          ")
+          if [ -z "$YARN_VERSION" ]; then
+            YARN_VERSION=$(yarn --version | cut -d. -f1)
+          fi
+          echo "major=$YARN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected Yarn major version: $YARN_VERSION"
 
       - name: Install dependencies
-        run: yarn --frozen-lockfile --non-interactive --prefer-offline
+        run: |
+          if [ "${{ steps.yarn-version.outputs.major }}" = "1" ]; then
+            yarn install --frozen-lockfile --non-interactive --prefer-offline
+          else
+            yarn install --immutable
+          fi
+
+      - name: Lint
+        run: yarn lint
 
       - name: Test
         run: yarn test
 
-      - name: Lint
-        run: yarn lint
+  test-results:
+    name: Tests passed
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all matrix jobs passed
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            echo "One or more test jobs failed"
+            exit 1
+          fi
