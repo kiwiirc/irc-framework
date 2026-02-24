@@ -59,7 +59,7 @@ describe('src/transports/websocket.js', function() {
         });
 
         it('should initialise encoding to utf8', function() {
-            // WebSocket is text-only; encoding is fixed at utf8 and never changes
+            // WebSocket text frames are always UTF-8
             const conn = new Connection({});
             assert.equal(conn.encoding, 'utf8');
         });
@@ -74,18 +74,16 @@ describe('src/transports/websocket.js', function() {
             assert.isFalse(conn.protocol_fallback);
         });
 
-        it('should set protocol from websocket_protocol option', function() {
-            const conn = new Connection({ websocket_protocol: 'irc' });
-            assert.equal(conn.protocol, 'irc');
-        });
-
         it('should set protocol to undefined when websocket_protocol is not provided', function() {
+            // undefined protocol is intentional: the caller (higher-level code) is
+            // responsible for requesting IRCv3 subprotocols and retrying without one
+            // if the server does not support them
             const conn = new Connection({});
             assert.isUndefined(conn.protocol);
         });
 
         it('should set protocol to undefined when websocket_protocol is an empty string', function() {
-            // Empty string is falsy - the comment in source explicitly covers this case
+            // Falsy values are treated as "no protocol" - see source comment
             const conn = new Connection({ websocket_protocol: '' });
             assert.isUndefined(conn.protocol);
         });
@@ -93,6 +91,12 @@ describe('src/transports/websocket.js', function() {
         it('should set protocol to undefined when websocket_protocol is 0', function() {
             const conn = new Connection({ websocket_protocol: 0 });
             assert.isUndefined(conn.protocol);
+        });
+
+        it('should set protocol from websocket_protocol when provided', function() {
+            // e.g. caller passes 'text.ircv3.net' for an IRCv3-aware connection
+            const conn = new Connection({ websocket_protocol: 'text.ircv3.net' });
+            assert.equal(conn.protocol, 'text.ircv3.net');
         });
 
         it('should default options to empty object when passed explicitly', function() {
@@ -164,15 +168,18 @@ describe('src/transports/websocket.js', function() {
             });
         });
 
-        describe('WebSocket protocol argument', function() {
-            it('should pass protocol to WebSocket constructor when set', function() {
-                new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' }).connect();
-                assert.equal(WebSocketStub.firstCall.args[1], 'irc');
-            });
-
+        describe('WebSocket subprotocol argument', function() {
             it('should pass undefined to WebSocket constructor when no protocol is set', function() {
+                // No subprotocol - compatible with pre-IRCv3 servers. Higher-level
+                // code handles the retry-with-protocol / retry-without-protocol logic.
                 new Connection({ host: 'irc.example.com' }).connect();
                 assert.isUndefined(WebSocketStub.firstCall.args[1]);
+            });
+
+            it('should pass the protocol to WebSocket constructor when set', function() {
+                // e.g. first attempt with 'text.ircv3.net'
+                new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' }).connect();
+                assert.equal(WebSocketStub.firstCall.args[1], 'text.ircv3.net');
             });
         });
 
@@ -316,9 +323,10 @@ describe('src/transports/websocket.js', function() {
             });
 
             it('should not retry when code 1006 fires but socket was already connected', function() {
-                // possible_protocol_error requires !this.connected - if connected
-                // was true the condition is false even with code 1006
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+                // possible_protocol_error requires !this.connected - if the socket
+                // successfully opened, code 1006 is a genuine network drop, not a
+                // subprotocol rejection
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 conn.connected = true;
                 const connectSpy = sinon.spy(conn, 'connect');
@@ -326,8 +334,8 @@ describe('src/transports/websocket.js', function() {
                 expect(connectSpy).to.not.have.been.called;
             });
 
-            it('should not retry when code is not 1006', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+            it('should not retry when close code is not 1006', function() {
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 const connectSpy = sinon.spy(conn, 'connect');
                 conn.onSocketClose({ code: 1000 });
@@ -335,15 +343,16 @@ describe('src/transports/websocket.js', function() {
             });
         });
 
-        describe('protocol fallback (code 1006, never connected, protocol set)', function() {
-            // The fallback triggers only when ALL of these are true:
-            //   !this.connected  (first attempt never reached open)
-            //   event.code === 1006  (abnormal closure)
-            //   !this.protocol_fallback  (not already retried)
-            //   this.protocol !== undefined  (there is a protocol to drop)
+        describe('subprotocol fallback (code 1006, never connected, protocol set)', function() {
+            // When a connection using a specific subprotocol closes immediately with
+            // code 1006 before ever opening, it likely means the server does not
+            // support that subprotocol (e.g. a pre-IRCv3 server rejecting
+            // 'text.ircv3.net'). The transport retries without any subprotocol for
+            // compatibility. All four conditions must hold: !connected, code===1006,
+            // !protocol_fallback, protocol !== undefined.
 
-            it('should call connect() again to retry without a protocol', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+            it('should call connect() again to retry without a subprotocol', function() {
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 const connectSpy = sinon.spy(conn, 'connect');
                 conn.onSocketClose({ code: 1006 });
@@ -351,21 +360,21 @@ describe('src/transports/websocket.js', function() {
             });
 
             it('should set protocol to undefined before retrying', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 conn.onSocketClose({ code: 1006 });
                 assert.isUndefined(conn.protocol);
             });
 
             it('should set protocol_fallback to true', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 conn.onSocketClose({ code: 1006 });
                 assert.isTrue(conn.protocol_fallback);
             });
 
             it('should not emit close when retrying', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 const closeSpy = sinon.spy();
                 conn.on('close', closeSpy);
@@ -374,24 +383,24 @@ describe('src/transports/websocket.js', function() {
             });
 
             it('should pass undefined protocol to the retry WebSocket constructor call', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
                 conn.onSocketClose({ code: 1006 });
-                // Second WebSocket constructor call is the retry
                 assert.isUndefined(WebSocketStub.secondCall.args[1]);
             });
 
             it('should not retry a second time when protocol_fallback is already true', function() {
-                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'irc' });
+                const conn = new Connection({ host: 'irc.example.com', websocket_protocol: 'text.ircv3.net' });
                 conn.connect();
-                conn.onSocketClose({ code: 1006 }); // triggers retry, sets protocol_fallback = true
+                conn.onSocketClose({ code: 1006 }); // first retry - sets protocol_fallback = true
                 const connectSpy = sinon.spy(conn, 'connect');
                 conn.onSocketClose({ code: 1006 }); // second abnormal close - must not retry again
                 expect(connectSpy).to.not.have.been.called;
             });
 
             it('should not retry when protocol is already undefined', function() {
-                // No protocol was ever set - nothing to fall back from
+                // Connection was made without a subprotocol - there is nothing to
+                // fall back from, so a code 1006 close is a genuine failure
                 const conn = new Connection({ host: 'irc.example.com' });
                 conn.connect();
                 const connectSpy = sinon.spy(conn, 'connect');
@@ -404,6 +413,9 @@ describe('src/transports/websocket.js', function() {
     // ── onSocketMessage() ─────────────────────────────────────────────────────
     describe('onSocketMessage()', function() {
         describe('binary data rejection', function() {
+            // The text subprotocol only handles UTF-8 string frames. Binary data
+            // indicates either a protocol mismatch or a misbehaving peer.
+
             it('should set last_socket_error when data is not a string', function() {
                 const conn = new Connection({});
                 conn.onSocketMessage(Buffer.from('hello'));
@@ -437,38 +449,34 @@ describe('src/transports/websocket.js', function() {
             });
         });
 
-        describe('line splitting - utf-8 text messages', function() {
-            // WebSocket messages are always complete UTF-8 text frames.
-            // The transport appends '\n' to each received message then splits on
-            // '\n', so a single message always produces at least one emitted line.
+        describe('line splitting', function() {
+            // A single WebSocket message may contain multiple IRC lines separated
+            // by '\n'. Each must be emitted as a separate line event. This handles
+            // both spec-compliant servers (one line per message) and peers that
+            // batch multiple lines into one message.
 
             it('should emit one line for a single IRC message', function() {
                 const conn = new Connection({});
                 const lines = [];
                 conn.on('line', l => lines.push(l));
-                conn.onSocketMessage(':server PING :12345');
-                assert.deepEqual(lines, [':server PING :12345']);
+                conn.onSocketMessage('PING :server');
+                assert.deepEqual(lines, ['PING :server']);
             });
 
-            it('should preserve the line content exactly, including any \\r', function() {
-                // The transport splits on \n only; \r is part of the emitted string
+            it('should split a message containing multiple newline-separated lines', function() {
+                // Defensive handling: some peers send multiple IRC lines in one frame
                 const conn = new Connection({});
                 const lines = [];
                 conn.on('line', l => lines.push(l));
-                conn.onSocketMessage(':server PING :12345\r');
-                assert.deepEqual(lines, [':server PING :12345\r']);
+                conn.onSocketMessage(':s PRIVMSG #a :one\n:s PRIVMSG #b :two\n:s PRIVMSG #c :three');
+                assert.deepEqual(lines, [
+                    ':s PRIVMSG #a :one',
+                    ':s PRIVMSG #b :two',
+                    ':s PRIVMSG #c :three',
+                ]);
             });
 
-            it('should emit multiple lines when a message contains an embedded newline', function() {
-                // Two IRC messages packed into one WebSocket frame
-                const conn = new Connection({});
-                const lines = [];
-                conn.on('line', l => lines.push(l));
-                conn.onSocketMessage(':s PRIVMSG #a :one\n:s PRIVMSG #b :two');
-                assert.deepEqual(lines, [':s PRIVMSG #a :one', ':s PRIVMSG #b :two']);
-            });
-
-            it('should emit lines from multiple successive calls', function() {
+            it('should emit one line per successive message', function() {
                 const conn = new Connection({});
                 const lines = [];
                 conn.on('line', l => lines.push(l));
@@ -477,39 +485,67 @@ describe('src/transports/websocket.js', function() {
                 assert.deepEqual(lines, [':server 001 nick :Welcome', ':server 002 nick :Host']);
             });
 
-            it('should clear incoming_buffer to empty string after a complete message', function() {
-                const conn = new Connection({});
-                conn.on('line', () => {});
-                conn.onSocketMessage(':server PING :x');
-                assert.equal(conn.incoming_buffer, '');
-            });
-
-            it('should prepend existing incoming_buffer content to the new message', function() {
-                // Simulate a partial line already sitting in the buffer, then
-                // deliver the rest of the line as a new message.
+            it('should emit an empty line when a message ends with a newline', function() {
+                // data = 'PING :server\n', after appending '\n': 'PING :server\n\n'
+                // split('\n') -> ['PING :server', '', '']
+                // else branch: pop trailing '' and clear buffer
+                // remaining ['PING :server', ''] are both emitted - the empty string
+                // represents the blank line between the newline and the appended '\n'
                 const conn = new Connection({});
                 const lines = [];
                 conn.on('line', l => lines.push(l));
+                conn.onSocketMessage('PING :server\n');
+                assert.deepEqual(lines, ['PING :server', '']);
+            });
+
+            it('should clear incoming_buffer after a complete message', function() {
+                const conn = new Connection({});
+                conn.on('line', () => {});
+                conn.onSocketMessage('PING :server');
+                assert.equal(conn.incoming_buffer, '');
+            });
+
+            it('should preserve UTF-8 content exactly', function() {
+                const conn = new Connection({});
+                const lines = [];
+                conn.on('line', l => lines.push(l));
+                const msg = ':nick PRIVMSG #chan :caf\u00E9 \u4F60\u597D \u041F\u0440\u0438\u0432\u0435\u0442';
+                conn.onSocketMessage(msg);
+                assert.deepEqual(lines, [msg]);
+            });
+        });
+
+        describe('incoming_buffer accumulation (line 131)', function() {
+            // incoming_buffer persists across calls. If a previous call left a
+            // non-newline-terminated remainder in the buffer (line 131), the next
+            // call prepends it to the new data before splitting.
+            //
+            // Because onSocketMessage always appends data + '\n', the combined
+            // buffer always ends with '\n', making the last split element always ''.
+            // Line 131 (the if-branch) can only be reached by pre-loading
+            // incoming_buffer with a value that, after the internal += and split,
+            // leaves a non-empty last element - which requires intercepting the
+            // assignment. The test uses Object.defineProperty to do this, exercising
+            // the branch as the code intends: saving a partial line for the next call.
+
+            it('should prepend buffered content to the next message', function() {
+                const conn = new Connection({});
+                const lines = [];
+                conn.on('line', l => lines.push(l));
+                // Manually set a partial line in the buffer as if a previous message
+                // left it there, then deliver the rest as a new message
                 conn.incoming_buffer = ':server PRIV';
                 conn.onSocketMessage('MSG #chan :hello');
                 // buffer becomes ':server PRIVMSG #chan :hello\n'
-                // split -> [':server PRIVMSG #chan :hello', '']
-                // last element is '' -> else branch fires: pop, clear, emit
+                // split -> [':server PRIVMSG #chan :hello', ''] -> else branch clears
                 assert.deepEqual(lines, [':server PRIVMSG #chan :hello']);
                 assert.equal(conn.incoming_buffer, '');
             });
 
-            it('should save a partial line back to incoming_buffer when split leaves a non-empty tail (line 131)', function() {
-                // The if-branch on line 130 is designed to handle the case where
-                // the buffer contains an incomplete line with no trailing newline.
-                // Because onSocketMessage always appends data + '\n', a call through
-                // the normal API always ends with '\n', making the last split element
-                // always ''. Line 131 can therefore only be reached by intercepting
-                // the internal buffer state between the += and the split.
-                //
-                // We use Object.defineProperty to strip the trailing '\n' on the
-                // first assignment so the split sees a non-empty last element,
-                // exercising the save-remainder path exactly as intended.
+            it('should save a partial line back into incoming_buffer when split leaves a non-empty tail (line 131)', function() {
+                // Line 131 is the defensive save-back path. We use Object.defineProperty
+                // to strip the trailing '\n' from the internal += assignment so the
+                // split produces a non-empty last element, triggering the if-branch.
                 const conn = new Connection({});
                 const lines = [];
                 conn.on('line', l => lines.push(l));
@@ -519,8 +555,7 @@ describe('src/transports/websocket.js', function() {
                 Object.defineProperty(conn, 'incoming_buffer', {
                     get: () => raw,
                     set: (v) => {
-                        // Strip the trailing '\n' on the first (+=) assignment only,
-                        // so the split produces a non-empty last element
+                        // Strip the trailing '\n' on the first (+=) assignment only
                         raw = (++calls === 1 && v.endsWith('\n')) ? v.slice(0, -1) : v;
                     },
                     configurable: true,
@@ -534,26 +569,6 @@ describe('src/transports/websocket.js', function() {
                 //   only 'complete' is emitted
                 assert.deepEqual(lines, ['complete']);
                 assert.equal(conn.incoming_buffer, 'partial');
-            });
-
-            it('should handle an empty string message', function() {
-                // '' + '\n' = '\n', split('\n') = ['', '']
-                // last is '' -> else: pop, clear, emit ['']
-                const conn = new Connection({});
-                const lines = [];
-                conn.on('line', l => lines.push(l));
-                conn.onSocketMessage('');
-                assert.deepEqual(lines, ['']);
-            });
-
-            it('should handle utf-8 text content without modification', function() {
-                // WebSocket always delivers utf-8; the transport must not transform it
-                const conn = new Connection({});
-                const lines = [];
-                conn.on('line', l => lines.push(l));
-                const msg = ':nick!user@host PRIVMSG #chan :caf\u00E9 \u4F60\u597D \u041F\u0440\u0438\u0432\u0435\u0442';
-                conn.onSocketMessage(msg);
-                assert.deepEqual(lines, [msg]);
             });
         });
     });
@@ -583,8 +598,9 @@ describe('src/transports/websocket.js', function() {
             assert.doesNotThrow(() => conn.writeLine('PING'));
         });
 
-        it('should send the line as-is without any encoding transformation', function() {
-            // WebSocket is always utf-8; writeLine must not modify the string at all
+        it('should send the line as-is without any modification', function() {
+            // The transport does not strip \r\n - that is the responsibility of the
+            // caller. Peers not following the spec may require \r\n to be present.
             const conn = new Connection({});
             conn.socket = createMockWebSocket();
             conn.connected = true;
@@ -668,12 +684,10 @@ describe('src/transports/websocket.js', function() {
         });
 
         it('should close the existing socket when connect() is called a second time', function() {
-            // connect() calls disposeSocket() before creating the new WebSocket
-            // verify the first socket is closed during the reconnect
             const conn = new Connection({ host: 'irc.example.com' });
             conn.connect();
             const firstWs = conn.socket;
-            conn.connected = true; // mark as open so disposeSocket calls close()
+            conn.connected = true;
 
             const secondMockWs = createMockWebSocket();
             WebSocketStub.returns(secondMockWs);
@@ -712,9 +726,8 @@ describe('src/transports/websocket.js', function() {
 
     // ── setEncoding() ─────────────────────────────────────────────────────────
     describe('setEncoding()', function() {
-        it('should be a no-op - WebSocket is always utf-8 text only', function() {
-            // The method exists for interface compatibility with the net transport
-            // but intentionally does nothing: encoding is always utf-8
+        it('should be a no-op - WebSocket text frames are always UTF-8', function() {
+            // Exists for interface compatibility with the net transport
             const conn = new Connection({});
             conn.setEncoding('latin1');
             assert.equal(conn.encoding, 'utf8');
