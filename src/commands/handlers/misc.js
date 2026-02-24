@@ -364,9 +364,9 @@ function standardReply(command, handler) {
     handler.emit('standard reply', {
         type: command.command,
         command: cmd,
-        code,
-        context,
-        description,
+        code: code,
+        context: context,
+        description: description,
         tags: command.tags,
     });
 }
