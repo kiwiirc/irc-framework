@@ -13,12 +13,12 @@ chaiUse(sinonChai);
 
 function createMockWebSocket() {
     return {
-        send:      sinon.stub(),
-        close:     sinon.stub(),
-        onopen:    null,
-        onclose:   null,
+        send: sinon.stub(),
+        close: sinon.stub(),
+        onopen: null,
+        onclose: null,
         onmessage: null,
-        onerror:   null,
+        onerror: null,
     };
 }
 
@@ -28,8 +28,8 @@ describe('src/transports/websocket.js', function() {
     let WebSocketStub;
 
     beforeEach(function() {
-        sandbox       = sinon.createSandbox();
-        mockWs        = createMockWebSocket();
+        sandbox = sinon.createSandbox();
+        mockWs = createMockWebSocket();
         // The stub acts as the constructor - every `new WebSocket(...)` returns
         // the same mockWs so tests can inspect calls on it directly.
         WebSocketStub = sinon.stub().returns(mockWs);
@@ -656,10 +656,10 @@ describe('src/transports/websocket.js', function() {
         it('should null out all event handler properties on the socket', function() {
             const conn = new Connection({});
             const ws = createMockWebSocket();
-            ws.onopen    = () => {};
-            ws.onclose   = () => {};
+            ws.onopen = () => {};
+            ws.onclose = () => {};
             ws.onmessage = () => {};
-            ws.onerror   = () => {};
+            ws.onerror = () => {};
             conn.socket = ws;
             conn.connected = false;
             conn.disposeSocket();

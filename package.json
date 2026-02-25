@@ -23,6 +23,7 @@
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
     "@eslint/js": "^9.39.3",
+    "@stylistic/eslint-plugin": "^5.9.0",
     "chai": "^6.2.2",
     "chai-subset": "^1.6.0",
     "compression-webpack-plugin": "^11.1.0",

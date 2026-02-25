@@ -1,9 +1,11 @@
+'use strict';
+
 module.exports = {
-  presets: [
-    ['@babel/preset-env', {
-      forceAllTransforms: true,
-      useBuiltIns: 'usage',
-      corejs: 3,
-    }],
-  ],
-}
+    presets: [
+        ['@babel/preset-env', {
+            forceAllTransforms: true,
+            useBuiltIns: 'usage',
+            corejs: 3,
+        }],
+    ],
+};
