@@ -31,6 +31,7 @@ module.exports = class Connection extends EventEmitter {
 
     registeredSuccessfully() {
         this.registered = Date.now();
+        this.reconnect_attempts = 0;
     }
 
     connect(options) {
@@ -83,7 +84,6 @@ module.exports = class Connection extends EventEmitter {
         // Called when the socket is connected and ready to start sending/receiving data.
         function socketOpen() {
             that.debugOut('Socket fully connected');
-            that.reconnect_attempts = 0;
             that.connected = true;
             that.emit('socket connected');
         }
@@ -117,11 +117,13 @@ module.exports = class Connection extends EventEmitter {
             } else if (that.reconnect_attempts && that.reconnect_attempts < that.auto_reconnect_max_retries) {
                 should_reconnect = true;
 
-            // If we were originally connected OK, reconnect
-            } else if (was_connected && safely_registered) {
-                should_reconnect = true;
+            // If we were originally connected, reconnect if the connection was OK
+            } else if (was_connected && that.registered !== false) {
+                should_reconnect = safely_registered;
+
+            // Potentially a transient initial connection error
             } else {
-                should_reconnect = false;
+                should_reconnect = true;
             }
 
             if (should_reconnect) {
