@@ -87,6 +87,16 @@ const handlers = {
             } else if (option[0] === 'CLIENTTAGDENY') {
                 // https://ircv3.net/specs/extensions/message-tags#rpl_isupport-tokens
                 handler.network.options.CLIENTTAGDENY = option[1].split(',').filter((f) => !!f);
+            } else if (option[0] === 'EXTBAN') {
+                // https://ircv3.net/specs/extensions/account-extban
+                const parts = option[1].split(',');
+                handler.network.options.EXTBAN = {
+                    prefix: parts[0] || '',
+                    types: parts.slice(1).join('').split(''),
+                };
+            } else if (option[0] === 'ACCOUNTEXTBAN') {
+                // https://ircv3.net/specs/extensions/account-extban
+                handler.network.options.ACCOUNTEXTBAN = option[1].split(',').filter((f) => !!f);
             } else if (option[0] === 'NETWORK') {
                 handler.network.name = option[1];
             } else if (option[0] === 'NAMESX' && !handler.network.cap.isEnabled('multi-prefix')) {

@@ -132,6 +132,15 @@ function NetworkInfo() {
         return this.options.CLIENTTAGDENY.some((tag) => tag === `-${tag_name}`);
     };
 
+    this.accountBanMask = function accountBanMask(account) {
+        if (!this.options.EXTBAN || !this.options.ACCOUNTEXTBAN || !this.options.ACCOUNTEXTBAN.length) {
+            return null;
+        }
+
+        const type = this.options.ACCOUNTEXTBAN[0];
+        return this.options.EXTBAN.prefix + type + ':' + account;
+    };
+
     this.isChannelName = function isChannelName(channel_name) {
         if (typeof channel_name !== 'string' || channel_name === '') {
             return false;
