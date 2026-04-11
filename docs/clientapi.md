@@ -122,8 +122,8 @@ Send a CTCP request to target with any number of parameters.
 ##### `.ctcpResponse(target, type [, paramN])`
 Send a CTCP response to target with any number of parameters.
 
-##### `.action(target, message)`
-Send an action message (typically /me) to a target.
+##### `.action(target, message [, tags])`
+Send an action message (typically /me) to a target, optionally with tags.
 
 ##### `.whois(nick [, cb])`
 Receive information about a user on the network if they exist. Optionally calls
