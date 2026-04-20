@@ -6,6 +6,18 @@ const _ = {
 };
 const util = require('util');
 
+// Returns true when the message was sent by our own client and echoed back by the server.
+// This happens when either echo-message or znc.in/self-message cap is active.
+function isSelfMessage(command, handler) {
+    const cap = handler.network.cap;
+    const echoActive = cap.isEnabled('echo-message') || cap.isEnabled('znc.in/self-message');
+    if (!echoActive) {
+        return false;
+    }
+    const ownNick = handler.client.user.nick;
+    return !!(ownNick && command.nick && handler.client.caseCompare(command.nick, ownNick));
+}
+
 const handlers = {
     NOTICE: function(command, handler) {
         const time = command.getServerTime();
@@ -44,7 +56,8 @@ const handlers = {
                 tags: command.tags,
                 time: time,
                 account: command.getTag('account'),
-                batch: command.batch
+                batch: command.batch,
+                self: isSelfMessage(command, handler)
             });
         }
     },
@@ -76,7 +89,8 @@ const handlers = {
                     tags: command.tags,
                     time: time,
                     account: command.getTag('account'),
-                    batch: command.batch
+                    batch: command.batch,
+                    self: isSelfMessage(command, handler)
                 });
             } else if (ctcp_command === 'VERSION' && handler.connection.options.version) {
                 handler.connection.write(util.format(
@@ -111,7 +125,8 @@ const handlers = {
                 tags: command.tags,
                 time: time,
                 account: command.getTag('account'),
-                batch: command.batch
+                batch: command.batch,
+                self: isSelfMessage(command, handler)
             });
         }
     },
@@ -127,7 +142,8 @@ const handlers = {
             tags: command.tags,
             time: time,
             account: command.getTag('account'),
-            batch: command.batch
+            batch: command.batch,
+            self: isSelfMessage(command, handler)
         });
     },
 
