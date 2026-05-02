@@ -169,6 +169,11 @@ const handlers = {
         if (handler.connection.options.enable_standardreplies) {
             want.push('standard-replies');
         }
+        if (handler.connection.options.enable_echomessage) {
+            // labeled-response requires batch and is most
+            // useful alongside echo-message for correlating sent messages
+            want.push('labeled-response');
+        }
 
         want = _.uniq(want.concat(handler.request_extra_caps));
 

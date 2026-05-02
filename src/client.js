@@ -73,6 +73,10 @@ module.exports = class IrcClient extends EventEmitter {
     createStructure() {
         const client = this;
 
+        // Labeled-response tracking
+        client._labelCounter = 0;
+        client._pendingLabels = new Map();
+
         // Provides middleware hooks for either raw IRC commands or the easier to use parsed commands
         client.raw_middleware = new MiddlewareHandler();
         client.parsed_middleware = new MiddlewareHandler();
@@ -120,6 +124,10 @@ module.exports = class IrcClient extends EventEmitter {
             client.network.cap.requested = [];
             client.network.cap.enabled = [];
             client.network.cap.available.clear();
+
+            // Clear any pending labeled-response entries from the previous connection
+            client._pendingLabels.clear();
+            client._labelCounter = 0;
 
             client.command_handler.resetCache();
         });
@@ -419,6 +427,42 @@ module.exports = class IrcClient extends EventEmitter {
         }
     }
 
+    /**
+     * ==== labeled-response support ====
+     */
+    _nextLabel() {
+        this._labelCounter = (this._labelCounter + 1) % 1000000;
+        return 'L' + this._labelCounter;
+    }
+
+    _applyLabel(tags) {
+        if (!this.network.cap.isEnabled('labeled-response')) {
+            return null;
+        }
+
+        const label = this._nextLabel();
+        tags.label = label;
+        this._pendingLabels.set(label, { time: Date.now() });
+        return label;
+    }
+
+    _resolvePendingLabel(label, data) {
+        const pending = this._pendingLabels.get(label);
+        if (pending) {
+            if (pending.timer) {
+                clearTimeout(pending.timer);
+            }
+            this._pendingLabels.delete(label);
+        }
+
+        const event = Object.assign({ label: label }, data);
+        this.emit('labeled response', event);
+    }
+
+    /**
+     * ==== end labeled-response support ====
+     */
+
     rawString(input) {
         let args;
 
@@ -451,7 +495,11 @@ module.exports = class IrcClient extends EventEmitter {
         this.raw('NICK', nick);
     }
 
-    sendMessage(commandName, target, message, tags) {
+    sendMessage(commandName, target, message, tags, options) {
+        const label_requested = options && options.label;
+        let label_applied = false;
+        const use_tags = label_requested || (tags && Object.keys(tags).length);
+
         const lines = message
             .split(/\r\n|\n|\r/)
             .filter(i => i);
@@ -469,9 +517,16 @@ module.exports = class IrcClient extends EventEmitter {
             ];
 
             blocks.forEach(block => {
-                if (tags && Object.keys(tags).length) {
+                if (use_tags) {
                     const msg = new IrcMessage(commandName, target, block);
-                    msg.tags = tags;
+                    msg.tags = Object.assign(Object.create(null), tags || {});
+
+                    // Servers respond once per label
+                    if (label_requested && !label_applied) {
+                        this._applyLabel(msg.tags);
+                        label_applied = true;
+                    }
+
                     this.raw(msg);
                 } else {
                     this.raw(commandName, target, block);
@@ -480,12 +535,12 @@ module.exports = class IrcClient extends EventEmitter {
         });
     }
 
-    say(target, message, tags) {
-        return this.sendMessage('PRIVMSG', target, message, tags);
+    say(target, message, tags, options) {
+        return this.sendMessage('PRIVMSG', target, message, tags, options);
     }
 
-    notice(target, message, tags) {
-        return this.sendMessage('NOTICE', target, message, tags);
+    notice(target, message, tags, options) {
+        return this.sendMessage('NOTICE', target, message, tags, options);
     }
 
     tagmsg(target, tags = {}) {
@@ -662,8 +717,11 @@ module.exports = class IrcClient extends EventEmitter {
         );
     }
 
-    action(target, message, tags) {
+    action(target, message, tags, options) {
         const that = this;
+        const label_requested = options && options.label;
+        let label_applied = false;
+        const has_tags = tags && Object.keys(tags).length;
 
         // Maximum length of target + message we can send to the IRC server is 500 characters
         // but we need to leave extra room for the sender prefix so the entire message can
@@ -677,10 +735,15 @@ module.exports = class IrcClient extends EventEmitter {
         const blocks = [...lineBreak(message, { bytes: blockLength, allowBreakingWords: true, allowBreakingGraphemes: true })];
 
         blocks.forEach(function(block) {
-            const ctcpBody = String.fromCharCode(1) + commandName + ' ' + block + String.fromCharCode(1);
-            if (tags && Object.keys(tags).length) {
+            const should_label = label_requested && !label_applied;
+            if (has_tags || should_label) {
+                const ctcpBody = String.fromCharCode(1) + commandName + ' ' + block + String.fromCharCode(1);
                 const msg = new IrcMessage('PRIVMSG', target, ctcpBody);
-                msg.tags = tags;
+                msg.tags = has_tags ? Object.assign(Object.create(null), tags) : Object.create(null);
+                if (should_label) {
+                    that._applyLabel(msg.tags);
+                    label_applied = true;
+                }
                 that.raw(msg);
             } else {
                 that.ctcpRequest(target, commandName, block);

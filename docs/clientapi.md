@@ -95,11 +95,13 @@ Ping the IRC server to show you're still alive.
 ##### `.changeNick(nick)`
 Attempt to change the clients nick on the network
 
-##### `.say(target, message [, tags])`
-Send a message to the target, optionally with tags.
+##### `.say(target, message [, tags [, options]])`
+Send a message to the target, optionally with tags. Pass `{ label: true }` as options
+to attach a labeled-response label (if the cap is enabled). The server's response will
+be emitted as a `labeled response` event.
 
-##### `.notice(target, message [, tags])`
-Send a notice to the target, optionally with tags.
+##### `.notice(target, message [, tags [, options]])`
+Send a notice to the target, optionally with tags. Accepts the same options as `.say()`.
 
 ##### `.tagmsg(target, tags)`
 Send a tagged message without content to the target
@@ -122,8 +124,10 @@ Send a CTCP request to target with any number of parameters.
 ##### `.ctcpResponse(target, type [, paramN])`
 Send a CTCP response to target with any number of parameters.
 
-##### `.action(target, message [, tags])`
-Send an action message (typically /me) to a target, optionally with tags.
+##### `.action(target, message [, tags [, options]])`
+Send an action message (typically /me) to a target, optionally with tags. Pass
+`{ label: true }` as options to attach a labeled-response label (if the cap is
+enabled). The server's response will be emitted as a `labeled response` event.
 
 ##### `.whois(nick [, cb])`
 Receive information about a user on the network if they exist. Optionally calls

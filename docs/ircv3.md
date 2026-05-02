@@ -19,6 +19,7 @@
 * server-time
 * userhost-in-names
 * message-tags
+* labeled-response
 
 #### Extra notes
 * chghost
@@ -28,4 +29,7 @@
 * echo-message
 
   Only enabled if the client `enable_echomessage` option is `true`. Clients may not be expecting their own messages being echoed back by default so it must be enabled manually.
-  Until IRCv3 labelled replies are available, sent message confirmations will not be available. More information on the echo-message limitations can be found here https://github.com/ircv3/ircv3-specifications/pull/284/files
+
+* labeled-response
+
+  Automatically enabled when `enable_echomessage` is `true` (requires batch, which is always requested). Pass `{ label: true }` as options to `say()`, `notice()`, or `action()` to attach a label. The server's response will trigger a `labeled response` event on the client with the matching label. See [events.md](events.md) for the event format.
