@@ -51,7 +51,7 @@ module.exports = class IrcCommandHandler extends EventEmitter {
         } else {
             // Check for labeled-response on non-batched single-message responses.
             // Batched labeled responses are handled in the BATCH end handler.
-            // ACK is handled in its own command handler.
+            // ACK is handled in its own handler.
             const label = irc_command.getTag('label');
             if (label && irc_command.command !== 'BATCH' && irc_command.command !== 'ACK') {
                 irc_command.label = label;

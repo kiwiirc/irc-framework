@@ -428,19 +428,13 @@ module.exports = class IrcClient extends EventEmitter {
     }
 
     /**
-     * Generate the next label value for labeled-response.
-     * Returns a short opaque string, max 64 bytes per spec.
+     * ==== labeled-response support ====
      */
     _nextLabel() {
         this._labelCounter = (this._labelCounter + 1) % 1000000;
         return 'L' + this._labelCounter;
     }
 
-    /**
-     * If labeled-response is enabled, generate a label, attach it to the
-     * tags object, and register it as pending. Returns the label string,
-     * or null if the cap is not enabled.
-     */
     _applyLabel(tags) {
         if (!this.network.cap.isEnabled('labeled-response')) {
             return null;
@@ -452,10 +446,6 @@ module.exports = class IrcClient extends EventEmitter {
         return label;
     }
 
-    /**
-     * Resolve a pending labeled-response.
-     * Called by the command handler when a labeled response arrives.
-     */
     _resolvePendingLabel(label, data) {
         const pending = this._pendingLabels.get(label);
         if (pending) {
@@ -468,6 +458,10 @@ module.exports = class IrcClient extends EventEmitter {
         const event = Object.assign({ label: label }, data);
         this.emit('labeled response', event);
     }
+
+    /**
+     * ==== end labeled-response support ====
+     */
 
     rawString(input) {
         let args;
@@ -527,7 +521,7 @@ module.exports = class IrcClient extends EventEmitter {
                     const msg = new IrcMessage(commandName, target, block);
                     msg.tags = Object.assign(Object.create(null), tags || {});
 
-                    // Only label the first block — the server responds once per label
+                    // Servers respond once per label
                     if (label_requested && !label_applied) {
                         this._applyLabel(msg.tags);
                         label_applied = true;
