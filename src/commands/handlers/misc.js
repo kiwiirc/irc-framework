@@ -306,6 +306,15 @@ const handlers = {
 
     NOTE: standardReply,
 
+    ACK: function(command, handler) {
+        const label = command.getTag('label');
+        if (label) {
+            handler.client._resolvePendingLabel(label, {
+                type: 'ack',
+            });
+        }
+    },
+
     BATCH: function(command, handler) {
         const batch_start = command.params[0].substr(0, 1) === '+';
         const batch_id = command.params[0].substr(1);
@@ -320,6 +329,14 @@ const handlers = {
             cache.commands = [];
             cache.type = command.params[1];
             cache.params = command.params.slice(2);
+
+            // If the batch start has a label tag, store it for resolution
+            // when the batch ends (per labeled-response spec, the label is
+            // on the BATCH + opener)
+            const label = command.getTag('label');
+            if (label) {
+                cache.label = label;
+            }
 
             return;
         }
@@ -336,12 +353,22 @@ const handlers = {
             id: batch_id,
             type: cache.type,
             params: cache.params,
-            commands: cache.commands
+            commands: cache.commands,
+            label: cache.label || null,
         };
 
         // Destroy the cache object before executing each command. If one
         // errors out then we don't have the cache object stuck in memory.
         cache.destroy();
+
+        // Resolve the pending labeled-response if this batch was labeled
+        if (emit_obj.label) {
+            handler.client._resolvePendingLabel(emit_obj.label, {
+                type: 'batch',
+                batchType: emit_obj.type,
+                commands: emit_obj.commands,
+            });
+        }
 
         handler.emit('batch start', emit_obj);
         handler.emit('batch start ' + emit_obj.type, emit_obj);
@@ -351,6 +378,9 @@ const handlers = {
                 type: cache.type,
                 params: cache.params
             };
+            if (emit_obj.label) {
+                c.label = emit_obj.label;
+            }
             handler.executeCommand(c);
         });
         handler.emit('batch end', emit_obj);

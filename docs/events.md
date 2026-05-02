@@ -697,6 +697,26 @@ A `batch end <type>` event is also triggered.
 ~~~
 
 
+**labeled response**
+
+Emitted when a labeled-response is received from the server, correlating a response
+with a previously sent labeled command. The `label` property matches the label string
+returned by `say()`, `action()`, etc. when `{ label: true }` was passed.
+
+`type` will be one of `'ack'` (command produced no response), `'single'` (single message
+response), or `'batch'` (multi-message batched response).
+~~~javascript
+// ACK (no response needed)
+{ label: 'L1', type: 'ack' }
+
+// Single message response (eg. ERR_NOSUCHNICK)
+{ label: 'L2', type: 'single', command: IrcCommand }
+
+// Batched response (eg. WHOIS)
+{ label: 'L3', type: 'batch', batchType: 'labeled-response', commands: [...] }
+~~~
+
+
 **cap ls**, **cap ack**, **cap nak**, **cap list**, **cap new**, **cap del**
 
 Triggered for each `CAP` command, lists the sent capabilities list.
