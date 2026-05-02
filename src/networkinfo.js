@@ -80,6 +80,41 @@ function NetworkInfo() {
         return this.options[support_name.toUpperCase()];
     };
 
+    this.multilineLimits = function multilineLimits() {
+        if (!this.cap.isEnabled('draft/multiline')) {
+            return null;
+        }
+
+        const value = this.cap.available.get('draft/multiline');
+        if (typeof value !== 'string' || value === '') {
+            return null;
+        }
+
+        const limits = { maxBytes: 0, maxLines: null };
+        value.split(',').forEach((token) => {
+            const sep = token.indexOf('=');
+            if (sep === -1) {
+                return;
+            }
+            const key = token.substr(0, sep);
+            const num = parseInt(token.substr(sep + 1), 10);
+            if (Number.isNaN(num)) {
+                return;
+            }
+            if (key === 'max-bytes') {
+                limits.maxBytes = num;
+            } else if (key === 'max-lines') {
+                limits.maxLines = num;
+            }
+        });
+
+        if (limits.maxBytes <= 0) {
+            return null;
+        }
+
+        return limits;
+    };
+
     this.supportsTag = function supportsTag(tag_name) {
         if (!this.cap.isEnabled('message-tags')) {
             return false;

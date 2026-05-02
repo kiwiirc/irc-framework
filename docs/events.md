@@ -390,7 +390,8 @@ Also triggers a **message** event with .type = 'privmsg'
     message: 'Hello everybody',
     tags: [],
     time: 000000000,
-    account: 'account_name'
+    account: 'account_name',
+    multiline: false
 }
 ~~~
 

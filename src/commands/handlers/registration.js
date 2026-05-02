@@ -174,6 +174,9 @@ const handlers = {
             // useful alongside echo-message for correlating sent messages
             want.push('labeled-response');
         }
+        if (handler.connection.options.enable_multiline) {
+            want.push('draft/multiline');
+        }
 
         want = _.uniq(want.concat(handler.request_extra_caps));
 

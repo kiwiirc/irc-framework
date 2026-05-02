@@ -17,6 +17,13 @@ const User = require('./user');
 const Channel = require('./channel');
 const { lineBreak } = require('./linebreak');
 const MessageTags = require('./messagetags');
+const { encode: encodeUTF8 } = require('isomorphic-textencoder');
+
+let batch_reftag_counter = 0;
+function generateBatchReftag() {
+    batch_reftag_counter = (batch_reftag_counter + 1) % 0xffffffff;
+    return Date.now().toString(36) + batch_reftag_counter.toString(36);
+}
 
 let default_transport = null;
 
@@ -547,6 +554,89 @@ module.exports = class IrcClient extends EventEmitter {
 
     notice(target, message, tags, options) {
         return this.sendMessage('NOTICE', target, message, tags, options);
+    }
+
+    sendMultiline(commandName, target, lines, tags) {
+        const limits = this.network.multilineLimits();
+
+        if (!limits) {
+            // as a fallback, split into individual lines
+            for (let i = 0; i < lines.length; i++) {
+                this.sendMessage(commandName, target, lines[i], tags);
+            }
+            return;
+        }
+
+        const frames = [];
+        let totalBytes = 0;
+        const maxBytes = this.options.message_max_length;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (i > 0) {
+                // \n separator between logical lines counts toward max-bytes per spec
+                totalBytes += 1;
+            }
+
+            if (line === '') {
+                frames.push({ message: '', concat: false });
+                continue;
+            }
+
+            const blocks = [...lineBreak(line, {
+                bytes: maxBytes,
+                allowBreakingWords: true,
+                allowBreakingGraphemes: true,
+            })];
+
+            blocks.forEach((block, blockIdx) => {
+                frames.push({
+                    message: block,
+                    concat: blockIdx > 0,
+                });
+                totalBytes += encodeUTF8(block).byteLength;
+            });
+        }
+
+        if (totalBytes > limits.maxBytes) {
+            const err = new Error('Multiline batch exceeds max-bytes limit');
+            err.code = 'MULTILINE_MAX_BYTES';
+            err.limit = limits.maxBytes;
+            throw err;
+        }
+        if (limits.maxLines !== null && frames.length > limits.maxLines) {
+            const err = new Error('Multiline batch exceeds max-lines limit');
+            err.code = 'MULTILINE_MAX_LINES';
+            err.limit = limits.maxLines;
+            throw err;
+        }
+
+        const reftag = generateBatchReftag();
+
+        const startMsg = new IrcMessage('BATCH', '+' + reftag, 'draft/multiline', target);
+        if (tags && Object.keys(tags).length) {
+            startMsg.tags = tags;
+        }
+        this.raw(startMsg);
+
+        frames.forEach((frame) => {
+            const msg = new IrcMessage(commandName, target, frame.message);
+            msg.tags = { batch: reftag };
+            if (frame.concat) {
+                msg.tags['draft/multiline-concat'] = true;
+            }
+            this.raw(msg);
+        });
+
+        this.raw('BATCH', '-' + reftag);
+    }
+
+    sayMultiline(target, lines, tags) {
+        return this.sendMultiline('PRIVMSG', target, lines, tags);
+    }
+
+    noticeMultiline(target, lines, tags) {
+        return this.sendMultiline('NOTICE', target, lines, tags);
     }
 
     tagmsg(target, tags = {}) {

@@ -12,6 +12,7 @@ new Irc.Client({
     version: 'node.js irc-framework',
     enable_chghost: false,
     enable_echomessage: false,
+    enable_multiline: false,
     auto_reconnect: true,
     auto_reconnect_max_wait: 300000,
     auto_reconnect_max_retries: 3,
@@ -102,6 +103,14 @@ be emitted as a `labeled response` event.
 
 ##### `.notice(target, message [, tags [, options]])`
 Send a notice to the target, optionally with tags. Accepts the same options as `.say()`.
+
+##### `.sayMultiline(target, lines [, tags])`
+##### `.noticeMultiline(target, lines [, tags])`
+Send `lines` to `target` as a single
+[`draft/multiline`](https://ircv3.net/specs/extensions/multiline) batch when the
+network supports the capability. Falls
+
+Requires `enable_multiline: true`.
 
 ##### `.tagmsg(target, tags)`
 Send a tagged message without content to the target
