@@ -6,6 +6,7 @@ const _ = {
     map: require('lodash/map'),
 };
 const Helpers = require('../../helpers');
+const IrcCommand = require('../command');
 
 const handlers = {
     RPL_LISTSTART: function(command, handler) {
@@ -338,6 +339,15 @@ const handlers = {
                 cache.label = label;
             }
 
+            // https://ircv3.net/specs/extensions/multiline#message-tags-spec
+            if (cache.type === 'draft/multiline') {
+                cache.tags = command.tags;
+                cache.prefix = command.prefix;
+                cache.nick = command.nick;
+                cache.ident = command.ident;
+                cache.hostname = command.hostname;
+            }
+
             return;
         }
 
@@ -372,17 +382,22 @@ const handlers = {
 
         handler.emit('batch start', emit_obj);
         handler.emit('batch start ' + emit_obj.type, emit_obj);
-        emit_obj.commands.forEach((c) => {
-            c.batch = {
-                id: batch_id,
-                type: cache.type,
-                params: cache.params
-            };
-            if (emit_obj.label) {
-                c.label = emit_obj.label;
-            }
-            handler.executeCommand(c);
-        });
+        if (cache.type === 'draft/multiline') {
+            handleMultilineBatch(emit_obj, cache, handler);
+        } else {
+            emit_obj.commands.forEach((c) => {
+                c.batch = {
+                    id: batch_id,
+                    type: cache.type,
+                    params: cache.params
+                };
+                if (emit_obj.label) {
+                    c.label = emit_obj.label;
+                }
+                handler.executeCommand(c);
+            });
+        }
+
         handler.emit('batch end', emit_obj);
         handler.emit('batch end ' + emit_obj.type, emit_obj);
     }
@@ -416,4 +431,77 @@ function getChanListCache(handler) {
     }
 
     return cache;
+}
+
+// https://ircv3.net/specs/extensions/multiline
+function handleMultilineBatch(emit_obj, cache, handler) {
+    const lines = emit_obj.commands;
+
+    if (lines.length === 0) {
+        return;
+    }
+
+    // Use same command (PRIVMSG or NOTICE) and target for all lines
+    const first = lines[0];
+    const lineCommand = first.command;
+    if (lineCommand !== 'PRIVMSG' && lineCommand !== 'NOTICE') {
+        return;
+    }
+
+    const target = first.params[0];
+
+    let allBlank = true;
+    for (let i = 0; i < lines.length; i++) {
+        const c = lines[i];
+        if (c.command !== lineCommand) {
+            return;
+        }
+        if (c.params[0] !== target) {
+            return;
+        }
+        const msg = c.params[c.params.length - 1];
+        const isBlank = msg === '';
+        if (!isBlank) {
+            allBlank = false;
+        }
+        if (isBlank && c.tags && c.tags['draft/multiline-concat'] !== undefined) {
+            // https://ircv3.net/specs/extensions/multiline#batch-types
+            // "Clients MUST NOT send blank lines with the draft/multiline-concat tag.""
+            return;
+        }
+    }
+
+    if (allBlank) {
+        return;
+    }
+
+    let combined = '';
+    for (let i = 0; i < lines.length; i++) {
+        const c = lines[i];
+        const msg = c.params[c.params.length - 1];
+        if (i === 0) {
+            combined = msg;
+        } else if (c.tags && c.tags['draft/multiline-concat'] !== undefined) {
+            combined += msg;
+        } else {
+            combined += '\n' + msg;
+        }
+    }
+
+    const tmp = new IrcCommand(lineCommand, {
+        params: [target, combined],
+        tags: cache.tags || Object.create(null),
+        prefix: cache.prefix !== undefined ? cache.prefix : first.prefix,
+        nick: cache.nick !== undefined ? cache.nick : first.nick,
+        ident: cache.ident !== undefined ? cache.ident : first.ident,
+        hostname: cache.hostname !== undefined ? cache.hostname : first.hostname,
+    });
+    tmp.batch = {
+        id: emit_obj.id,
+        type: emit_obj.type,
+        params: emit_obj.params,
+    };
+    tmp.multiline = true;
+
+    handler.executeCommand(tmp);
 }

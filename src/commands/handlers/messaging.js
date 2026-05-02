@@ -46,6 +46,7 @@ const handlers = {
                 account: command.getTag('account'),
                 batch: command.batch,
                 label: command.label || command.getTag('label') || undefined,
+                multiline: !!command.multiline,
             });
         }
     },
@@ -115,6 +116,7 @@ const handlers = {
                 account: command.getTag('account'),
                 batch: command.batch,
                 label: command.label || command.getTag('label') || undefined,
+                multiline: !!command.multiline,
             });
         }
     },
