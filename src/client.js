@@ -662,7 +662,7 @@ module.exports = class IrcClient extends EventEmitter {
         );
     }
 
-    action(target, message) {
+    action(target, message, tags) {
         const that = this;
 
         // Maximum length of target + message we can send to the IRC server is 500 characters
@@ -677,7 +677,14 @@ module.exports = class IrcClient extends EventEmitter {
         const blocks = [...lineBreak(message, { bytes: blockLength, allowBreakingWords: true, allowBreakingGraphemes: true })];
 
         blocks.forEach(function(block) {
-            that.ctcpRequest(target, commandName, block);
+            const ctcpBody = String.fromCharCode(1) + commandName + ' ' + block + String.fromCharCode(1);
+            if (tags && Object.keys(tags).length) {
+                const msg = new IrcMessage('PRIVMSG', target, ctcpBody);
+                msg.tags = tags;
+                that.raw(msg);
+            } else {
+                that.ctcpRequest(target, commandName, block);
+            }
         });
 
         return blocks;
