@@ -310,19 +310,23 @@ const handlers = {
         const cache_key = command.params[1].toLowerCase();
         const cache = handler.cache('whois.' + cache_key);
 
-        // <source> 338 <target> <nick> [<user>@]<host> <ip> :Actual user@host, Actual IP
-        const user_host = command.params[command.params.length - 3] || '';
-        const mask_sep = user_host.indexOf('@');
-        const user = user_host.substring(0, mask_sep) || undefined;
-        const host = user_host.substring(mask_sep + 1);
-        const ip = command.params[command.params.length - 2];
+        // Until 2018 (commit 5044013) UnrealIRCd used to use this numeric for
+        // RPL_IRCOPS. If there's not enough parameters for it to be the numeric
+        // we expect then just ignore it.
+        if (command.params.length < 4) {
+            return;
+        }
 
-        // UnrealIRCd uses this numeric for something else resulting in ip+host
-        // to be empty, so ignore this is that's the case
-        if (ip && host) {
-            cache.actual_ip = ip;
-            cache.actual_username = user;
-            cache.actual_hostname = host;
+        // <source> 338 <target> <nick> [[<user>@]<host>] <ip> :Actual user@host, Actual IP
+        cache.actual_ip = command.params[command.params.length - 2];
+
+        // Some servers (e.g. Libera.Chat) only return an actual IP address.
+        if (command.params.length > 4) {
+            const user_host = command.params[command.params.length - 3];
+            const mask_sep = user_host.indexOf('@');
+
+            cache.actual_username = user_host.substring(0, mask_sep) || undefined;
+            cache.actual_hostname = user_host.substring(mask_sep + 1);
         }
     },
 
