@@ -1,0 +1,6 @@
+# Testing IRC registration without CAP support
+READ CAP LS 302
+READ NICK $nick
+READ USER $ $ $ $
+SEND :src 001 $nick something :Welcome home
+EVENT registered nick=$nick

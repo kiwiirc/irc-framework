@@ -1,0 +1,20 @@
+# Test script RESET example
+
+READWAIT USER $ $ $ $
+SEND :src 001 nick1 something :Welcome home
+EVENT registered nick=nick1
+
+RESET
+READWAIT USER $ $ $ $
+SEND :src 001 nick2 something :Welcome home
+EVENT registered nick=nick2
+
+RESET
+READWAIT USER $ $ $ $
+SEND :src 001 nick3 something :Welcome home
+EVENT registered nick=nick3
+
+RESET
+READWAIT USER $ $ $ $
+SEND :src 001 nick4 something :Welcome home
+EVENT registered nick=nick4
