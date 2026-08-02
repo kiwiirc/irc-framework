@@ -261,8 +261,8 @@ const handlers = {
                 const cap = capabilities[i];
                 if (
                     want.indexOf(cap) > -1 &&
-                        request_caps.indexOf(cap) === -1 &&
-                        !handler.network.cap.isEnabled(cap)
+                    request_caps.indexOf(cap) === -1 &&
+                    !handler.network.cap.isEnabled(cap)
                 ) {
                     handler.network.cap.requested.push(cap);
                     request_caps.push(cap);

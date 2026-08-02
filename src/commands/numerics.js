@@ -1,6 +1,5 @@
 'use strict';
 
-/* eslint-disable quote-props */
 module.exports = {
     '001': 'RPL_WELCOME',
     '002': 'RPL_YOURHOST',

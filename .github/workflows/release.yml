@@ -1,28 +1,153 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish"
+        required: true
+      dry_run:
+        description: "Perform a dry run without publishing"
+        type: boolean
+        required: false
+        default: true
+
+concurrency:
+  group: npm-publish-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   release:
     name: Release workflow
-
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write   # Required for OIDC trusted publishing
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Validate GitHub release and tag exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ inputs.version }}"
+          echo "Looking for release with tag $TAG..."
+
+          RELEASE=$(gh release view "$TAG" --repo ${{ github.repository }} --json tagName,name 2>/dev/null)
+          if [ $? -ne 0 ]; then
+            echo "❌ No GitHub release found with tag $TAG"
+            exit 1
+          fi
+
+          RELEASE_NAME=$(echo "$RELEASE" | jq -r '.name')
+          if [ "$RELEASE_NAME" != "$TAG" ]; then
+            echo "❌ Release name '$RELEASE_NAME' does not match expected '$TAG'"
+            exit 1
+          fi
+
+          echo "✅ GitHub release '$RELEASE_NAME' confirmed"
+
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: "v${{ inputs.version }}"
+          fetch-depth: 0
+
+      - name: Ensure tag commit is on master
+        run: |
+          if ! git branch -r --contains "$(git rev-parse HEAD)" | grep -q "origin/master"; then
+            echo "❌ Tag is not based on master branch"
+            exit 1
+          fi
+          echo "✅ Tag commit is on master"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org/'
+          node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org/"
 
-      - name: Install
-        run: yarn --frozen-lockfile --non-interactive
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Detect Yarn version
+        id: yarn-version
+        run: |
+          # Resolve the Yarn major version from the packageManager field in
+          # package.json if present, otherwise fall back to the installed version.
+          YARN_VERSION=$(node -p "
+            try {
+              const pm = require('./package.json').packageManager ?? '';
+              const match = pm.match(/^yarn@(\d+)/);
+              match ? match[1] : '';
+            } catch { '' }
+          ")
+          if [ -z "$YARN_VERSION" ]; then
+            YARN_VERSION=$(yarn --version | cut -d. -f1)
+          fi
+          echo "major=$YARN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected Yarn major version: $YARN_VERSION"
+
+      - name: Validate version matches package.json
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          INPUT_VERSION="${{ inputs.version }}"
+          if [ "$PKG_VERSION" != "$INPUT_VERSION" ]; then
+            echo "❌ Version mismatch: package.json has $PKG_VERSION but input was $INPUT_VERSION"
+            exit 1
+          fi
+          echo "✅ Version $PKG_VERSION confirmed"
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ steps.yarn-version.outputs.major }}" = "1" ]; then
+            yarn install --frozen-lockfile --non-interactive
+          else
+            yarn install --immutable
+          fi
+
+      - name: Build package (if build script exists)
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)" 2>/dev/null; then
+            yarn build
+          else
+            echo "No build script found — skipping build step"
+          fi
+
+      - name: Publish (dry run)
+        if: ${{ inputs.dry_run }}
+        env:
+          # The npm CLI automatically detects the OIDC environment via
+          # ACTIONS_ID_TOKEN_REQUEST_URL / ACTIONS_ID_TOKEN_REQUEST_TOKEN and
+          # handles the token exchange itself. NODE_AUTH_TOKEN must still be set
+          # (even if empty) to satisfy the .npmrc written by actions/setup-node,
+          # otherwise npm errors before it reaches OIDC auth.
+          NODE_AUTH_TOKEN: ""
+        run: npm publish --provenance --access public --dry-run
 
       - name: Publish
-        run: yarn publish
+        if: ${{ !inputs.dry_run }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ""
+        run: npm publish --provenance --access public
+
+      - name: Verify published version
+        if: ${{ !inputs.dry_run }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          EXPECTED_VERSION="${{ inputs.version }}"
+
+          echo "Waiting for npm propagation..."
+
+          for i in {1..10}; do
+            PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null)
+            if [ "$PUBLISHED_VERSION" = "$EXPECTED_VERSION" ]; then
+              echo "✅ Version $PUBLISHED_VERSION confirmed on npm"
+              exit 0
+            fi
+            echo "Not visible yet (attempt $i)..."
+            sleep 15
+          done
+
+          echo "❌ Published version not visible after waiting"
+          exit 1

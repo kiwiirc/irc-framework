@@ -1,10 +1,7 @@
-'use strict';
+import { assert } from 'chai';
 
-/* globals describe, it */
-const chai = require('chai');
-const assert = chai.assert;
-const NetworkInfo = require('../src/networkinfo');
-const IrcCommandHandler = require('../src/commands/handler');
+import NetworkInfo from '../src/networkinfo.js';
+import IrcCommandHandler from '../src/commands/handler.js';
 
 function newMockClient() {
     const handler = new IrcCommandHandler({ network: new NetworkInfo() });
@@ -26,7 +23,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CHANTYPES=#&'],
-                tags: []
+                tags: [],
             });
             const results = names.map(name => client.network.isChannelName(name));
             assert.deepEqual(results, [false, true, false, false, true, false]);
@@ -37,7 +34,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CHANTYPES=%'],
-                tags: []
+                tags: [],
             });
             const results = names.map(name => client.network.isChannelName(name));
             assert.deepEqual(results, [false, false, false, true, false, true]);
@@ -48,7 +45,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CHANTYPES='],
-                tags: []
+                tags: [],
             });
             const results = names.map(name => client.network.isChannelName(name));
             assert.deepEqual(results, [false, false, false, false, false, false]);
@@ -61,7 +58,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY=a,b,c'],
-                tags: []
+                tags: [],
             });
             assert.deepEqual(client.network.options.CLIENTTAGDENY, ['a', 'b', 'c']);
         });
@@ -71,7 +68,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY=*,-a,-b'],
-                tags: []
+                tags: [],
             });
             assert.deepEqual(client.network.options.CLIENTTAGDENY, ['*', '-a', '-b']);
         });
@@ -81,7 +78,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY='],
-                tags: []
+                tags: [],
             });
             assert.isArray(client.network.options.CLIENTTAGDENY);
             assert.isEmpty(client.network.options.CLIENTTAGDENY);
@@ -92,7 +89,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', ''],
-                tags: []
+                tags: [],
             });
             assert.isUndefined(client.network.options.CLIENTTAGDENY);
         });
@@ -102,7 +99,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY=*,-a,-b'],
-                tags: []
+                tags: [],
             });
             assert.isFalse(client.network.supportsTag('a'));
             assert.isFalse(client.network.supportsTag('b'));
@@ -114,7 +111,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY='],
-                tags: []
+                tags: [],
             });
             assert.isTrue(client.network.supportsTag('a'));
             assert.isTrue(client.network.supportsTag('b'));
@@ -126,7 +123,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY=*'],
-                tags: []
+                tags: [],
             });
             assert.isFalse(client.network.supportsTag('a'));
             assert.isFalse(client.network.supportsTag('b'));
@@ -138,7 +135,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY=*,-a'],
-                tags: []
+                tags: [],
             });
             assert.isTrue(client.network.supportsTag('a'));
             assert.isFalse(client.network.supportsTag('b'));
@@ -150,7 +147,7 @@ describe('src/networkinfo.js', function() {
             client.dispatch({
                 command: '005',
                 params: ['nick', 'CLIENTTAGDENY=b'],
-                tags: []
+                tags: [],
             });
             assert.isTrue(client.network.supportsTag('a'));
             assert.isFalse(client.network.supportsTag('b'));

@@ -1,3 +1,5 @@
+'use strict';
+
 const MessageTags = require('./messagetags');
 
 module.exports = class IrcMessage {
