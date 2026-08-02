@@ -15,7 +15,7 @@ module.exports = class Connection extends EventEmitter {
         this.connected = false;
         this.requested_disconnect = false;
 
-        this.reconnect_attempts = 0;
+        this.reconnect_attempts = 1;
 
         // When an IRC connection was successfully registered.
         this.registered = false;
@@ -31,6 +31,7 @@ module.exports = class Connection extends EventEmitter {
 
     registeredSuccessfully() {
         this.registered = Date.now();
+        this.reconnect_attempts = 1;
     }
 
     connect(options) {
@@ -83,7 +84,6 @@ module.exports = class Connection extends EventEmitter {
         // Called when the socket is connected and ready to start sending/receiving data.
         function socketOpen() {
             that.debugOut('Socket fully connected');
-            that.reconnect_attempts = 0;
             that.connected = true;
             that.emit('socket connected');
         }
