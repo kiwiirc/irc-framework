@@ -316,11 +316,13 @@ const handlers = {
         }
 
         if (batch_start) {
+            // in case of an interleaving batch
+            if (handler.hasCache(cache_key)) return;
             const cache = handler.cache(cache_key);
             cache.commands = [];
             cache.type = command.params[1];
             cache.params = command.params.slice(2);
-
+            cache.tags = command.tags;
             return;
         }
 
@@ -336,7 +338,8 @@ const handlers = {
             id: batch_id,
             type: cache.type,
             params: cache.params,
-            commands: cache.commands
+            commands: cache.commands,
+            tags: cache.tags,
         };
 
         // Destroy the cache object before executing each command. If one
@@ -346,10 +349,12 @@ const handlers = {
         handler.emit('batch start', emit_obj);
         handler.emit('batch start ' + emit_obj.type, emit_obj);
         emit_obj.commands.forEach((c) => {
+            if (c.getTag('batch') !== batch_id) return;
             c.batch = {
                 id: batch_id,
                 type: cache.type,
-                params: cache.params
+                params: cache.params,
+                tags: cache.tags,
             };
             handler.executeCommand(c);
         });
