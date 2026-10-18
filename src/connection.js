@@ -15,7 +15,7 @@ module.exports = class Connection extends EventEmitter {
         this.connected = false;
         this.requested_disconnect = false;
 
-        this.reconnect_attempts = 1;
+        this.reconnect_attempts = 0;
 
         // When an IRC connection was successfully registered.
         this.registered = false;
@@ -31,7 +31,10 @@ module.exports = class Connection extends EventEmitter {
 
     registeredSuccessfully() {
         this.registered = Date.now();
-        this.reconnect_attempts = 1;
+        // Count attempts from the last successful registration, not from the
+        // last TCP connect: a socket that opens but fails to register should
+        // use up the retry budget, not reset it.
+        this.reconnect_attempts = 0;
     }
 
     connect(options) {
@@ -113,12 +116,18 @@ module.exports = class Connection extends EventEmitter {
             if (that.requested_disconnect || !that.auto_reconnect) {
                 should_reconnect = false;
 
-            // If trying to reconnect, continue with it
-            } else if (that.reconnect_attempts && that.reconnect_attempts < that.auto_reconnect_max_retries) {
-                should_reconnect = true;
+            // Registered, then dropped almost immediately: an aKill rather
+            // than a network problem, so don't retry
+            } else if (was_connected && that.registered !== false && !safely_registered) {
+                should_reconnect = false;
 
             // If we were originally connected OK, reconnect
             } else if (was_connected && safely_registered) {
+                should_reconnect = true;
+
+            // Any other failure (first connect, failed registration, or a
+            // retry that failed again) retries until the budget runs out
+            } else if (that.reconnect_attempts < that.auto_reconnect_max_retries) {
                 should_reconnect = true;
             } else {
                 should_reconnect = false;
