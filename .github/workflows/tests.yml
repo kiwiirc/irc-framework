@@ -51,6 +51,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
+      - name: Record Node.js version
+        run: printf 'Node.js `%s` (`%s`)\n' "$(node -v)" "${{ matrix.node-version }}" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install dependencies
         run: yarn --frozen-lockfile --non-interactive --prefer-offline
 
