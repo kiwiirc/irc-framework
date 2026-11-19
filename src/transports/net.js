@@ -212,6 +212,15 @@ module.exports = class Connection extends EventEmitter {
         this.debugOut('socketError() ' + err.message);
         this.last_socket_error = err;
         // this.emit('error', err);
+
+        // With a SOCKS proxy there is no socket until createConnection() resolves, so a
+        // rejection here has nothing bound to it: no 'close' is emitted, Connection's
+        // socketClose() never runs, and no reconnect is ever scheduled. Emit the close
+        // ourselves so the normal backoff applies, as the direct path already gets from
+        // _onSocketCreate().
+        if (!this.socket) {
+            this.onSocketClose();
+        }
     }
 
     onSocketTimeout() {

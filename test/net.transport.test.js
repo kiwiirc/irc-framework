@@ -505,6 +505,34 @@ describe('src/transports/net.js', function() {
 
             assert.equal(conn.last_socket_error, err);
         });
+
+        it('should emit close when there is no socket', function() {
+            // The SOCKS path assigns this.socket only once createConnection() resolves, so a
+            // rejection arrives with nothing bound to emit 'close' for it. Without this the
+            // connection sits in SOCK_CONNECTING forever and never reconnects.
+            const conn = new Connection({});
+            const spy = sinon.spy();
+            const err = new Error('Proxy connection timed out');
+            conn.on('close', spy);
+            conn.socket = null;
+            conn.onSocketError(err);
+
+            expect(spy).to.have.been.calledOnce;
+            expect(spy).to.have.been.calledWith(err);
+            assert.equal(conn.state, 0); // SOCK_DISCONNECTED
+        });
+
+        it('should not emit close when a socket exists', function() {
+            // A bound socket emits its own 'close', so synthesising one here would schedule
+            // two reconnects for a single failure.
+            const conn = new Connection({});
+            const spy = sinon.spy();
+            conn.on('close', spy);
+            conn.socket = createMockSocket();
+            conn.onSocketError(new Error('ECONNRESET'));
+
+            expect(spy).to.not.have.been.called;
+        });
     });
 
     describe('onSocketTimeout()', function() {
