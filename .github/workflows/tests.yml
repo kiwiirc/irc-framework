@@ -1,30 +1,75 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x, 22.x]
+    timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: lts/*
           cache: 'yarn'
 
       - name: Install dependencies
         run: yarn --frozen-lockfile --non-interactive --prefer-offline
 
-      - name: Test
-        run: yarn test
-
       - name: Lint
         run: yarn lint
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [lts/-3, lts/-2, lts/-1, lts/*]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Record Node.js version
+        run: printf 'Node.js `%s` (`%s`)\n' "$(node -v)" "${{ matrix.node-version }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile --non-interactive --prefer-offline
+
+      - name: Test
+        run: yarn coverage
+
+  all-checks:
+    name: All Checks
+    if: always()
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify all jobs passed
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" ]]; then
+            echo "lint: ${{ needs.lint.result }}, test: ${{ needs.test.result }}"
+            exit 1
+          fi
