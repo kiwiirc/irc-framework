@@ -156,4 +156,92 @@ describe('src/networkinfo.js', function() {
             assert.isFalse(client.network.supportsTag('b'));
         });
     });
+
+    describe('EXTBAN and ACCOUNTEXTBAN support', function() {
+        it('should parse EXTBAN into prefix and types', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'EXTBAN=$,ARar'],
+                tags: []
+            });
+            assert.deepEqual(client.network.options.EXTBAN, {
+                prefix: '$',
+                types: ['A', 'R', 'a', 'r'],
+            });
+        });
+
+        it('should parse EXTBAN with tilde prefix', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'EXTBAN=~,a'],
+                tags: []
+            });
+            assert.deepEqual(client.network.options.EXTBAN, {
+                prefix: '~',
+                types: ['a'],
+            });
+        });
+
+        it('should parse ACCOUNTEXTBAN as a list', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'ACCOUNTEXTBAN=a,account'],
+                tags: []
+            });
+            assert.deepEqual(client.network.options.ACCOUNTEXTBAN, ['a', 'account']);
+        });
+
+        it('should parse single ACCOUNTEXTBAN value', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'ACCOUNTEXTBAN=R'],
+                tags: []
+            });
+            assert.deepEqual(client.network.options.ACCOUNTEXTBAN, ['R']);
+        });
+
+        it('should construct account ban mask with $ prefix', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'EXTBAN=$,ARar', 'ACCOUNTEXTBAN=R'],
+                tags: []
+            });
+            assert.equal(client.network.accountBanMask('bob'), '$R:bob');
+        });
+
+        it('should construct account ban mask with ~ prefix', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'EXTBAN=~,a', 'ACCOUNTEXTBAN=a,account'],
+                tags: []
+            });
+            assert.equal(client.network.accountBanMask('bob'), '~a:bob');
+        });
+
+        it('should return null when EXTBAN is not available', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'ACCOUNTEXTBAN=R'],
+                tags: []
+            });
+            assert.isNull(client.network.accountBanMask('bob'));
+        });
+
+        it('should return null when ACCOUNTEXTBAN is not available', function() {
+            const client = newMockClient();
+            client.dispatch({
+                command: '005',
+                params: ['nick', 'EXTBAN=$,ARar'],
+                tags: []
+            });
+            assert.isNull(client.network.accountBanMask('bob'));
+        });
+    });
 });
